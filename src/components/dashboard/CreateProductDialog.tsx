@@ -1,0 +1,649 @@
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Loader2, ImagePlus, X, ExternalLink, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Product {
+  id: string;
+  product_name: string;
+  amount: number;
+}
+
+const STRIPE_METHODS = [
+  { value: "card", label: "Card (Visa/Mastercard)" },
+  { value: "apple_pay", label: "Apple Pay" },
+  { value: "google_pay", label: "Google Pay" },
+  { value: "link", label: "Link (Stripe)" },
+];
+
+interface CreateProductDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  existingProducts: Product[];
+  onCreate: (data: {
+    productName: string;
+    productDescription: string;
+    amount: string;
+    imageFile: File | null;
+    orderBumpName: string;
+    orderBumpPrice: string;
+    redirectUrl: string;
+    currency: string;
+    checkoutLanguage: string;
+    stripePaymentMethods: string[];
+    facebookPixelId: string;
+    facebookToken: string;
+    checkoutBannerFile: File | null;
+    checkoutTimerMinutes: string;
+    recoveryEnabled: boolean;
+    recoveryDiscountPercent: string;
+    recoveryHeadline: string;
+    recoveryMessage: string;
+    recoveryCtaText: string;
+    recoveryRedirectUrl: string;
+  }) => Promise<void>;
+  creating: boolean;
+}
+
+export function CreateProductDialog({
+  open,
+  onOpenChange,
+  existingProducts,
+  onCreate,
+  creating,
+}: CreateProductDialogProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [productName, setProductName] = useState("");
+  const [productDescription, setProductDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [orderBumpName, setOrderBumpName] = useState("");
+  const [orderBumpPrice, setOrderBumpPrice] = useState("");
+  const [redirectUrl, setRedirectUrl] = useState("");
+  const [currency, setCurrency] = useState("MZN");
+  const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
+  const [stripePaymentMethods, setStripePaymentMethods] = useState<string[]>(["card"]);
+  const [facebookPixelId, setFacebookPixelId] = useState("");
+  const [facebookToken, setFacebookToken] = useState("");
+  const [checkoutBannerFile, setCheckoutBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [checkoutTimerMinutes, setCheckoutTimerMinutes] = useState("");
+  const [recoveryEnabled, setRecoveryEnabled] = useState(false);
+  const [recoveryDiscountPercent, setRecoveryDiscountPercent] = useState("");
+  const [recoveryHeadline, setRecoveryHeadline] = useState("");
+  const [recoveryMessage, setRecoveryMessage] = useState("");
+  const [recoveryCtaText, setRecoveryCtaText] = useState("");
+  const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
+
+  const isStripe = currency === "ZAR" || currency === "USD";
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) return;
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) return;
+      setCheckoutBannerFile(file);
+      setBannerPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const clearBanner = () => {
+    setCheckoutBannerFile(null);
+    setBannerPreview(null);
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const resetForm = () => {
+    setProductName("");
+    setProductDescription("");
+    setAmount("");
+    setOrderBumpName("");
+    setOrderBumpPrice("");
+    setRedirectUrl("");
+    setCurrency("MZN");
+    setCheckoutLanguage("pt");
+    setStripePaymentMethods(["card"]);
+    setFacebookPixelId("");
+    setFacebookToken("");
+    setCheckoutTimerMinutes("");
+    setRecoveryEnabled(false);
+    setRecoveryDiscountPercent("");
+    setRecoveryHeadline("");
+    setRecoveryMessage("");
+    setRecoveryCtaText("");
+    setRecoveryRedirectUrl("");
+    clearImage();
+    clearBanner();
+  };
+
+  const toggleMethod = (method: string) => {
+    setStripePaymentMethods((prev) =>
+      prev.includes(method) ? prev.filter((m) => m !== method) : [...prev, method]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onCreate({
+      productName,
+      productDescription,
+      amount,
+      imageFile,
+      orderBumpName: orderBumpName.trim(),
+      orderBumpPrice: orderBumpPrice.trim(),
+      redirectUrl,
+      currency,
+      checkoutLanguage,
+      stripePaymentMethods: isStripe ? stripePaymentMethods : [],
+      facebookPixelId: facebookPixelId.trim(),
+      facebookToken: facebookToken.trim(),
+      checkoutBannerFile,
+      checkoutTimerMinutes: checkoutTimerMinutes.trim(),
+      recoveryEnabled,
+      recoveryDiscountPercent: recoveryDiscountPercent.trim(),
+      recoveryHeadline: recoveryHeadline.trim(),
+      recoveryMessage: recoveryMessage.trim(),
+      recoveryCtaText: recoveryCtaText.trim(),
+      recoveryRedirectUrl: recoveryRedirectUrl.trim(),
+    });
+    resetForm();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        onOpenChange(o);
+        if (!o) resetForm();
+      }}
+    >
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Novo Produto</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {/* Currency Selector */}
+          <div className="space-y-2">
+            <Label>Moeda</Label>
+          <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrency("MZN");
+                  setCheckoutLanguage("pt");
+                }}
+                className={cn(
+                  "p-3 rounded-xl border-2 text-center transition-all text-sm font-semibold",
+                  currency === "MZN"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                🇲🇿 MZN
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrency("ZAR");
+                  setCheckoutLanguage("en");
+                }}
+                className={cn(
+                  "p-3 rounded-xl border-2 text-center transition-all text-sm font-semibold",
+                  currency === "ZAR"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                🇿🇦 ZAR
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrency("USD");
+                  setCheckoutLanguage("en");
+                }}
+                className={cn(
+                  "p-3 rounded-xl border-2 text-center transition-all text-sm font-semibold",
+                  currency === "USD"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                🇺🇸 USD
+              </button>
+            </div>
+          </div>
+
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label>Imagem (opcional)</Label>
+            <div className="flex items-center gap-4">
+              {imagePreview ? (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-border"
+                  />
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                >
+                  <ImagePlus className="w-6 h-6 mb-1" />
+                  <span className="text-xs">Adicionar</span>
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG ou WebP
+                <br />
+                Máximo 2MB
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="productName">Nome do Produto</Label>
+            <Input
+              id="productName"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              placeholder="Ex: Curso de Marketing"
+              required
+              className="h-12 rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição (opcional)</Label>
+            <Textarea
+              id="description"
+              value={productDescription}
+              onChange={(e) => setProductDescription(e.target.value)}
+              placeholder="Descrição breve do produto..."
+              className="rounded-xl resize-none"
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="amount">Preço ({currency})</Label>
+            <Input
+              id="amount"
+              type="number"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              required
+              className="h-12 rounded-xl"
+            />
+          </div>
+
+          {/* Checkout Language */}
+          <div className="space-y-2">
+            <Label>Idioma do Checkout</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setCheckoutLanguage("pt")}
+                className={cn(
+                  "p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium",
+                  checkoutLanguage === "pt"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                🇵🇹 Português
+              </button>
+              <button
+                type="button"
+                onClick={() => setCheckoutLanguage("en")}
+                className={cn(
+                  "p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium",
+                  checkoutLanguage === "en"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                🇬🇧 English
+              </button>
+              <button
+                type="button"
+                onClick={() => setCheckoutLanguage("es")}
+                className={cn(
+                  "p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium",
+                  checkoutLanguage === "es"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                🇪🇸 Español
+              </button>
+            </div>
+          </div>
+
+          {/* Stripe Payment Methods (only for ZAR) */}
+          {isStripe && (
+            <div className="space-y-2">
+              <Label>Métodos de Pagamento (Stripe)</Label>
+              <p className="text-xs text-muted-foreground">
+                Selecione os métodos que aparecerão no checkout
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {STRIPE_METHODS.map((m) => (
+                  <button
+                    type="button"
+                    key={m.value}
+                    onClick={() => toggleMethod(m.value)}
+                    className={cn(
+                      "p-2.5 rounded-xl border-2 text-left transition-all text-xs font-medium",
+                      stripePaymentMethods.includes(m.value)
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+              {stripePaymentMethods.length === 0 && (
+                <p className="text-xs text-destructive">Selecione pelo menos um método</p>
+              )}
+            </div>
+          )}
+
+          {/* Redirect URL */}
+          <div className="space-y-2">
+            <Label htmlFor="redirectUrl" className="flex items-center gap-1.5">
+              <ExternalLink className="w-3.5 h-3.5" />
+              Link de Redirecionamento (opcional)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              O cliente será redirecionado para este link após o pagamento ser aprovado
+            </p>
+            <Input
+              id="redirectUrl"
+              type="url"
+              value={redirectUrl}
+              onChange={(e) => setRedirectUrl(e.target.value)}
+              placeholder="https://exemplo.com/obrigado"
+              className="h-12 rounded-xl"
+            />
+          </div>
+
+          {/* Order Bump (inline) */}
+          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="flex items-center gap-2 mb-1">
+              <Label className="text-sm font-semibold">Order Bump (opcional)</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Adicione um produto extra sugerido no checkout para aumentar o ticket médio
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="bumpName" className="text-xs">Nome do Order Bump</Label>
+              <Input
+                id="bumpName"
+                value={orderBumpName}
+                onChange={(e) => setOrderBumpName(e.target.value)}
+                placeholder="Ex: Mentoria VIP"
+                className="h-10 rounded-lg text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bumpPrice" className="text-xs">Preço ({currency})</Label>
+              <Input
+                id="bumpPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                value={orderBumpPrice}
+                onChange={(e) => setOrderBumpPrice(e.target.value)}
+                placeholder="0.00"
+                className="h-10 rounded-lg text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Checkout Appearance */}
+          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="flex items-center gap-2 mb-1">
+              <ImagePlus className="w-4 h-4 text-muted-foreground" />
+              <Label className="text-sm font-semibold">Aparencia do Checkout (opcional)</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Personalize a pagina de pagamento com banner e contagem regressiva
+            </p>
+
+            {/* Banner Upload */}
+            <div className="space-y-2">
+              <Label className="text-xs">Banner</Label>
+              <div className="flex items-center gap-4">
+                {bannerPreview ? (
+                  <div className="relative w-full">
+                    <img
+                      src={bannerPreview}
+                      alt="Banner preview"
+                      className="w-full h-24 rounded-lg object-cover border-2 border-border"
+                    />
+                    <button
+                      type="button"
+                      onClick={clearBanner}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => bannerInputRef.current?.click()}
+                    className="w-full h-20 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <ImagePlus className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Adicionar Banner</span>
+                  </button>
+                )}
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerSelect}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Timer */}
+            <div className="space-y-2">
+              <Label htmlFor="timerMinutes" className="text-xs">Contagem Regressiva (minutos)</Label>
+              <Input
+                id="timerMinutes"
+                type="number"
+                min="0"
+                max="1440"
+                value={checkoutTimerMinutes}
+                onChange={(e) => setCheckoutTimerMinutes(e.target.value)}
+                placeholder="Ex: 15"
+                className="h-10 rounded-lg text-sm"
+              />
+              <p className="text-xs text-muted-foreground">Deixe vazio para desativar</p>
+            </div>
+          </div>
+
+          {/* Recovery / Sales Recovery */}
+          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="flex items-center gap-2 mb-1">
+              <RotateCcw className="w-4 h-4 text-[hsl(145,60%,40%)]" />
+              <Label className="text-sm font-semibold">Recuperação de Vendas</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Popup inteligente ativado ao tentar sair da página ou quando o pagamento falha
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setRecoveryEnabled(!recoveryEnabled)}
+                className={cn(
+                  "w-10 h-6 rounded-full transition-colors relative",
+                  recoveryEnabled ? "bg-[hsl(145,60%,40%)]" : "bg-border"
+                )}
+              >
+                <span className={cn(
+                  "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
+                  recoveryEnabled ? "translate-x-4" : "translate-x-0.5"
+                )} />
+              </button>
+              <span className="text-sm text-foreground">{recoveryEnabled ? "Ativado" : "Desativado"}</span>
+            </div>
+            {recoveryEnabled && (
+              <div className="space-y-3 mt-2">
+                <div className="space-y-2">
+                  <Label className="text-xs">Desconto (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="90"
+                    value={recoveryDiscountPercent}
+                    onChange={(e) => setRecoveryDiscountPercent(e.target.value)}
+                    placeholder="Ex: 20"
+                    className="h-10 rounded-lg text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Título (opcional)</Label>
+                  <Input
+                    value={recoveryHeadline}
+                    onChange={(e) => setRecoveryHeadline(e.target.value)}
+                    placeholder="Ex: Espere um momento!"
+                    className="h-10 rounded-lg text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Mensagem (opcional)</Label>
+                  <Textarea
+                    value={recoveryMessage}
+                    onChange={(e) => setRecoveryMessage(e.target.value)}
+                    placeholder="Mensagem personalizada para recuperar a venda..."
+                    className="rounded-lg text-sm resize-none"
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Texto do Botão (opcional)</Label>
+                  <Input
+                    value={recoveryCtaText}
+                    onChange={(e) => setRecoveryCtaText(e.target.value)}
+                    placeholder="Ex: Aproveitar oferta agora"
+                    className="h-10 rounded-lg text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Link do Desconto (URL)</Label>
+                  <Input
+                    type="url"
+                    value={recoveryRedirectUrl}
+                    onChange={(e) => setRecoveryRedirectUrl(e.target.value)}
+                    placeholder="https://cashpaysa.lovable.app/checkout/..."
+                    className="h-10 rounded-lg text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Link de pagamento com o preço reduzido (crie outro produto com o valor descontado)
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Facebook Pixel & Conversions API */}
+          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="flex items-center gap-2 mb-1">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-[hsl(220,80%,50%)]" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              <Label className="text-sm font-semibold">Facebook Pixel & API</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Adicione o Pixel ID e Token de Conversão para rastrear vendas no Facebook/Meta Ads
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="fbPixelId" className="text-xs">Pixel ID</Label>
+              <Input
+                id="fbPixelId"
+                value={facebookPixelId}
+                onChange={(e) => setFacebookPixelId(e.target.value.replace(/\D/g, ""))}
+                placeholder="Ex: 123456789012345"
+                className="h-10 rounded-lg font-mono text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fbToken" className="text-xs">Token de Conversão (Conversions API)</Label>
+              <Input
+                id="fbToken"
+                type="password"
+                value={facebookToken}
+                onChange={(e) => setFacebookToken(e.target.value)}
+                placeholder="EAAxxxxxxx..."
+                className="h-10 rounded-lg font-mono text-sm"
+              />
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={creating || (isStripe && stripePaymentMethods.length === 0)}
+            className="w-full h-12 rounded-xl gradient-primary text-white"
+          >
+            {creating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              "Criar Produto"
+            )}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
