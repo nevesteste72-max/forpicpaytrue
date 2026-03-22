@@ -24,6 +24,7 @@ interface Product {
   checkout_language: string;
   stripe_payment_methods: string[];
   order_bump_name: string | null;
+  order_bump_description: string | null;
   order_bump_price: number | null;
   redirect_url?: string | null;
   facebook_pixel_id?: string | null;
