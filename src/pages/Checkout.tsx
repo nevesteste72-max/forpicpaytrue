@@ -518,7 +518,7 @@ export default function Checkout() {
     try {
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
