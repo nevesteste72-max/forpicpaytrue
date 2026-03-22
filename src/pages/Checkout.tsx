@@ -541,8 +541,14 @@ export default function Checkout() {
     }
   };
 
-  const hasBump = !!(link?.order_bump_name && link?.order_bump_price && link.order_bump_price > 0);
-  const bumpAmount = hasBump && bumpAccepted ? Number(link!.order_bump_price) : 0;
+  const bumps = link ? [
+    { name: link.order_bump_name, desc: link.order_bump_description, price: link.order_bump_price },
+    { name: link.order_bump_2_name, desc: link.order_bump_2_description, price: link.order_bump_2_price },
+    { name: link.order_bump_3_name, desc: link.order_bump_3_description, price: link.order_bump_3_price },
+  ].filter(b => b.name && b.price && Number(b.price) > 0) : [];
+  const hasBump = bumps.length > 0;
+  const bumpAmount = bumps.reduce((sum, b, i) => sum + (bumpsAccepted[i] ? Number(b.price) : 0), 0);
+  const bumpAccepted = bumpsAccepted.some(Boolean);
   const totalAmount = link ? Number(link.amount) + bumpAmount : 0;
 
   // --- M-Pesa / eMola submit ---
