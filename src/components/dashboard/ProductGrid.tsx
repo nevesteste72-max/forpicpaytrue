@@ -24,6 +24,7 @@ interface Product {
   created_at: string;
   order_bump_id: string | null;
   order_bump_name: string | null;
+  order_bump_description: string | null;
   order_bump_price: number | null;
   currency: string;
   checkout_language: string;

@@ -50,6 +50,7 @@ interface Product {
   created_at: string;
   order_bump_id: string | null;
   order_bump_name: string | null;
+  order_bump_description: string | null;
   order_bump_price: number | null;
   currency: string;
   checkout_language: string;
@@ -280,6 +281,7 @@ export default function Dashboard() {
     amount: string;
     imageFile: File | null;
     orderBumpName: string;
+    orderBumpDescription: string;
     orderBumpPrice: string;
     redirectUrl: string;
     currency: string;
@@ -306,6 +308,7 @@ export default function Dashboard() {
         product_description: data.productDescription || null,
         amount: parseFloat(data.amount),
         order_bump_name: data.orderBumpName || null,
+        order_bump_description: data.orderBumpDescription || null,
         order_bump_price: data.orderBumpPrice ? parseFloat(data.orderBumpPrice) : null,
         redirect_url: data.redirectUrl || null,
         currency: data.currency,

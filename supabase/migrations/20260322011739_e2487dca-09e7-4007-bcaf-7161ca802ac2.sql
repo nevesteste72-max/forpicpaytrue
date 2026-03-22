@@ -1,0 +1,1 @@
+ALTER TABLE public.payment_links ADD COLUMN order_bump_description text DEFAULT NULL;

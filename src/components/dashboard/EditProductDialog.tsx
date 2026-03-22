@@ -24,6 +24,7 @@ interface Product {
   checkout_language: string;
   stripe_payment_methods: string[];
   order_bump_name: string | null;
+  order_bump_description: string | null;
   order_bump_price: number | null;
   redirect_url?: string | null;
   facebook_pixel_id?: string | null;
@@ -64,6 +65,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
   const [stripePaymentMethods, setStripePaymentMethods] = useState<string[]>(["card"]);
   const [orderBumpName, setOrderBumpName] = useState("");
+  const [orderBumpDescription, setOrderBumpDescription] = useState("");
   const [orderBumpPrice, setOrderBumpPrice] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [facebookPixelId, setFacebookPixelId] = useState("");
@@ -89,6 +91,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setCheckoutLanguage(product.checkout_language || "pt");
       setStripePaymentMethods(product.stripe_payment_methods?.length ? product.stripe_payment_methods : ["card"]);
       setOrderBumpName(product.order_bump_name || "");
+      setOrderBumpDescription((product as any).order_bump_description || "");
       setOrderBumpPrice(product.order_bump_price ? String(product.order_bump_price) : "");
       setRedirectUrl((product as any).redirect_url || "");
       setFacebookPixelId((product as any).facebook_pixel_id || "");
@@ -153,6 +156,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         checkout_language: checkoutLanguage,
         stripe_payment_methods: isStripe ? stripePaymentMethods : product.stripe_payment_methods,
         order_bump_name: orderBumpName || null,
+        order_bump_description: orderBumpDescription || null,
         order_bump_price: orderBumpPrice ? parseFloat(orderBumpPrice) : null,
         redirect_url: redirectUrl || null,
         facebook_pixel_id: facebookPixelId || null,
@@ -292,6 +296,10 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
             <div className="space-y-2">
               <Label className="text-xs">Nome</Label>
               <Input value={orderBumpName} onChange={(e) => setOrderBumpName(e.target.value)} placeholder="Ex: Mentoria VIP" className="h-10 rounded-lg text-sm" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Descrição</Label>
+              <Input value={orderBumpDescription} onChange={(e) => setOrderBumpDescription(e.target.value)} placeholder="Ex: Multiply your Income Results Instantly" className="h-10 rounded-lg text-sm" />
             </div>
             <div className="space-y-2">
               <Label className="text-xs">Preço ({product?.currency || "MZN"})</Label>

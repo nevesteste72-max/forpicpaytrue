@@ -35,6 +35,7 @@ interface CreateProductDialogProps {
     amount: string;
     imageFile: File | null;
     orderBumpName: string;
+    orderBumpDescription: string;
     orderBumpPrice: string;
     redirectUrl: string;
     currency: string;
@@ -69,6 +70,7 @@ export function CreateProductDialog({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [orderBumpName, setOrderBumpName] = useState("");
+  const [orderBumpDescription, setOrderBumpDescription] = useState("");
   const [orderBumpPrice, setOrderBumpPrice] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [currency, setCurrency] = useState("MZN");
@@ -123,6 +125,7 @@ export function CreateProductDialog({
     setProductDescription("");
     setAmount("");
     setOrderBumpName("");
+    setOrderBumpDescription("");
     setOrderBumpPrice("");
     setRedirectUrl("");
     setCurrency("MZN");
@@ -155,6 +158,7 @@ export function CreateProductDialog({
       amount,
       imageFile,
       orderBumpName: orderBumpName.trim(),
+      orderBumpDescription: orderBumpDescription.trim(),
       orderBumpPrice: orderBumpPrice.trim(),
       redirectUrl,
       currency,
@@ -429,6 +433,16 @@ export function CreateProductDialog({
                 value={orderBumpName}
                 onChange={(e) => setOrderBumpName(e.target.value)}
                 placeholder="Ex: Mentoria VIP"
+                className="h-10 rounded-lg text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bumpDescription" className="text-xs">Descrição do Order Bump</Label>
+              <Input
+                id="bumpDescription"
+                value={orderBumpDescription}
+                onChange={(e) => setOrderBumpDescription(e.target.value)}
+                placeholder="Ex: Multiply your Income Results Instantly"
                 className="h-10 rounded-lg text-sm"
               />
             </div>
