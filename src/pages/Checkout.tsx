@@ -917,13 +917,20 @@ export default function Checkout() {
                   {/* Order Bump */}
                   {hasBump && (
                     <OrderBump
-                      productName={link.order_bump_name!}
-                      productDescription={link.order_bump_description || null}
-                      amount={Number(link.order_bump_price)}
+                  {/* Order Bumps */}
+                  {bumps.map((bump, idx) => (
+                    <OrderBump
+                      key={idx}
+                      productName={bump.name!}
+                      productDescription={bump.desc || null}
+                      amount={Number(bump.price)}
                       logoUrl={null}
-                      accepted={bumpAccepted}
-                      onToggle={setBumpAccepted}
+                      accepted={bumpsAccepted[idx]}
+                      onToggle={(v) => setBumpsAccepted(prev => { const n = [...prev]; n[idx] = v; return n; })}
                       currency={link.currency}
+                      locale={locale}
+                    />
+                  ))}
                       locale={locale}
                     />
                   )}
