@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle, Zap, ArrowRight } from "lucide-react";
 import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
-import { useUtmifyScript } from "@/hooks/useUtmifyScript";
+import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
 
 interface FlowStep {
   id: string;
