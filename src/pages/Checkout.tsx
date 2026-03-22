@@ -464,6 +464,7 @@ export default function Checkout() {
               transaction_id: stripeTransactionId,
               payment_link_id: link.id,
               order_bump_accepted: bumpAccepted,
+              bumps_accepted: bumpsAccepted,
             }),
           }
         );
