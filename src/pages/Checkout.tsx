@@ -1225,17 +1225,26 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Order Bump */}
-              {hasBump && (
+              {/* Order Bumps */}
+              {bumps.map((bump, idx) => (
                 <OrderBump
-                  productName={link.order_bump_name!}
-                  productDescription={link.order_bump_description || null}
-                  amount={Number(link.order_bump_price)}
+                  key={idx}
+                  productName={bump.name!}
+                  productDescription={bump.desc || null}
+                  amount={Number(bump.price)}
                   logoUrl={null}
-                  accepted={bumpAccepted}
-                  onToggle={setBumpAccepted}
+                  accepted={bumpsAccepted[idx]}
+                  onToggle={(v) => {
+                    setBumpsAccepted(prev => {
+                      const n = [...prev];
+                      n[idx] = v;
+                      return n;
+                    });
+                  }}
+                  currency={link.currency}
+                  locale={locale}
                 />
-              )}
+              ))}
 
               {/* Summary */}
               <div className="pt-6 border-t border-border space-y-2">
@@ -1243,12 +1252,12 @@ export default function Checkout() {
                   <span>{link.product_name}</span>
                   <span>{Number(link.amount).toLocaleString(locale)} {currencySymbol}</span>
                 </div>
-                {bumpAccepted && hasBump && (
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{link.order_bump_name}</span>
-                    <span>{Number(link.order_bump_price).toLocaleString(locale)} {currencySymbol}</span>
+                {bumps.map((bump, idx) => bumpsAccepted[idx] && (
+                  <div key={idx} className="flex justify-between text-sm text-muted-foreground">
+                    <span>{bump.name}</span>
+                    <span>{Number(bump.price).toLocaleString(locale)} {currencySymbol}</span>
                   </div>
-                )}
+                ))}
                 <div className="flex justify-between text-lg font-bold text-foreground pt-2">
                   <span>{t.total}</span>
                   <span>{totalAmount.toLocaleString(locale)} {currencySymbol}</span>
