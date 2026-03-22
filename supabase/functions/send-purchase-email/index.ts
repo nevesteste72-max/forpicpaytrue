@@ -70,7 +70,7 @@ serve(async (req) => {
     let accessButton = "";
     if (redirect_url) {
       accessButton = `
-        <div style="text-align: center; margin: 32px 0;">
+        <div style="text-align: center; margin: 32px 0 16px;">
           <a href="${redirect_url}" 
              style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
             Access Your Product
@@ -78,6 +78,16 @@ serve(async (req) => {
         </div>
       `;
     }
+
+    // WhatsApp support button
+    const whatsappButton = `
+      <div style="text-align: center; margin: 16px 0 0;">
+        <a href="https://wa.link/ta5if1" 
+           style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+          💬 Contact us on WhatsApp
+        </a>
+      </div>
+    `;
 
     const html = `
     <!DOCTYPE html>
