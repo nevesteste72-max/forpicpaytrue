@@ -128,6 +128,9 @@ serve(async (req) => {
           <!-- Access Button -->
           ${accessButton}
 
+          <!-- WhatsApp Button -->
+          ${whatsappButton}
+
           <!-- Transaction ID -->
           <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
             <p style="margin: 0; color: #9ca3af; font-size: 12px;">Transaction ID: ${transaction_id}</p>
