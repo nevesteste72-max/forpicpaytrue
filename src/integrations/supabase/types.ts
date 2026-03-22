@@ -127,6 +127,12 @@ export type Database = {
           id: string
           is_active: boolean
           logo_url: string | null
+          order_bump_2_description: string | null
+          order_bump_2_name: string | null
+          order_bump_2_price: number | null
+          order_bump_3_description: string | null
+          order_bump_3_name: string | null
+          order_bump_3_price: number | null
           order_bump_description: string | null
           order_bump_id: string | null
           order_bump_name: string | null
@@ -159,6 +165,12 @@ export type Database = {
           id?: string
           is_active?: boolean
           logo_url?: string | null
+          order_bump_2_description?: string | null
+          order_bump_2_name?: string | null
+          order_bump_2_price?: number | null
+          order_bump_3_description?: string | null
+          order_bump_3_name?: string | null
+          order_bump_3_price?: number | null
           order_bump_description?: string | null
           order_bump_id?: string | null
           order_bump_name?: string | null
@@ -191,6 +203,12 @@ export type Database = {
           id?: string
           is_active?: boolean
           logo_url?: string | null
+          order_bump_2_description?: string | null
+          order_bump_2_name?: string | null
+          order_bump_2_price?: number | null
+          order_bump_3_description?: string | null
+          order_bump_3_name?: string | null
+          order_bump_3_price?: number | null
           order_bump_description?: string | null
           order_bump_id?: string | null
           order_bump_name?: string | null
