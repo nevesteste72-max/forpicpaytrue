@@ -437,6 +437,16 @@ export function CreateProductDialog({
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="bumpDescription" className="text-xs">Descrição do Order Bump</Label>
+              <Input
+                id="bumpDescription"
+                value={orderBumpDescription}
+                onChange={(e) => setOrderBumpDescription(e.target.value)}
+                placeholder="Ex: Multiply your Income Results Instantly"
+                className="h-10 rounded-lg text-sm"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="bumpPrice" className="text-xs">Preço ({currency})</Label>
               <Input
                 id="bumpPrice"

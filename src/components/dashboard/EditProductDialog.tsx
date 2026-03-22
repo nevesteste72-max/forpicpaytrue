@@ -298,6 +298,10 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
               <Input value={orderBumpName} onChange={(e) => setOrderBumpName(e.target.value)} placeholder="Ex: Mentoria VIP" className="h-10 rounded-lg text-sm" />
             </div>
             <div className="space-y-2">
+              <Label className="text-xs">Descrição</Label>
+              <Input value={orderBumpDescription} onChange={(e) => setOrderBumpDescription(e.target.value)} placeholder="Ex: Multiply your Income Results Instantly" className="h-10 rounded-lg text-sm" />
+            </div>
+            <div className="space-y-2">
               <Label className="text-xs">Preço ({product?.currency || "MZN"})</Label>
               <Input type="number" min="0" step="0.01" value={orderBumpPrice} onChange={(e) => setOrderBumpPrice(e.target.value)} placeholder="0.00" className="h-10 rounded-lg text-sm" />
             </div>
