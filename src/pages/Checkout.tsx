@@ -623,7 +623,7 @@ export default function Checkout() {
   const resetForm = async () => {
     setPhoneError("");
     setErrorMessage("");
-    setBumpAccepted(false);
+    setBumpsAccepted([false, false, false]);
     setDebitoReference(null);
     setInternalTxId(null);
     setCheckoutStep(1);
