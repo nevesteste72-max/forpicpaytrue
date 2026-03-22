@@ -125,6 +125,7 @@ export function CreateProductDialog({
     setProductDescription("");
     setAmount("");
     setOrderBumpName("");
+    setOrderBumpDescription("");
     setOrderBumpPrice("");
     setRedirectUrl("");
     setCurrency("MZN");
