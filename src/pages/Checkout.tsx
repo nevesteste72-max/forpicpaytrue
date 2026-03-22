@@ -476,7 +476,7 @@ export default function Checkout() {
     };
 
     updateIntent();
-  }, [bumpAccepted, stripePaymentIntentId]);
+  }, [bumpsAccepted, stripePaymentIntentId]);
 
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
