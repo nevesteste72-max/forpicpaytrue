@@ -35,7 +35,7 @@ serve(async (req) => {
       // Fetch authoritative prices from database
       const { data: linkData, error: linkErr } = await supabaseAdmin
         .from("payment_links")
-        .select("amount, order_bump_price")
+        .select("amount, order_bump_price, order_bump_2_price, order_bump_3_price")
         .eq("id", payment_link_id)
         .single();
 
@@ -46,10 +46,13 @@ serve(async (req) => {
         );
       }
 
+      // Support multiple bumps: bumps_accepted is array [bool, bool, bool]
+      const bumpsAccepted: boolean[] = Array.isArray(body.bumps_accepted) ? body.bumps_accepted : [order_bump_accepted || false, false, false];
+      const bumpPrices = [linkData.order_bump_price, linkData.order_bump_2_price, linkData.order_bump_3_price];
       let bumpAmount = 0;
-      if (order_bump_accepted && linkData.order_bump_price && Number(linkData.order_bump_price) > 0) {
-        bumpAmount = Number(linkData.order_bump_price);
-      }
+      bumpPrices.forEach((price, i) => {
+        if (bumpsAccepted[i] && price && Number(price) > 0) bumpAmount += Number(price);
+      });
 
       const serverTotal = Number(linkData.amount) + bumpAmount;
       const stripeAmount = Math.round(serverTotal * 100);
