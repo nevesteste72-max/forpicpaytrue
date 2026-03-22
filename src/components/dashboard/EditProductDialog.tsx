@@ -156,6 +156,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         checkout_language: checkoutLanguage,
         stripe_payment_methods: isStripe ? stripePaymentMethods : product.stripe_payment_methods,
         order_bump_name: orderBumpName || null,
+        order_bump_description: orderBumpDescription || null,
         order_bump_price: orderBumpPrice ? parseFloat(orderBumpPrice) : null,
         redirect_url: redirectUrl || null,
         facebook_pixel_id: facebookPixelId || null,
