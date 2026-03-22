@@ -77,6 +77,7 @@ interface PaymentLink {
   logo_url: string | null;
   amount: number;
   order_bump_name: string | null;
+  order_bump_description: string | null;
   order_bump_price: number | null;
   redirect_url: string | null;
   currency: string;
