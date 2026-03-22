@@ -308,21 +308,21 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
             <Input type="url" value={redirectUrl} onChange={(e) => setRedirectUrl(e.target.value)} placeholder="https://exemplo.com/obrigado" className="h-12 rounded-xl" />
           </div>
 
-          {/* Order Bump */}
+          {/* Order Bumps (até 3) */}
           <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
-            <Label className="text-sm font-semibold">Order Bump</Label>
-            <div className="space-y-2">
-              <Label className="text-xs">Nome</Label>
-              <Input value={orderBumpName} onChange={(e) => setOrderBumpName(e.target.value)} placeholder="Ex: Mentoria VIP" className="h-10 rounded-lg text-sm" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Descrição</Label>
-              <Input value={orderBumpDescription} onChange={(e) => setOrderBumpDescription(e.target.value)} placeholder="Ex: Multiply your Income Results Instantly" className="h-10 rounded-lg text-sm" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Preço ({product?.currency || "MZN"})</Label>
-              <Input type="number" min="0" step="0.01" value={orderBumpPrice} onChange={(e) => setOrderBumpPrice(e.target.value)} placeholder="0.00" className="h-10 rounded-lg text-sm" />
-            </div>
+            <Label className="text-sm font-semibold">Order Bumps (até 3)</Label>
+            {[
+              { label: "Order Bump 1", name: orderBumpName, setName: setOrderBumpName, desc: orderBumpDescription, setDesc: setOrderBumpDescription, price: orderBumpPrice, setPrice: setOrderBumpPrice },
+              { label: "Order Bump 2", name: orderBump2Name, setName: setOrderBump2Name, desc: orderBump2Description, setDesc: setOrderBump2Description, price: orderBump2Price, setPrice: setOrderBump2Price },
+              { label: "Order Bump 3", name: orderBump3Name, setName: setOrderBump3Name, desc: orderBump3Description, setDesc: setOrderBump3Description, price: orderBump3Price, setPrice: setOrderBump3Price },
+            ].map((bump, idx) => (
+              <div key={idx} className="space-y-2 pt-3 border-t border-border first:border-t-0 first:pt-0">
+                <Label className="text-xs font-semibold text-muted-foreground">{bump.label}</Label>
+                <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-10 rounded-lg text-sm" />
+                <Input value={bump.desc} onChange={(e) => bump.setDesc(e.target.value)} placeholder="Descrição" className="h-10 rounded-lg text-sm" />
+                <Input type="number" min="0" step="0.01" value={bump.price} onChange={(e) => bump.setPrice(e.target.value)} placeholder={`Preço (${product?.currency || "MZN"})`} className="h-10 rounded-lg text-sm" />
+              </div>
+            ))}
           </div>
 
           {/* Checkout Appearance */}
