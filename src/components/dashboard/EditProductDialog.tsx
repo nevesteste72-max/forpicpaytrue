@@ -67,6 +67,12 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [orderBumpName, setOrderBumpName] = useState("");
   const [orderBumpDescription, setOrderBumpDescription] = useState("");
   const [orderBumpPrice, setOrderBumpPrice] = useState("");
+  const [orderBump2Name, setOrderBump2Name] = useState("");
+  const [orderBump2Description, setOrderBump2Description] = useState("");
+  const [orderBump2Price, setOrderBump2Price] = useState("");
+  const [orderBump3Name, setOrderBump3Name] = useState("");
+  const [orderBump3Description, setOrderBump3Description] = useState("");
+  const [orderBump3Price, setOrderBump3Price] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [facebookPixelId, setFacebookPixelId] = useState("");
   const [facebookToken, setFacebookToken] = useState("");
