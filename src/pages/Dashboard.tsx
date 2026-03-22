@@ -283,6 +283,12 @@ export default function Dashboard() {
     orderBumpName: string;
     orderBumpDescription: string;
     orderBumpPrice: string;
+    orderBump2Name: string;
+    orderBump2Description: string;
+    orderBump2Price: string;
+    orderBump3Name: string;
+    orderBump3Description: string;
+    orderBump3Price: string;
     redirectUrl: string;
     currency: string;
     checkoutLanguage: string;
