@@ -281,6 +281,7 @@ export default function Dashboard() {
     amount: string;
     imageFile: File | null;
     orderBumpName: string;
+    orderBumpDescription: string;
     orderBumpPrice: string;
     redirectUrl: string;
     currency: string;
