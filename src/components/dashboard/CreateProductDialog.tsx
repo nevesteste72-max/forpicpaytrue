@@ -37,6 +37,12 @@ interface CreateProductDialogProps {
     orderBumpName: string;
     orderBumpDescription: string;
     orderBumpPrice: string;
+    orderBump2Name: string;
+    orderBump2Description: string;
+    orderBump2Price: string;
+    orderBump3Name: string;
+    orderBump3Description: string;
+    orderBump3Price: string;
     redirectUrl: string;
     currency: string;
     checkoutLanguage: string;
@@ -72,6 +78,12 @@ export function CreateProductDialog({
   const [orderBumpName, setOrderBumpName] = useState("");
   const [orderBumpDescription, setOrderBumpDescription] = useState("");
   const [orderBumpPrice, setOrderBumpPrice] = useState("");
+  const [orderBump2Name, setOrderBump2Name] = useState("");
+  const [orderBump2Description, setOrderBump2Description] = useState("");
+  const [orderBump2Price, setOrderBump2Price] = useState("");
+  const [orderBump3Name, setOrderBump3Name] = useState("");
+  const [orderBump3Description, setOrderBump3Description] = useState("");
+  const [orderBump3Price, setOrderBump3Price] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [currency, setCurrency] = useState("MZN");
   const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
@@ -127,6 +139,12 @@ export function CreateProductDialog({
     setOrderBumpName("");
     setOrderBumpDescription("");
     setOrderBumpPrice("");
+    setOrderBump2Name("");
+    setOrderBump2Description("");
+    setOrderBump2Price("");
+    setOrderBump3Name("");
+    setOrderBump3Description("");
+    setOrderBump3Price("");
     setRedirectUrl("");
     setCurrency("MZN");
     setCheckoutLanguage("pt");
@@ -160,6 +178,12 @@ export function CreateProductDialog({
       orderBumpName: orderBumpName.trim(),
       orderBumpDescription: orderBumpDescription.trim(),
       orderBumpPrice: orderBumpPrice.trim(),
+      orderBump2Name: orderBump2Name.trim(),
+      orderBump2Description: orderBump2Description.trim(),
+      orderBump2Price: orderBump2Price.trim(),
+      orderBump3Name: orderBump3Name.trim(),
+      orderBump3Description: orderBump3Description.trim(),
+      orderBump3Price: orderBump3Price.trim(),
       redirectUrl,
       currency,
       checkoutLanguage,
@@ -418,47 +442,26 @@ export function CreateProductDialog({
             />
           </div>
 
-          {/* Order Bump (inline) */}
+          {/* Order Bumps (até 3) */}
           <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
             <div className="flex items-center gap-2 mb-1">
-              <Label className="text-sm font-semibold">Order Bump (opcional)</Label>
+              <Label className="text-sm font-semibold">Order Bumps (opcional, até 3)</Label>
             </div>
             <p className="text-xs text-muted-foreground">
-              Adicione um produto extra sugerido no checkout para aumentar o ticket médio
+              Adicione produtos extras sugeridos no checkout para aumentar o ticket médio
             </p>
-            <div className="space-y-2">
-              <Label htmlFor="bumpName" className="text-xs">Nome do Order Bump</Label>
-              <Input
-                id="bumpName"
-                value={orderBumpName}
-                onChange={(e) => setOrderBumpName(e.target.value)}
-                placeholder="Ex: Mentoria VIP"
-                className="h-10 rounded-lg text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bumpDescription" className="text-xs">Descrição do Order Bump</Label>
-              <Input
-                id="bumpDescription"
-                value={orderBumpDescription}
-                onChange={(e) => setOrderBumpDescription(e.target.value)}
-                placeholder="Ex: Multiply your Income Results Instantly"
-                className="h-10 rounded-lg text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bumpPrice" className="text-xs">Preço ({currency})</Label>
-              <Input
-                id="bumpPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                value={orderBumpPrice}
-                onChange={(e) => setOrderBumpPrice(e.target.value)}
-                placeholder="0.00"
-                className="h-10 rounded-lg text-sm"
-              />
-            </div>
+            {[
+              { label: "Order Bump 1", name: orderBumpName, setName: setOrderBumpName, desc: orderBumpDescription, setDesc: setOrderBumpDescription, price: orderBumpPrice, setPrice: setOrderBumpPrice },
+              { label: "Order Bump 2", name: orderBump2Name, setName: setOrderBump2Name, desc: orderBump2Description, setDesc: setOrderBump2Description, price: orderBump2Price, setPrice: setOrderBump2Price },
+              { label: "Order Bump 3", name: orderBump3Name, setName: setOrderBump3Name, desc: orderBump3Description, setDesc: setOrderBump3Description, price: orderBump3Price, setPrice: setOrderBump3Price },
+            ].map((bump, idx) => (
+              <div key={idx} className="space-y-2 pt-3 border-t border-border first:border-t-0 first:pt-0">
+                <Label className="text-xs font-semibold text-muted-foreground">{bump.label}</Label>
+                <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-10 rounded-lg text-sm" />
+                <Input value={bump.desc} onChange={(e) => bump.setDesc(e.target.value)} placeholder="Descrição" className="h-10 rounded-lg text-sm" />
+                <Input type="number" min="0" step="0.01" value={bump.price} onChange={(e) => bump.setPrice(e.target.value)} placeholder={`Preço (${currency})`} className="h-10 rounded-lg text-sm" />
+              </div>
+            ))}
           </div>
 
           {/* Checkout Appearance */}

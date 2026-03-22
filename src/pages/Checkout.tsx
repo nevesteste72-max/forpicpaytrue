@@ -79,6 +79,12 @@ interface PaymentLink {
   order_bump_name: string | null;
   order_bump_description: string | null;
   order_bump_price: number | null;
+  order_bump_2_name: string | null;
+  order_bump_2_description: string | null;
+  order_bump_2_price: number | null;
+  order_bump_3_name: string | null;
+  order_bump_3_description: string | null;
+  order_bump_3_price: number | null;
   redirect_url: string | null;
   currency: string;
   checkout_language: string;
@@ -241,7 +247,7 @@ export default function Checkout() {
   const [phoneError, setPhoneError] = useState("");
   const [paymentState, setPaymentState] = useState<PaymentState>("form");
   const [errorMessage, setErrorMessage] = useState("");
-  const [bumpAccepted, setBumpAccepted] = useState(false);
+  const [bumpsAccepted, setBumpsAccepted] = useState<boolean[]>([false, false, false]);
   const [selectedMethod, setSelectedMethod] = useState<SelectedMethod>("mpesa");
 
   // Stripe state
@@ -416,6 +422,7 @@ export default function Checkout() {
             customer_name: customerName || "Customer",
             payment_methods: link.stripe_payment_methods,
             order_bump_accepted: bumpAccepted,
+            bumps_accepted: bumpsAccepted,
             order_bump_amount: bumpAmount,
           }),
         }
@@ -457,6 +464,7 @@ export default function Checkout() {
               transaction_id: stripeTransactionId,
               payment_link_id: link.id,
               order_bump_accepted: bumpAccepted,
+              bumps_accepted: bumpsAccepted,
             }),
           }
         );
@@ -470,7 +478,7 @@ export default function Checkout() {
     };
 
     updateIntent();
-  }, [bumpAccepted, stripePaymentIntentId]);
+  }, [bumpsAccepted, stripePaymentIntentId]);
 
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
@@ -518,7 +526,7 @@ export default function Checkout() {
     try {
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -535,8 +543,14 @@ export default function Checkout() {
     }
   };
 
-  const hasBump = !!(link?.order_bump_name && link?.order_bump_price && link.order_bump_price > 0);
-  const bumpAmount = hasBump && bumpAccepted ? Number(link!.order_bump_price) : 0;
+  const bumps = link ? [
+    { name: link.order_bump_name, desc: link.order_bump_description, price: link.order_bump_price },
+    { name: link.order_bump_2_name, desc: link.order_bump_2_description, price: link.order_bump_2_price },
+    { name: link.order_bump_3_name, desc: link.order_bump_3_description, price: link.order_bump_3_price },
+  ].filter(b => b.name && b.price && Number(b.price) > 0) : [];
+  const hasBump = bumps.length > 0;
+  const bumpAmount = bumps.reduce((sum, b, i) => sum + (bumpsAccepted[i] ? Number(b.price) : 0), 0);
+  const bumpAccepted = bumpsAccepted.some(Boolean);
   const totalAmount = link ? Number(link.amount) + bumpAmount : 0;
 
   // --- M-Pesa / eMola submit ---
@@ -611,7 +625,7 @@ export default function Checkout() {
   const resetForm = async () => {
     setPhoneError("");
     setErrorMessage("");
-    setBumpAccepted(false);
+    setBumpsAccepted([false, false, false]);
     setDebitoReference(null);
     setInternalTxId(null);
     setCheckoutStep(1);
@@ -902,19 +916,26 @@ export default function Checkout() {
                     </div>
                   )}
 
-                  {/* Order Bump */}
-                  {hasBump && (
+                  {/* Order Bumps */}
+                  {bumps.map((bump, idx) => (
                     <OrderBump
-                      productName={link.order_bump_name!}
-                      productDescription={link.order_bump_description || null}
-                      amount={Number(link.order_bump_price)}
+                      key={idx}
+                      productName={bump.name!}
+                      productDescription={bump.desc || null}
+                      amount={Number(bump.price)}
                       logoUrl={null}
-                      accepted={bumpAccepted}
-                      onToggle={setBumpAccepted}
+                      accepted={bumpsAccepted[idx]}
+                      onToggle={(v) => {
+                        setBumpsAccepted(prev => {
+                          const n = [...prev];
+                          n[idx] = v;
+                          return n;
+                        });
+                      }}
                       currency={link.currency}
                       locale={locale}
                     />
-                  )}
+                  ))}
 
                   {/* Pay Button - Green */}
                   <Button
@@ -1206,17 +1227,26 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Order Bump */}
-              {hasBump && (
+              {/* Order Bumps */}
+              {bumps.map((bump, idx) => (
                 <OrderBump
-                  productName={link.order_bump_name!}
-                  productDescription={link.order_bump_description || null}
-                  amount={Number(link.order_bump_price)}
+                  key={idx}
+                  productName={bump.name!}
+                  productDescription={bump.desc || null}
+                  amount={Number(bump.price)}
                   logoUrl={null}
-                  accepted={bumpAccepted}
-                  onToggle={setBumpAccepted}
+                  accepted={bumpsAccepted[idx]}
+                  onToggle={(v) => {
+                    setBumpsAccepted(prev => {
+                      const n = [...prev];
+                      n[idx] = v;
+                      return n;
+                    });
+                  }}
+                  currency={link.currency}
+                  locale={locale}
                 />
-              )}
+              ))}
 
               {/* Summary */}
               <div className="pt-6 border-t border-border space-y-2">
@@ -1224,12 +1254,12 @@ export default function Checkout() {
                   <span>{link.product_name}</span>
                   <span>{Number(link.amount).toLocaleString(locale)} {currencySymbol}</span>
                 </div>
-                {bumpAccepted && hasBump && (
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{link.order_bump_name}</span>
-                    <span>{Number(link.order_bump_price).toLocaleString(locale)} {currencySymbol}</span>
+                {bumps.map((bump, idx) => bumpsAccepted[idx] && (
+                  <div key={idx} className="flex justify-between text-sm text-muted-foreground">
+                    <span>{bump.name}</span>
+                    <span>{Number(bump.price).toLocaleString(locale)} {currencySymbol}</span>
                   </div>
-                )}
+                ))}
                 <div className="flex justify-between text-lg font-bold text-foreground pt-2">
                   <span>{t.total}</span>
                   <span>{totalAmount.toLocaleString(locale)} {currencySymbol}</span>
