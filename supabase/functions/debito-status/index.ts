@@ -283,11 +283,24 @@ async function notifyFacebook(
         if (internalStatus === "successful" && transaction_id) {
           const { data: txRow } = await supabaseAdmin
             .from("transactions")
-            .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name)")
+            .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price)")
             .eq("id", transaction_id)
             .single();
 
           if (txRow) {
+            // Build order bumps array for UTMify products[]
+            const pl = txRow.payment_links;
+            const orderBumps: { id: string; name: string; price: number }[] = [];
+            if (pl?.order_bump_name && pl?.order_bump_price) {
+              orderBumps.push({ id: `bump-1-${txRow.payment_link_id}`, name: pl.order_bump_name, price: Number(pl.order_bump_price) });
+            }
+            if (pl?.order_bump_2_name && pl?.order_bump_2_price) {
+              orderBumps.push({ id: `bump-2-${txRow.payment_link_id}`, name: pl.order_bump_2_name, price: Number(pl.order_bump_2_price) });
+            }
+            if (pl?.order_bump_3_name && pl?.order_bump_3_price) {
+              orderBumps.push({ id: `bump-3-${txRow.payment_link_id}`, name: pl.order_bump_3_name, price: Number(pl.order_bump_3_price) });
+            }
+
             await notifyUtmify(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
               transaction_id: txRow.id,
               product_name: txRow.payment_links?.product_name || "Product",
@@ -303,6 +316,7 @@ async function notifyFacebook(
               status: "successful",
               created_at: txRow.created_at,
               tracking_params: tracking_params || undefined,
+              order_bumps: txRow.order_bump_accepted ? orderBumps : undefined,
             });
 
             // Fire Facebook Conversions API if configured
