@@ -79,6 +79,12 @@ interface PaymentLink {
   order_bump_name: string | null;
   order_bump_description: string | null;
   order_bump_price: number | null;
+  order_bump_2_name: string | null;
+  order_bump_2_description: string | null;
+  order_bump_2_price: number | null;
+  order_bump_3_name: string | null;
+  order_bump_3_description: string | null;
+  order_bump_3_price: number | null;
   redirect_url: string | null;
   currency: string;
   checkout_language: string;
