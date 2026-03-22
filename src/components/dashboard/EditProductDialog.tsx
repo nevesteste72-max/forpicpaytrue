@@ -99,6 +99,12 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setOrderBumpName(product.order_bump_name || "");
       setOrderBumpDescription((product as any).order_bump_description || "");
       setOrderBumpPrice(product.order_bump_price ? String(product.order_bump_price) : "");
+      setOrderBump2Name((product as any).order_bump_2_name || "");
+      setOrderBump2Description((product as any).order_bump_2_description || "");
+      setOrderBump2Price((product as any).order_bump_2_price ? String((product as any).order_bump_2_price) : "");
+      setOrderBump3Name((product as any).order_bump_3_name || "");
+      setOrderBump3Description((product as any).order_bump_3_description || "");
+      setOrderBump3Price((product as any).order_bump_3_price ? String((product as any).order_bump_3_price) : "");
       setRedirectUrl((product as any).redirect_url || "");
       setFacebookPixelId((product as any).facebook_pixel_id || "");
       setFacebookToken((product as any).facebook_token || "");
