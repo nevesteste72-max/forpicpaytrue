@@ -21,6 +21,9 @@ export default function ThankYouPage() {
   const [searchParams] = useSearchParams();
   const txId = searchParams.get("tx");
 
+  // UTMify script on thank you page
+  useUtmifyScript();
+
   const [linkInfo, setLinkInfo] = useState<PaymentLinkInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchases, setPurchases] = useState<{ name: string; amount: number }[]>([]);
