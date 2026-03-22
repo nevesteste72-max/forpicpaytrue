@@ -98,7 +98,7 @@ const financeLinks: { icon: typeof Wallet; label: string; tab: DashboardTab }[] 
 ];
 
 export default function Dashboard() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, isAdmin } = useAuth();
   const { toast } = useToast();
   useSaleNotifications(user?.id);
   const [products, setProducts] = useState<Product[]>([]);
