@@ -70,6 +70,7 @@ export function CreateProductDialog({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [orderBumpName, setOrderBumpName] = useState("");
+  const [orderBumpDescription, setOrderBumpDescription] = useState("");
   const [orderBumpPrice, setOrderBumpPrice] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [currency, setCurrency] = useState("MZN");
