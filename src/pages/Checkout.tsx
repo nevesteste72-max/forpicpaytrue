@@ -422,6 +422,7 @@ export default function Checkout() {
             customer_name: customerName || "Customer",
             payment_methods: link.stripe_payment_methods,
             order_bump_accepted: bumpAccepted,
+            bumps_accepted: bumpsAccepted,
             order_bump_amount: bumpAmount,
           }),
         }
