@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle, Zap, ArrowRight } from "lucide-react";
 import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
-import { useUtmifyScript } from "@/hooks/useUtmifyScript";
+import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
 
 interface FlowStep {
   id: string;
@@ -79,16 +79,28 @@ export default function UpsellPage() {
   const linkId = searchParams.get("link");
   const isEmbed = searchParams.get("embed") === "true";
 
-  // Capture tracking params from URL to pass to one-click-upsell
-  const trackingParams = {
-    src: searchParams.get("src") || searchParams.get("ref") || null,
-    sck: searchParams.get("sck") || null,
-    utm_source: searchParams.get("utm_source") || null,
-    utm_campaign: searchParams.get("utm_campaign") || null,
-    utm_medium: searchParams.get("utm_medium") || null,
-    utm_content: searchParams.get("utm_content") || null,
-    utm_term: searchParams.get("utm_term") || null,
-  };
+  // Capture tracking params from URL + sessionStorage (sessionStorage has original checkout UTMs)
+  const trackingParams = (() => {
+    const stored = getStoredTracking();
+    const fromUrl = {
+      src: searchParams.get("src") || searchParams.get("ref") || null,
+      sck: searchParams.get("sck") || null,
+      utm_source: searchParams.get("utm_source") || null,
+      utm_campaign: searchParams.get("utm_campaign") || null,
+      utm_medium: searchParams.get("utm_medium") || null,
+      utm_content: searchParams.get("utm_content") || null,
+      utm_term: searchParams.get("utm_term") || null,
+    };
+    return {
+      src: fromUrl.src || stored.src || null,
+      sck: fromUrl.sck || stored.sck || null,
+      utm_source: fromUrl.utm_source || stored.utm_source || null,
+      utm_campaign: fromUrl.utm_campaign || stored.utm_campaign || null,
+      utm_medium: fromUrl.utm_medium || stored.utm_medium || null,
+      utm_content: fromUrl.utm_content || stored.utm_content || null,
+      utm_term: fromUrl.utm_term || stored.utm_term || null,
+    };
+  })();
 
   const [step, setStep] = useState<FlowStep | null>(null);
   const [loading, setLoading] = useState(true);

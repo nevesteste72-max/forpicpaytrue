@@ -9,7 +9,7 @@ import { OrderBump } from "@/components/checkout/OrderBump";
 import { RecoveryPopup, useExitIntent } from "@/components/checkout/RecoveryPopup";
 import { StripeCheckoutForm } from "@/components/checkout/StripeCheckoutForm";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
-import { useUtmifyScript } from "@/hooks/useUtmifyScript";
+import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
 import {
   initiatePayment,
   formatPhoneNumber,
@@ -278,9 +278,10 @@ export default function Checkout() {
     }
   );
 
-  // Capture UTM/tracking params from URL for UTMify attribution
+  // Capture UTM/tracking params from URL + sessionStorage for UTMify attribution
   const trackingParams = useMemo(() => {
-    return {
+    const stored = getStoredTracking();
+    const fromUrl = {
       src: searchParams.get("src") || searchParams.get("ref") || null,
       sck: searchParams.get("sck") || null,
       utm_source: searchParams.get("utm_source") || null,
@@ -288,6 +289,15 @@ export default function Checkout() {
       utm_medium: searchParams.get("utm_medium") || null,
       utm_content: searchParams.get("utm_content") || null,
       utm_term: searchParams.get("utm_term") || null,
+    };
+    return {
+      src: fromUrl.src || stored.src || null,
+      sck: fromUrl.sck || stored.sck || null,
+      utm_source: fromUrl.utm_source || stored.utm_source || null,
+      utm_campaign: fromUrl.utm_campaign || stored.utm_campaign || null,
+      utm_medium: fromUrl.utm_medium || stored.utm_medium || null,
+      utm_content: fromUrl.utm_content || stored.utm_content || null,
+      utm_term: fromUrl.utm_term || stored.utm_term || null,
     };
   }, [searchParams]);
 

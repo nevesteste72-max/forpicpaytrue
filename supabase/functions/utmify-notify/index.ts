@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,73 +8,39 @@ const corsHeaders = {
 
 const UTMIFY_API_URL = "https://api.utmify.com.br/api-credentials/orders";
 
-interface UtmifyPayload {
-  transaction_id: string;
-  product_name: string;
-  product_id: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  amount: number;
-  currency: string;
-  order_bump_accepted: boolean;
-  order_bump_amount: number;
-  payment_method: string;
-  status: string;
-  created_at: string;
-  approved_at: string | null;
-  tracking_params?: {
-    src?: string | null;
-    sck?: string | null;
-    utm_source?: string | null;
-    utm_campaign?: string | null;
-    utm_medium?: string | null;
-    utm_content?: string | null;
-    utm_term?: string | null;
-  };
-}
-
 const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[UTMIFY-NOTIFY] ${step}${detailsStr}`);
 };
 
 /**
- * Fetches the current ZAR → USD exchange rate using a free API.
- * Falls back to a reasonable estimate if the API fails.
+ * Fetches exchange rate to USD. Falls back to hardcoded rate.
  */
-async function getZarToUsdRate(): Promise<number> {
+async function getExchangeRateToUsd(currency: string): Promise<number> {
+  const fallbacks: Record<string, number> = { ZAR: 0.055, MZN: 0.016 };
   try {
-    const res = await fetch(
-      "https://open.er-api.com/v6/latest/ZAR",
-      { signal: AbortSignal.timeout(5000) }
-    );
+    const res = await fetch(`https://open.er-api.com/v6/latest/${currency}`, {
+      signal: AbortSignal.timeout(5000),
+    });
     const data = await res.json();
     if (data.result === "success" && data.rates?.USD) {
-      logStep("Exchange rate fetched", { ZAR_to_USD: data.rates.USD });
+      logStep("Exchange rate fetched", { [`${currency}_to_USD`]: data.rates.USD });
       return data.rates.USD;
     }
-    throw new Error("Invalid exchange rate response");
   } catch (err) {
-    logStep("Exchange rate API failed, trying fallback", { error: String(err) });
-    // Fallback API
-    try {
-      const res2 = await fetch(
-        "https://api.exchangerate-api.com/v4/latest/ZAR",
-        { signal: AbortSignal.timeout(5000) }
-      );
-      const data2 = await res2.json();
-      if (data2.rates?.USD) {
-        logStep("Fallback exchange rate fetched", { ZAR_to_USD: data2.rates.USD });
-        return data2.rates.USD;
-      }
-    } catch {
-      // ignore
-    }
-    // Hard fallback ~0.055 (approximate ZAR/USD)
-    logStep("Using hardcoded fallback rate", { ZAR_to_USD: 0.055 });
-    return 0.055;
+    logStep("Exchange rate API failed", { error: String(err) });
   }
+  // Fallback
+  try {
+    const res2 = await fetch(`https://api.exchangerate-api.com/v4/latest/${currency}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    const data2 = await res2.json();
+    if (data2.rates?.USD) return data2.rates.USD;
+  } catch { /* ignore */ }
+  const rate = fallbacks[currency] || 0.016;
+  logStep("Using hardcoded fallback rate", { rate });
+  return rate;
 }
 
 /**
@@ -83,19 +48,11 @@ async function getZarToUsdRate(): Promise<number> {
  */
 function mapStatus(status: string): string {
   switch (status) {
-    case "successful":
-    case "completed":
-    case "success":
-      return "paid";
-    case "pending":
-    case "processing":
-      return "waiting_payment";
-    case "failed":
-      return "refused";
-    case "refunded":
-      return "refunded";
-    default:
-      return "waiting_payment";
+    case "successful": case "completed": case "success": return "paid";
+    case "pending": case "processing": return "waiting_payment";
+    case "failed": return "refused";
+    case "refunded": return "refunded";
+    default: return "waiting_payment";
   }
 }
 
@@ -104,14 +61,19 @@ function mapStatus(status: string): string {
  */
 function mapPaymentMethod(provider: string): string {
   switch (provider) {
-    case "stripe":
-      return "credit_card";
-    case "debito":
-    case "mpesa":
-      return "pix"; // closest mobile money equivalent
-    default:
-      return "credit_card";
+    case "stripe": return "credit_card";
+    case "debito": case "mpesa": return "pix";
+    default: return "credit_card";
   }
+}
+
+/**
+ * Converts an amount in a given currency to USD cents.
+ */
+async function toCentsUSD(amount: number, currency: string): Promise<number> {
+  if (currency === "USD") return Math.round(amount * 100);
+  const rate = await getExchangeRateToUsd(currency);
+  return Math.round(amount * rate * 100);
 }
 
 serve(async (req) => {
@@ -121,29 +83,20 @@ serve(async (req) => {
 
   try {
     const UTMIFY_API_TOKEN = Deno.env.get("UTMIFY_API_TOKEN");
-    if (!UTMIFY_API_TOKEN) {
-      throw new Error("UTMIFY_API_TOKEN is not configured");
-    }
+    if (!UTMIFY_API_TOKEN) throw new Error("UTMIFY_API_TOKEN is not configured");
 
     logStep("Function started");
 
-    const body: UtmifyPayload = await req.json();
+    const body = await req.json();
     const {
-      transaction_id,
-      product_name,
-      product_id,
-      customer_name,
-      customer_email,
-      customer_phone,
-      amount,
-      currency,
-      order_bump_accepted,
-      order_bump_amount,
-      payment_method,
-      status,
-      created_at,
-      approved_at,
+      transaction_id, product_name, product_id,
+      customer_name, customer_email, customer_phone,
+      amount, currency,
+      order_bump_accepted, order_bump_amount,
+      payment_method, status, created_at, approved_at,
       tracking_params,
+      // New: order bump details for products array
+      order_bumps,
     } = body;
 
     if (!transaction_id || !customer_email) {
@@ -155,56 +108,43 @@ serve(async (req) => {
 
     logStep("Processing transaction", { transaction_id, currency, amount, status });
 
-    // The 'amount' field from the DB already includes the order bump value,
-    // so we must NOT add order_bump_amount again to avoid double-counting.
-    const totalAmount = Number(amount);
+    // Build products array
+    const products: { id: string; name: string; planId: null; planName: null; quantity: number; priceInCents: number }[] = [];
 
-    // Determine currency and convert if needed
-    let finalAmountInCents: number;
-    let utmifyCurrency: string;
+    // Main product: amount minus order bump total
+    const bumpTotal = order_bump_accepted ? Number(order_bump_amount || 0) : 0;
+    const mainProductAmount = Number(amount) - bumpTotal;
+    const mainPriceCents = await toCentsUSD(mainProductAmount, currency);
 
-    if (currency === "ZAR") {
-      // Convert ZAR to USD using daily exchange rate
-      const zarToUsd = await getZarToUsdRate();
-      const amountInUsd = totalAmount * zarToUsd;
-      finalAmountInCents = Math.round(amountInUsd * 100);
-      utmifyCurrency = "USD";
-      logStep("ZAR converted to USD", {
-        originalZAR: totalAmount,
-        rate: zarToUsd,
-        convertedUSD: amountInUsd,
-        centsUSD: finalAmountInCents,
-      });
-    } else {
-      // MZN - also not supported by UTMify, convert to USD
-      // Use a rough MZN/USD rate
-      try {
-        const res = await fetch("https://open.er-api.com/v6/latest/MZN", {
-          signal: AbortSignal.timeout(5000),
-        });
-        const data = await res.json();
-        if (data.result === "success" && data.rates?.USD) {
-          const mznToUsd = data.rates.USD;
-          const amountInUsd = totalAmount * mznToUsd;
-          finalAmountInCents = Math.round(amountInUsd * 100);
-          utmifyCurrency = "USD";
-          logStep("MZN converted to USD", {
-            originalMZN: totalAmount,
-            rate: mznToUsd,
-            convertedUSD: amountInUsd,
+    products.push({
+      id: product_id || transaction_id,
+      name: product_name || "Product",
+      planId: null,
+      planName: null,
+      quantity: 1,
+      priceInCents: mainPriceCents,
+    });
+
+    // Add individual order bumps if accepted
+    if (order_bump_accepted && order_bumps && Array.isArray(order_bumps)) {
+      for (const bump of order_bumps) {
+        if (bump.name && bump.price && Number(bump.price) > 0) {
+          const bumpCents = await toCentsUSD(Number(bump.price), currency);
+          products.push({
+            id: bump.id || `bump-${products.length}`,
+            name: `Order Bump: ${bump.name}`,
+            planId: null,
+            planName: null,
+            quantity: 1,
+            priceInCents: bumpCents,
           });
-        } else {
-          // Fallback: ~0.016 USD per MZN
-          finalAmountInCents = Math.round(totalAmount * 0.016 * 100);
-          utmifyCurrency = "USD";
         }
-      } catch {
-        finalAmountInCents = Math.round(totalAmount * 0.016 * 100);
-        utmifyCurrency = "USD";
       }
     }
 
-    // Build UTMify payload
+    // Total in cents USD
+    const totalCents = products.reduce((sum, p) => sum + p.priceInCents, 0);
+
     const utmifyStatus = mapStatus(status);
     const utmifyPaymentMethod = mapPaymentMethod(payment_method);
 
@@ -228,16 +168,7 @@ serve(async (req) => {
         phone: customer_phone || null,
         document: null,
       },
-      products: [
-        {
-          id: product_id || transaction_id,
-          name: product_name || "Product",
-          planId: null,
-          planName: null,
-          quantity: 1,
-          priceInCents: finalAmountInCents,
-        },
-      ],
+      products,
       trackingParameters: {
         src: tracking_params?.src || null,
         sck: tracking_params?.sck || null,
@@ -248,17 +179,21 @@ serve(async (req) => {
         utm_term: tracking_params?.utm_term || null,
       },
       commission: {
-        totalPriceInCents: finalAmountInCents,
+        totalPriceInCents: totalCents,
         gatewayFeeInCents: 0,
-        userCommissionInCents: finalAmountInCents,
-        currency: utmifyCurrency,
+        userCommissionInCents: totalCents,
+        currency: "USD",
       },
       isTest: false,
     };
 
-    logStep("Sending to UTMify", { orderId: utmifyPayload.orderId, status: utmifyPayload.status });
+    logStep("Sending to UTMify", {
+      orderId: utmifyPayload.orderId,
+      status: utmifyPayload.status,
+      products: utmifyPayload.products.length,
+      trackingParameters: utmifyPayload.trackingParameters,
+    });
 
-    // Send to UTMify
     const utmifyResponse = await fetch(UTMIFY_API_URL, {
       method: "POST",
       headers: {
@@ -269,13 +204,9 @@ serve(async (req) => {
     });
 
     const responseText = await utmifyResponse.text();
-    logStep("UTMify response", {
-      status: utmifyResponse.status,
-      body: responseText.substring(0, 500),
-    });
+    logStep("UTMify response", { status: utmifyResponse.status, body: responseText.substring(0, 500) });
 
     if (!utmifyResponse.ok) {
-      logStep("UTMify API error", { status: utmifyResponse.status });
       return new Response(
         JSON.stringify({
           success: false,

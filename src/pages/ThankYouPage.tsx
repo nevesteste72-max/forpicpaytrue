@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, PartyPopper, ExternalLink } from "lucide-react";
 import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
+import { useUtmifyScript } from "@/hooks/useUtmifyScript";
 
 interface PaymentLinkInfo {
   product_name: string;
@@ -19,6 +20,9 @@ export default function ThankYouPage() {
   const { linkId } = useParams<{ linkId: string }>();
   const [searchParams] = useSearchParams();
   const txId = searchParams.get("tx");
+
+  // UTMify script on thank you page
+  useUtmifyScript();
 
   const [linkInfo, setLinkInfo] = useState<PaymentLinkInfo | null>(null);
   const [loading, setLoading] = useState(true);
