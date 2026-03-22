@@ -139,6 +139,12 @@ export function CreateProductDialog({
     setOrderBumpName("");
     setOrderBumpDescription("");
     setOrderBumpPrice("");
+    setOrderBump2Name("");
+    setOrderBump2Description("");
+    setOrderBump2Price("");
+    setOrderBump3Name("");
+    setOrderBump3Description("");
+    setOrderBump3Price("");
     setRedirectUrl("");
     setCurrency("MZN");
     setCheckoutLanguage("pt");
