@@ -65,6 +65,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
   const [stripePaymentMethods, setStripePaymentMethods] = useState<string[]>(["card"]);
   const [orderBumpName, setOrderBumpName] = useState("");
+  const [orderBumpDescription, setOrderBumpDescription] = useState("");
   const [orderBumpPrice, setOrderBumpPrice] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [facebookPixelId, setFacebookPixelId] = useState("");
