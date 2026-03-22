@@ -158,6 +158,7 @@ export function CreateProductDialog({
       amount,
       imageFile,
       orderBumpName: orderBumpName.trim(),
+      orderBumpDescription: orderBumpDescription.trim(),
       orderBumpPrice: orderBumpPrice.trim(),
       redirectUrl,
       currency,
