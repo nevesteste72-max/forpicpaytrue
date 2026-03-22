@@ -906,7 +906,7 @@ export default function Checkout() {
                   {hasBump && (
                     <OrderBump
                       productName={link.order_bump_name!}
-                      productDescription={null}
+                      productDescription={link.order_bump_description || null}
                       amount={Number(link.order_bump_price)}
                       logoUrl={null}
                       accepted={bumpAccepted}
