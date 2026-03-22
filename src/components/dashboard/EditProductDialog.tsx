@@ -91,6 +91,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setCheckoutLanguage(product.checkout_language || "pt");
       setStripePaymentMethods(product.stripe_payment_methods?.length ? product.stripe_payment_methods : ["card"]);
       setOrderBumpName(product.order_bump_name || "");
+      setOrderBumpDescription((product as any).order_bump_description || "");
       setOrderBumpPrice(product.order_bump_price ? String(product.order_bump_price) : "");
       setRedirectUrl((product as any).redirect_url || "");
       setFacebookPixelId((product as any).facebook_pixel_id || "");
