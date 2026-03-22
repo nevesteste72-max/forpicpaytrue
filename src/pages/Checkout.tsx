@@ -247,7 +247,7 @@ export default function Checkout() {
   const [phoneError, setPhoneError] = useState("");
   const [paymentState, setPaymentState] = useState<PaymentState>("form");
   const [errorMessage, setErrorMessage] = useState("");
-  const [bumpAccepted, setBumpAccepted] = useState(false);
+  const [bumpsAccepted, setBumpsAccepted] = useState<boolean[]>([false, false, false]);
   const [selectedMethod, setSelectedMethod] = useState<SelectedMethod>("mpesa");
 
   // Stripe state
