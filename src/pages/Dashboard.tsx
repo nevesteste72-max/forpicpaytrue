@@ -385,6 +385,18 @@ export default function Dashboard() {
     );
   }
 
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4 p-8">
+          <h1 className="text-2xl font-bold text-foreground">Acesso Restrito</h1>
+          <p className="text-muted-foreground">Não tem permissão para aceder ao painel.</p>
+          <Button onClick={signOut} variant="outline">Sair</Button>
+        </div>
+      </div>
+    );
+  }
+
   const businessName = user?.user_metadata?.business_name || "Minha Loja";
 
   const handleTabClick = (tab: DashboardTab) => {
