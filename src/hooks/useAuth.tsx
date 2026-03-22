@@ -7,16 +7,29 @@ export function useAuth(requireAuth = true) {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const initialised = useRef(false);
 
+  const checkAdminRole = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    setIsAdmin(!!data);
+  };
+
   useEffect(() => {
-    // Set up auth state listener FIRST (Supabase best practice)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        // Update user state
         setUser(session?.user ?? null);
+        if (session?.user) {
+          setTimeout(() => checkAdminRole(session.user.id), 0);
+        } else {
+          setIsAdmin(false);
+        }
 
-        // Only redirect after initial load is done
         if (!initialised.current) return;
 
         if (event === "SIGNED_OUT" && requireAuth) {
@@ -25,9 +38,11 @@ export function useAuth(requireAuth = true) {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkAdminRole(session.user.id);
+      }
       initialised.current = true;
       setLoading(false);
 
@@ -39,11 +54,9 @@ export function useAuth(requireAuth = true) {
     return () => subscription.unsubscribe();
   }, [navigate, requireAuth]);
 
-  // Handle visibility change — refresh session when app comes back to foreground
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        // Silently refresh the session when the app regains focus
         supabase.auth.getSession();
       }
     };
@@ -57,5 +70,5 @@ export function useAuth(requireAuth = true) {
     navigate("/auth");
   };
 
-  return { user, loading, signOut };
+  return { user, loading, signOut, isAdmin };
 }
