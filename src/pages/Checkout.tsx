@@ -9,7 +9,7 @@ import { OrderBump } from "@/components/checkout/OrderBump";
 import { RecoveryPopup, useExitIntent } from "@/components/checkout/RecoveryPopup";
 import { StripeCheckoutForm } from "@/components/checkout/StripeCheckoutForm";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
-import { useUtmifyScript } from "@/hooks/useUtmifyScript";
+import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
 import {
   initiatePayment,
   formatPhoneNumber,
