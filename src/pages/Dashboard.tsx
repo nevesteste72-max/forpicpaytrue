@@ -307,6 +307,7 @@ export default function Dashboard() {
         product_description: data.productDescription || null,
         amount: parseFloat(data.amount),
         order_bump_name: data.orderBumpName || null,
+        order_bump_description: data.orderBumpDescription || null,
         order_bump_price: data.orderBumpPrice ? parseFloat(data.orderBumpPrice) : null,
         redirect_url: data.redirectUrl || null,
         currency: data.currency,
