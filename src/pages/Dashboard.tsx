@@ -98,7 +98,7 @@ const financeLinks: { icon: typeof Wallet; label: string; tab: DashboardTab }[] 
 ];
 
 export default function Dashboard() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, isAdmin } = useAuth();
   const { toast } = useToast();
   useSaleNotifications(user?.id);
   const [products, setProducts] = useState<Product[]>([]);
@@ -381,6 +381,18 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4 p-8">
+          <h1 className="text-2xl font-bold text-foreground">Acesso Restrito</h1>
+          <p className="text-muted-foreground">Não tem permissão para aceder ao painel.</p>
+          <Button onClick={signOut} variant="outline">Sair</Button>
+        </div>
       </div>
     );
   }

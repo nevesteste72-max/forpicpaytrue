@@ -36,6 +36,16 @@ export default function Auth() {
         if (error) throw error;
         navigate("/dashboard");
       } else {
+        const ALLOWED_EMAIL = "gerciositoe2708@gmail.com";
+        if (email.toLowerCase().trim() !== ALLOWED_EMAIL) {
+          toast({
+            title: "Registo não permitido",
+            description: "O registo está fechado. Apenas contas autorizadas podem aceder.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
