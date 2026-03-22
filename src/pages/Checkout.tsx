@@ -914,9 +914,6 @@ export default function Checkout() {
                     </div>
                   )}
 
-                  {/* Order Bump */}
-                  {hasBump && (
-                    <OrderBump
                   {/* Order Bumps */}
                   {bumps.map((bump, idx) => (
                     <OrderBump
@@ -926,14 +923,17 @@ export default function Checkout() {
                       amount={Number(bump.price)}
                       logoUrl={null}
                       accepted={bumpsAccepted[idx]}
-                      onToggle={(v) => setBumpsAccepted(prev => { const n = [...prev]; n[idx] = v; return n; })}
+                      onToggle={(v) => {
+                        setBumpsAccepted(prev => {
+                          const n = [...prev];
+                          n[idx] = v;
+                          return n;
+                        });
+                      }}
                       currency={link.currency}
                       locale={locale}
                     />
                   ))}
-                      locale={locale}
-                    />
-                  )}
 
                   {/* Pay Button - Green */}
                   <Button
