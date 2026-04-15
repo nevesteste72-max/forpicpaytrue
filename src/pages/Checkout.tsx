@@ -253,7 +253,7 @@ export default function Checkout() {
   const [phonePrefix, setPhonePrefix] = useState("+27");
 
   // Stripe state
-  const [checkoutStep, setCheckoutStep] = useState<1 | 2>(1);
+  const [checkoutStep, setCheckoutStep] = useState<1 | 2>(1); // kept for resetForm compat
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [stripeTransactionId, setStripeTransactionId] = useState<string | null>(null);
   const [stripePaymentIntentId, setStripePaymentIntentId] = useState<string | null>(null);
