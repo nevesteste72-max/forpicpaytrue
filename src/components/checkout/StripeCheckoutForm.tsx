@@ -20,6 +20,19 @@ interface TrackingParams {
   utm_term?: string | null;
 }
 
+const PHONE_PREFIXES = [
+  { code: "+27", country: "🇿🇦 ZA", maxLen: 9 },
+  { code: "+258", country: "🇲🇿 MZ", maxLen: 9 },
+  { code: "+1", country: "🇺🇸 US", maxLen: 10 },
+  { code: "+44", country: "🇬🇧 UK", maxLen: 10 },
+  { code: "+351", country: "🇵🇹 PT", maxLen: 9 },
+  { code: "+55", country: "🇧🇷 BR", maxLen: 11 },
+  { code: "+244", country: "🇦🇴 AO", maxLen: 9 },
+  { code: "+91", country: "🇮🇳 IN", maxLen: 10 },
+  { code: "+234", country: "🇳🇬 NG", maxLen: 10 },
+  { code: "+254", country: "🇰🇪 KE", maxLen: 9 },
+];
+
 interface StripeCheckoutFormProps {
   totalAmount: number;
   currency: string;
@@ -29,19 +42,16 @@ interface StripeCheckoutFormProps {
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string;
+  phonePrefix?: string;
+  onPhonePrefixChange?: (prefix: string) => void;
+  onCustomerNameChange?: (name: string) => void;
+  onCustomerEmailChange?: (email: string) => void;
+  onCustomerPhoneChange?: (phone: string) => void;
   onSuccess: () => void;
   onError: (msg: string) => void;
   orderBumpSlot?: React.ReactNode;
   trackingParams?: TrackingParams;
   hideCustomerFields?: boolean;
-}
-
-function getPhoneConfig(currency: string) {
-  switch (currency) {
-    case "ZAR": return { prefix: "+27", maxLen: 10, placeholder: "61 234 5678" };
-    case "MZN": return { prefix: "+258", maxLen: 9, placeholder: "84 123 4567" };
-    default: return { prefix: "+1", maxLen: 15, placeholder: "555 123 4567" }; // USD/international
-  }
 }
 
 export function StripeCheckoutForm({
@@ -53,6 +63,11 @@ export function StripeCheckoutForm({
   customerName: initialName,
   customerEmail: initialEmail,
   customerPhone: initialPhone,
+  phonePrefix: externalPrefix,
+  onPhonePrefixChange,
+  onCustomerNameChange,
+  onCustomerEmailChange,
+  onCustomerPhoneChange,
   onSuccess,
   onError,
   orderBumpSlot,
@@ -65,12 +80,33 @@ export function StripeCheckoutForm({
   const [customerName, setCustomerName] = useState(initialName || "");
   const [customerEmail, setCustomerEmail] = useState(initialEmail || "");
   const [customerPhone, setCustomerPhone] = useState(initialPhone || "");
-  const phoneConfig = getPhoneConfig(currency);
+  const [phonePrefix, setPhonePrefix] = useState(externalPrefix || "+27");
+
+  const currentPrefix = PHONE_PREFIXES.find(p => p.code === phonePrefix) || PHONE_PREFIXES[0];
+  const phonePlaceholder = currentPrefix.code === "+27" ? "82 123 4567" : currentPrefix.code === "+258" ? "84 123 4567" : "123 456 7890";
+  const phoneMaxLen = currentPrefix.maxLen;
 
   const isEn = lang === "en";
   const isEs = lang === "es";
 
   const t = (pt: string, en: string, es: string) => isEs ? es : isEn ? en : pt;
+
+  const handleNameChange = (val: string) => {
+    setCustomerName(val);
+    onCustomerNameChange?.(val);
+  };
+  const handleEmailChange = (val: string) => {
+    setCustomerEmail(val);
+    onCustomerEmailChange?.(val);
+  };
+  const handlePhoneChange = (val: string) => {
+    setCustomerPhone(val);
+    onCustomerPhoneChange?.(val);
+  };
+  const handlePrefixChange = (val: string) => {
+    setPhonePrefix(val);
+    onPhonePrefixChange?.(val);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,8 +121,6 @@ export function StripeCheckoutForm({
       onError(t("Introduza um email válido", "Please enter a valid email", "Ingrese un email válido"));
       return;
     }
-
-    // No phone validation - allow any number through
 
     setProcessing(true);
 
@@ -107,7 +141,7 @@ export function StripeCheckoutForm({
               update_customer: true,
               customer_email: customerEmail,
               customer_name: customerName,
-              customer_phone: `${phoneConfig.prefix}${customerPhone}`,
+              customer_phone: `${phonePrefix}${customerPhone}`,
             }),
           }
         );
@@ -123,7 +157,7 @@ export function StripeCheckoutForm({
             billing_details: {
               name: customerName,
               email: customerEmail,
-              phone: `${phoneConfig.prefix}${customerPhone}`,
+              phone: `${phonePrefix}${customerPhone}`,
             },
           },
         },
@@ -131,7 +165,6 @@ export function StripeCheckoutForm({
       });
 
       if (error) {
-        // Notify backend of failed payment for auto WhatsApp
         try {
           await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-webhook-confirm`,
@@ -157,7 +190,6 @@ export function StripeCheckoutForm({
 
       if (paymentIntent) {
         const status = paymentIntent.status;
-        // Map Stripe status to our status
         const mappedStatus = status === "succeeded" ? "successful"
           : status === "processing" || status === "requires_action" ? "pending"
           : "failed";
@@ -211,78 +243,61 @@ export function StripeCheckoutForm({
         <>
           {/* Name */}
           <div>
-            <Label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wide">
-              {t("Nome", "Name", "Nombre")}
+            <Label className="block text-sm font-semibold text-foreground mb-1.5">
+              {t("Nome Completo", "Full Name", "Nombre Completo")}
             </Label>
-            <div className="relative">
-              <User className="absolute left-3.5 top-3 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder={t("Seu nome completo", "Your full name", "Tu nombre completo")}
-                required
-                className="pl-10 h-11 rounded-lg border-border focus:border-primary text-sm"
-              />
-            </div>
+            <Input
+              type="text"
+              value={customerName}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="John Doe"
+              required
+              className="h-12 rounded-xl border-border text-sm"
+            />
           </div>
 
           {/* Email */}
           <div>
-            <Label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wide">
-              {t("Email", "Email", "Correo electrónico")}
+            <Label className="block text-sm font-semibold text-foreground mb-1.5">
+              {t("Email", "Email Address", "Correo Electrónico")}
             </Label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-3 text-muted-foreground w-4 h-4" />
+            <Input
+              type="email"
+              value={customerEmail}
+              onChange={(e) => handleEmailChange(e.target.value)}
+              placeholder="john@example.com"
+              required
+              className="h-12 rounded-xl border-border text-sm"
+            />
+          </div>
+
+          {/* Phone with prefix selector */}
+          <div>
+            <Label className="block text-sm font-semibold text-foreground mb-1.5">
+              {t("Número de Telefone", "Phone Number", "Número de Teléfono")}
+            </Label>
+            <div className="relative flex">
+              <select
+                value={phonePrefix}
+                onChange={(e) => handlePrefixChange(e.target.value)}
+                className="flex items-center justify-center px-2 bg-muted border border-r-0 border-border rounded-l-xl text-muted-foreground text-sm font-medium appearance-none cursor-pointer focus:outline-none"
+                style={{ minWidth: "80px" }}
+              >
+                {PHONE_PREFIXES.map((p) => (
+                  <option key={p.code} value={p.code}>{p.country} {p.code}</option>
+                ))}
+              </select>
               <Input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder={t("exemplo@email.com", "example@email.com", "ejemplo@email.com")}
-                required
-                className="pl-10 h-11 rounded-lg border-border focus:border-primary text-sm"
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => handlePhoneChange(e.target.value.replace(/\D/g, "").slice(0, phoneMaxLen))}
+                placeholder={phonePlaceholder}
+                className="flex-1 rounded-l-none h-12 rounded-r-xl border-border text-sm font-mono"
               />
             </div>
           </div>
-
-          {/* Phone - hide for USD/international */}
-          {(currency === "MZN" || currency === "ZAR") && (
-            <div>
-              <Label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wide">
-                {t("Número de Telefone", "Phone Number", "Número de Teléfono")}
-              </Label>
-              <div className="relative flex">
-                <div className="flex items-center justify-center px-3 bg-muted border border-r-0 border-border rounded-l-lg text-muted-foreground text-sm font-medium">
-                  <Phone className="w-4 h-4 mr-2" />
-                  {phoneConfig.prefix}
-                </div>
-                <Input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, "").slice(0, phoneConfig.maxLen))}
-                  placeholder={phoneConfig.placeholder}
-                  className="flex-1 rounded-l-none h-11 rounded-r-lg border-border text-sm font-mono"
-                />
-              </div>
-            </div>
-          )}
         </>
       )}
-
-      {/* Stripe PaymentElement */}
-      <PaymentElement
-        options={{
-          layout: "accordion",
-          wallets: { applePay: "never", googlePay: "never", link: "never" },
-          paymentMethodOrder: ["card"],
-          fields: {
-            billingDetails: "auto",
-          },
-          terms: {
-            card: "never",
-          },
-        }}
-      />
 
       {/* Order Bump */}
       {orderBumpSlot && (
@@ -291,12 +306,32 @@ export function StripeCheckoutForm({
         </div>
       )}
 
+      {/* Stripe PaymentElement */}
+      <div className="pt-2">
+        <Label className="block text-sm font-semibold text-foreground mb-3">
+          {t("Dados do Cartão", "Card Details", "Datos de la Tarjeta")}
+        </Label>
+        <PaymentElement
+          options={{
+            layout: "accordion",
+            wallets: { applePay: "never", googlePay: "never", link: "never" },
+            paymentMethodOrder: ["card"],
+            fields: {
+              billingDetails: "auto",
+            },
+            terms: {
+              card: "never",
+            },
+          }}
+        />
+      </div>
+
       {/* Total */}
       <div className="pt-4 border-t border-border space-y-2">
         <div className="flex justify-between text-lg font-bold text-foreground">
           <span>Total</span>
           <span>
-            {currency} {totalAmount.toLocaleString(isEn ? "en-ZA" : "pt-MZ", { minimumFractionDigits: 2 })}
+            {currency === "ZAR" ? "R" : currency} {totalAmount.toLocaleString(isEn ? "en-ZA" : "pt-MZ", { minimumFractionDigits: 2 })}
           </span>
         </div>
       </div>
@@ -304,22 +339,23 @@ export function StripeCheckoutForm({
       <Button
         type="submit"
         disabled={!stripe || processing}
-        className="w-full h-12 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] transition-all group relative overflow-hidden"
+        className="w-full h-14 rounded-xl bg-[hsl(145,60%,40%)] hover:bg-[hsl(145,60%,35%)] text-white font-bold text-base shadow-lg shadow-[hsl(145,60%,40%)]/25 active:scale-[0.98] transition-all"
       >
-        <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-        <span className="relative z-10 flex items-center justify-center gap-2">
-          {processing ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            isEn ? "Pay Now" : isEs ? "Pagar Ahora" : "Pagar Agora"
-          )}
-        </span>
+        {processing ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <>
+            {isEn ? `Pay Now - ${currency === "ZAR" ? "R" : currency} ${totalAmount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` 
+              : isEs ? `Pagar Ahora - ${currency === "ZAR" ? "R" : currency} ${totalAmount.toLocaleString("pt-MZ", { minimumFractionDigits: 2 })}`
+              : `Pagar Agora - ${currency === "ZAR" ? "R" : currency} ${totalAmount.toLocaleString("pt-MZ", { minimumFractionDigits: 2 })}`}
+          </>
+        )}
       </Button>
 
       <div className="text-center">
         <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
           <ShieldCheck className="w-3 h-3" />
-          {t("Pagamento seguro processado pelo Stripe", "Secure payment processed by Stripe", "Pago seguro procesado por Stripe")}
+          {t("Pagamento seguro e encriptado.", "Your payment is secure and encrypted.", "Su pago es seguro y encriptado.")}
         </p>
       </div>
     </form>
