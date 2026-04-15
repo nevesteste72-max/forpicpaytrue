@@ -966,6 +966,7 @@ export default function Checkout() {
                 </form>
 
                 {/* Trust Badges */}
+                {(link as any).show_trust_badges !== false && (
                 <div className="px-6 md:px-8 pb-6 md:pb-8">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
@@ -990,6 +991,7 @@ export default function Checkout() {
                     </div>
                   </div>
                 </div>
+                )}
               </>
             ) : (
               <>
