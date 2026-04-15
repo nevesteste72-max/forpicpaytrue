@@ -280,11 +280,13 @@ export function StripeCheckoutForm({
               <select
                 value={phonePrefix}
                 onChange={(e) => handlePrefixChange(e.target.value)}
-                className="flex items-center justify-center px-2 bg-muted border border-r-0 border-border rounded-l-xl text-muted-foreground text-sm font-medium appearance-none cursor-pointer focus:outline-none"
-                style={{ minWidth: "80px" }}
+                className="flex items-center justify-center px-3 bg-muted border border-r-0 border-border rounded-l-xl text-muted-foreground text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+                style={{ minWidth: "90px" }}
               >
                 {PHONE_PREFIXES.map((p) => (
-                  <option key={p.code} value={p.code}>{p.country} {p.code}</option>
+                  <option key={p.code} value={p.code}>
+                    {p.country} {p.code}
+                  </option>
                 ))}
               </select>
               <Input
