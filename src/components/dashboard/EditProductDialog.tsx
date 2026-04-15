@@ -83,6 +83,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [recoveryMessage, setRecoveryMessage] = useState("");
   const [recoveryCtaText, setRecoveryCtaText] = useState("");
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
+  const [showTrustBadges, setShowTrustBadges] = useState(true);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -115,6 +116,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setRecoveryMessage(product.recovery_message || "");
       setRecoveryCtaText(product.recovery_cta_text || "");
       setRecoveryRedirectUrl(product.recovery_redirect_url || "");
+      setShowTrustBadges((product as any).show_trust_badges !== false);
       setImagePreview(product.logo_url || null);
       setBannerPreview(product.checkout_banner_url || null);
       setImageFile(null);
@@ -186,6 +188,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         recovery_message: recoveryMessage || null,
         recovery_cta_text: recoveryCtaText || null,
         recovery_redirect_url: recoveryRedirectUrl || null,
+        show_trust_badges: showTrustBadges,
       };
 
       if (imageFile) {
@@ -353,6 +356,28 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
             <div className="space-y-2">
               <Label className="text-xs">Contagem Regressiva (minutos)</Label>
               <Input type="number" min="0" max="1440" value={checkoutTimerMinutes} onChange={(e) => setCheckoutTimerMinutes(e.target.value)} placeholder="Ex: 15" className="h-10 rounded-lg text-sm" />
+            </div>
+
+            {/* Trust Badges Toggle */}
+            <div className="space-y-2 pt-3 border-t border-border">
+              <Label className="text-xs">Selos de Confiança</Label>
+              <p className="text-xs text-muted-foreground">Mostrar selos de privacidade, segurança e entrega no checkout</p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowTrustBadges(!showTrustBadges)}
+                  className={cn(
+                    "w-10 h-6 rounded-full transition-colors relative",
+                    showTrustBadges ? "bg-[hsl(145,60%,40%)]" : "bg-border"
+                  )}
+                >
+                  <span className={cn(
+                    "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
+                    showTrustBadges ? "translate-x-4" : "translate-x-0.5"
+                  )} />
+                </button>
+                <span className="text-sm text-foreground">{showTrustBadges ? "Ativado" : "Desativado"}</span>
+              </div>
             </div>
           </div>
 
