@@ -99,6 +99,7 @@ interface PaymentLink {
   recovery_message?: string | null;
   recovery_cta_text?: string | null;
   recovery_redirect_url?: string | null;
+  show_trust_badges?: boolean;
 }
 
 type PaymentState = "form" | "processing" | "pending" | "success" | "failed";
@@ -249,6 +250,7 @@ export default function Checkout() {
   const [errorMessage, setErrorMessage] = useState("");
   const [bumpsAccepted, setBumpsAccepted] = useState<boolean[]>([false, false, false]);
   const [selectedMethod, setSelectedMethod] = useState<SelectedMethod>("mpesa");
+  const [phonePrefix, setPhonePrefix] = useState("+27");
 
   // Stripe state
   const [checkoutStep, setCheckoutStep] = useState<1 | 2>(1);
@@ -536,7 +538,7 @@ export default function Checkout() {
     try {
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -809,10 +811,23 @@ export default function Checkout() {
   // --- STRIPE CHECKOUT: single-page with Elements ---
   if (isStripe) {
 
-    const phonePrefix = link.currency === "ZAR" ? "+27" : link.currency === "MZN" ? "+258" : "";
-    const phonePlaceholder = link.currency === "ZAR" ? "82 123 4567" : link.currency === "MZN" ? "84 123 4567" : "";
-    const phoneMaxLen = link.currency === "ZAR" ? 10 : link.currency === "MZN" ? 9 : 15;
-    const showPhone = link.currency === "MZN" || link.currency === "ZAR";
+    const PHONE_PREFIXES = [
+      { code: "+27", country: "🇿🇦 ZA", maxLen: 9 },
+      { code: "+258", country: "🇲🇿 MZ", maxLen: 9 },
+      { code: "+1", country: "🇺🇸 US", maxLen: 10 },
+      { code: "+44", country: "🇬🇧 UK", maxLen: 10 },
+      { code: "+351", country: "🇵🇹 PT", maxLen: 9 },
+      { code: "+55", country: "🇧🇷 BR", maxLen: 11 },
+      { code: "+244", country: "🇦🇴 AO", maxLen: 9 },
+      { code: "+91", country: "🇮🇳 IN", maxLen: 10 },
+      { code: "+234", country: "🇳🇬 NG", maxLen: 10 },
+      { code: "+254", country: "🇰🇪 KE", maxLen: 9 },
+    ];
+
+    const currentPrefix = PHONE_PREFIXES.find(p => p.code === phonePrefix) || PHONE_PREFIXES[0];
+    const phonePlaceholder = currentPrefix.code === "+27" ? "82 123 4567" : currentPrefix.code === "+258" ? "84 123 4567" : "123 456 7890";
+    const phoneMaxLen = currentPrefix.maxLen;
+    const showPhone = true;
 
     const handleStep1Continue = (e: React.FormEvent) => {
       e.preventDefault();
@@ -911,10 +926,16 @@ export default function Checkout() {
                         {lang === "en" ? "Phone Number" : lang === "es" ? "Número de Teléfono" : "Número de Telefone"}
                       </Label>
                       <div className="relative flex">
-                        <div className="flex items-center justify-center px-3 bg-muted border border-r-0 border-border rounded-l-xl text-muted-foreground text-sm font-medium">
-                          <Phone className="w-4 h-4 mr-2" />
-                          {phonePrefix}
-                        </div>
+                        <select
+                          value={phonePrefix}
+                          onChange={(e) => setPhonePrefix(e.target.value)}
+                          className="flex items-center justify-center px-2 bg-muted border border-r-0 border-border rounded-l-xl text-muted-foreground text-sm font-medium appearance-none cursor-pointer focus:outline-none"
+                          style={{ minWidth: "80px" }}
+                        >
+                          {PHONE_PREFIXES.map((p) => (
+                            <option key={p.code} value={p.code}>{p.country} {p.code}</option>
+                          ))}
+                        </select>
                         <Input
                           type="tel"
                           value={phone}
@@ -965,6 +986,7 @@ export default function Checkout() {
                 </form>
 
                 {/* Trust Badges */}
+                {(link as any).show_trust_badges !== false && (
                 <div className="px-6 md:px-8 pb-6 md:pb-8">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
@@ -989,6 +1011,7 @@ export default function Checkout() {
                     </div>
                   </div>
                 </div>
+                )}
               </>
             ) : (
               <>

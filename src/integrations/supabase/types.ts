@@ -146,6 +146,7 @@ export type Database = {
           recovery_message: string | null
           recovery_redirect_url: string | null
           redirect_url: string | null
+          show_trust_badges: boolean
           stripe_payment_methods: string[]
           thank_you_message: string | null
           thank_you_title: string | null
@@ -184,6 +185,7 @@ export type Database = {
           recovery_message?: string | null
           recovery_redirect_url?: string | null
           redirect_url?: string | null
+          show_trust_badges?: boolean
           stripe_payment_methods?: string[]
           thank_you_message?: string | null
           thank_you_title?: string | null
@@ -222,6 +224,7 @@ export type Database = {
           recovery_message?: string | null
           recovery_redirect_url?: string | null
           redirect_url?: string | null
+          show_trust_badges?: boolean
           stripe_payment_methods?: string[]
           thank_you_message?: string | null
           thank_you_title?: string | null

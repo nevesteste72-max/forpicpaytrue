@@ -57,6 +57,7 @@ interface CreateProductDialogProps {
     recoveryMessage: string;
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
+    showTrustBadges: boolean;
   }) => Promise<void>;
   creating: boolean;
 }
@@ -99,6 +100,7 @@ export function CreateProductDialog({
   const [recoveryMessage, setRecoveryMessage] = useState("");
   const [recoveryCtaText, setRecoveryCtaText] = useState("");
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
+  const [showTrustBadges, setShowTrustBadges] = useState(true);
 
   const isStripe = currency === "ZAR" || currency === "USD";
 
@@ -158,6 +160,7 @@ export function CreateProductDialog({
     setRecoveryMessage("");
     setRecoveryCtaText("");
     setRecoveryRedirectUrl("");
+    setShowTrustBadges(true);
     clearImage();
     clearBanner();
   };
@@ -198,6 +201,7 @@ export function CreateProductDialog({
       recoveryMessage: recoveryMessage.trim(),
       recoveryCtaText: recoveryCtaText.trim(),
       recoveryRedirectUrl: recoveryRedirectUrl.trim(),
+      showTrustBadges,
     });
     resetForm();
   };
@@ -527,6 +531,28 @@ export function CreateProductDialog({
                 className="h-10 rounded-lg text-sm"
               />
               <p className="text-xs text-muted-foreground">Deixe vazio para desativar</p>
+            </div>
+
+            {/* Trust Badges Toggle */}
+            <div className="space-y-2 pt-3 border-t border-border">
+              <Label className="text-xs">Selos de Confiança</Label>
+              <p className="text-xs text-muted-foreground">Mostrar selos de privacidade, segurança e entrega no checkout</p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowTrustBadges(!showTrustBadges)}
+                  className={cn(
+                    "w-10 h-6 rounded-full transition-colors relative",
+                    showTrustBadges ? "bg-[hsl(145,60%,40%)]" : "bg-border"
+                  )}
+                >
+                  <span className={cn(
+                    "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
+                    showTrustBadges ? "translate-x-4" : "translate-x-0.5"
+                  )} />
+                </button>
+                <span className="text-sm text-foreground">{showTrustBadges ? "Ativado" : "Desativado"}</span>
+              </div>
             </div>
           </div>
 

@@ -303,6 +303,7 @@ export default function Dashboard() {
     recoveryMessage: string;
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
+    showTrustBadges: boolean;
   }) => {
     if (!user) return;
     setCreating(true);
@@ -335,6 +336,7 @@ export default function Dashboard() {
         recovery_message: data.recoveryMessage || null,
         recovery_cta_text: data.recoveryCtaText || null,
         recovery_redirect_url: data.recoveryRedirectUrl || null,
+        show_trust_badges: data.showTrustBadges,
       };
 
       const { data: newProduct, error } = await supabase

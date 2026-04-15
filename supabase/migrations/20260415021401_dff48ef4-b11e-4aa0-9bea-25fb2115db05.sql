@@ -1,0 +1,1 @@
+ALTER TABLE public.payment_links ADD COLUMN show_trust_badges boolean NOT NULL DEFAULT true;
