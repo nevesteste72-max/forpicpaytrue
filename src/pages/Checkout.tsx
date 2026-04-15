@@ -808,39 +808,32 @@ export default function Checkout() {
     );
   }
 
-  // --- STRIPE CHECKOUT: single-page with Elements ---
+  // --- STRIPE CHECKOUT: single-page with Elements (one step) ---
   if (isStripe) {
 
-    const PHONE_PREFIXES = [
-      { code: "+27", country: "🇿🇦 ZA", maxLen: 9 },
-      { code: "+258", country: "🇲🇿 MZ", maxLen: 9 },
-      { code: "+1", country: "🇺🇸 US", maxLen: 10 },
-      { code: "+44", country: "🇬🇧 UK", maxLen: 10 },
-      { code: "+351", country: "🇵🇹 PT", maxLen: 9 },
-      { code: "+55", country: "🇧🇷 BR", maxLen: 11 },
-      { code: "+244", country: "🇦🇴 AO", maxLen: 9 },
-      { code: "+91", country: "🇮🇳 IN", maxLen: 10 },
-      { code: "+234", country: "🇳🇬 NG", maxLen: 10 },
-      { code: "+254", country: "🇰🇪 KE", maxLen: 9 },
-    ];
-
-    const currentPrefix = PHONE_PREFIXES.find(p => p.code === phonePrefix) || PHONE_PREFIXES[0];
-    const phonePlaceholder = currentPrefix.code === "+27" ? "82 123 4567" : currentPrefix.code === "+258" ? "84 123 4567" : "123 456 7890";
-    const phoneMaxLen = currentPrefix.maxLen;
-    const showPhone = true;
-
-    const handleStep1Continue = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!email || !email.includes("@")) {
-        toast({ title: t.invalidEmail, description: t.invalidEmailDesc, variant: "destructive" });
-        return;
-      }
-      if (!customerName.trim()) {
-        toast({ title: t.name, description: lang === "en" ? "Please enter your name" : "Introduza o seu nome", variant: "destructive" });
-        return;
-      }
-      setCheckoutStep(2);
-    };
+    const orderBumpSlot = bumps.length > 0 ? (
+      <>
+        {bumps.map((bump, idx) => (
+          <OrderBump
+            key={idx}
+            productName={bump.name!}
+            productDescription={bump.desc || null}
+            amount={Number(bump.price)}
+            logoUrl={null}
+            accepted={bumpsAccepted[idx]}
+            onToggle={(v) => {
+              setBumpsAccepted(prev => {
+                const n = [...prev];
+                n[idx] = v;
+                return n;
+              });
+            }}
+            currency={link.currency}
+            locale={locale}
+          />
+        ))}
+      </>
+    ) : null;
 
     return (
       <div className="min-h-screen bg-muted flex flex-col md:items-center md:justify-center">
@@ -860,226 +853,92 @@ export default function Checkout() {
               />
             )}
 
-            {/* Step indicator */}
-            <div className="flex items-center gap-2 px-6 md:px-8 pt-6">
-              <div className={cn("flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold", checkoutStep >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>1</div>
-              <div className={cn("flex-1 h-0.5 rounded-full", checkoutStep >= 2 ? "bg-primary" : "bg-border")} />
-              <div className={cn("flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold", checkoutStep >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>2</div>
+            {/* Product Header */}
+            <div className="p-6 md:p-8 pb-0">
+              <div className="bg-muted/40 rounded-2xl p-6 border border-border text-center">
+                {link.logo_url && (
+                  <img src={link.logo_url} alt={link.product_name} className="h-16 w-auto object-contain mx-auto mb-4 rounded-xl" />
+                )}
+                <h2 className="text-lg font-bold text-foreground">{link.product_name}</h2>
+                <p className="text-3xl font-bold text-foreground mt-2">
+                  {currencySymbol === "ZAR" ? "R" : currencySymbol} {Number(link.amount).toLocaleString(locale, { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> SSL Encrypted</span>
+                <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> Secure Payment</span>
+              </div>
             </div>
 
-            {checkoutStep === 1 ? (
-              <>
-                {/* Product Header */}
-                <div className="p-6 md:p-8 pb-0">
-                  <div className="bg-muted/40 rounded-2xl p-6 border border-border text-center">
-                    {link.logo_url && (
-                      <img src={link.logo_url} alt={link.product_name} className="h-16 w-auto object-contain mx-auto mb-4 rounded-xl" />
-                    )}
-                    <h2 className="text-lg font-bold text-foreground">{link.product_name}</h2>
-                    <p className="text-3xl font-bold text-foreground mt-2">
-                      {currencySymbol === "ZAR" ? "R" : currencySymbol} {Number(link.amount).toLocaleString(locale, { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> SSL Encrypted</span>
-                    <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> Secure Payment</span>
-                  </div>
+            {/* Single-step form */}
+            <div className="p-6 md:p-8">
+              {clientSecret && stripeOptions && stripeInstance ? (
+                <Elements stripe={stripeInstance} options={stripeOptions}>
+                  <StripeCheckoutForm
+                    totalAmount={totalAmount}
+                    currency={currencySymbol}
+                    lang={lang}
+                    transactionId={stripeTransactionId || ""}
+                    redirectUrl={link.redirect_url}
+                    customerName={customerName}
+                    customerEmail={email}
+                    customerPhone={phone}
+                    phonePrefix={phonePrefix}
+                    onPhonePrefixChange={setPhonePrefix}
+                    onCustomerNameChange={setCustomerName}
+                    onCustomerEmailChange={setEmail}
+                    onCustomerPhoneChange={setPhone}
+                    hideCustomerFields={false}
+                    trackingParams={trackingParams}
+                    onSuccess={async () => {
+                      trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);
+                      const hasFlow = await checkAndRedirectToFlow(stripeTransactionId || "");
+                      if (!hasFlow) setPaymentState("success");
+                    }}
+                    onError={(msg) => {
+                      setErrorMessage(msg);
+                      if (link?.recovery_enabled && !recoveryShownRef.current) {
+                        recoveryShownRef.current = true;
+                        setRecoveryTrigger("payment_failed");
+                      }
+                      setPaymentState("failed");
+                    }}
+                    orderBumpSlot={orderBumpSlot}
+                  />
+                </Elements>
+              ) : (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
+              )}
+            </div>
 
-                {/* Customer Info Form */}
-                <form onSubmit={handleStep1Continue} className="p-6 md:p-8 space-y-5">
-                  <h3 className="text-base font-bold text-foreground">
-                    {lang === "en" ? "Your Information" : lang === "es" ? "Tu Información" : "Suas Informações"}
-                  </h3>
-
-                  <div>
-                    <Label className="block text-sm font-semibold text-foreground mb-1.5">
-                      {lang === "en" ? "Full Name" : lang === "es" ? "Nombre Completo" : "Nome Completo"}
-                    </Label>
-                    <Input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="John Doe"
-                      required
-                      className="h-12 rounded-xl border-border text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="block text-sm font-semibold text-foreground mb-1.5">
-                      {lang === "en" ? "Email Address" : lang === "es" ? "Correo Electrónico" : "Email"}
-                    </Label>
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="john@example.com"
-                      required
-                      className="h-12 rounded-xl border-border text-sm"
-                    />
-                  </div>
-
-                  {showPhone && (
-                    <div>
-                      <Label className="block text-sm font-semibold text-foreground mb-1.5">
-                        {lang === "en" ? "Phone Number" : lang === "es" ? "Número de Teléfono" : "Número de Telefone"}
-                      </Label>
-                      <div className="relative flex">
-                        <select
-                          value={phonePrefix}
-                          onChange={(e) => setPhonePrefix(e.target.value)}
-                          className="flex items-center justify-center px-2 bg-muted border border-r-0 border-border rounded-l-xl text-muted-foreground text-sm font-medium appearance-none cursor-pointer focus:outline-none"
-                          style={{ minWidth: "80px" }}
-                        >
-                          {PHONE_PREFIXES.map((p) => (
-                            <option key={p.code} value={p.code}>{p.country} {p.code}</option>
-                          ))}
-                        </select>
-                        <Input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, phoneMaxLen))}
-                          placeholder={phonePlaceholder}
-                          className="flex-1 rounded-l-none h-12 rounded-r-xl border-border text-sm font-mono"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Order Bumps */}
-                  {bumps.map((bump, idx) => (
-                    <OrderBump
-                      key={idx}
-                      productName={bump.name!}
-                      productDescription={bump.desc || null}
-                      amount={Number(bump.price)}
-                      logoUrl={null}
-                      accepted={bumpsAccepted[idx]}
-                      onToggle={(v) => {
-                        setBumpsAccepted(prev => {
-                          const n = [...prev];
-                          n[idx] = v;
-                          return n;
-                        });
-                      }}
-                      currency={link.currency}
-                      locale={locale}
-                    />
-                  ))}
-
-                  {/* Pay Button - Green */}
-                  <Button
-                    type="submit"
-                    className="w-full h-14 rounded-xl bg-[hsl(145,60%,40%)] hover:bg-[hsl(145,60%,35%)] text-white font-bold text-base shadow-lg shadow-[hsl(145,60%,40%)]/25 active:scale-[0.98] transition-all"
-                  >
-                    {lang === "en" ? `Pay Now - ${currencySymbol === "ZAR" ? "R" : currencySymbol} ${totalAmount.toLocaleString(locale, { minimumFractionDigits: 2 })}` 
-                      : lang === "es" ? `Pagar Ahora - ${currencySymbol === "ZAR" ? "R" : currencySymbol} ${totalAmount.toLocaleString(locale, { minimumFractionDigits: 2 })}`
-                      : `Pagar Agora - ${currencySymbol === "ZAR" ? "R" : currencySymbol} ${totalAmount.toLocaleString(locale, { minimumFractionDigits: 2 })}`}
-                  </Button>
-
-                  <div className="text-center">
-                    <p className="text-[10px] text-muted-foreground">
-                      {lang === "en" ? "Your payment is secure and encrypted." : lang === "es" ? "Su pago es seguro y encriptado." : "Pagamento seguro e encriptado."}
-                    </p>
-                  </div>
-                </form>
-
-                {/* Trust Badges */}
-                {(link as any).show_trust_badges !== false && (
-                <div className="px-6 md:px-8 pb-6 md:pb-8">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                      <Shield className="w-6 h-6 text-primary mb-2" />
-                      <p className="text-sm font-bold text-foreground">{lang === "en" ? "Privacy" : lang === "es" ? "Privacidad" : "Privacidade"}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your information is 100% secure" : lang === "es" ? "Su información es 100% segura" : "Seus dados estão 100% seguros"}</p>
-                    </div>
-                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                      <Lock className="w-6 h-6 text-primary mb-2" />
-                      <p className="text-sm font-bold text-foreground">{lang === "en" ? "Secure Purchase" : lang === "es" ? "Compra Segura" : "Compra Segura"}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
-                    </div>
-                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                      <Mail className="w-6 h-6 text-primary mb-2" />
-                      <p className="text-sm font-bold text-foreground">{lang === "en" ? "Delivered via Email" : lang === "es" ? "Entrega por Email" : "Entrega por Email"}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Product access delivered by email" : lang === "es" ? "Acceso entregado por email" : "Acesso entregue por email"}</p>
-                    </div>
-                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                      <Award className="w-6 h-6 text-primary mb-2" />
-                      <p className="text-sm font-bold text-foreground">{lang === "en" ? "Approved Content" : lang === "es" ? "Contenido Aprobado" : "Conteudo Aprovado"}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "100% reviewed and approved" : lang === "es" ? "100% revisado y aprobado" : "100% revisado e aprovado"}</p>
-                    </div>
-                  </div>
+            {/* Trust Badges */}
+            {(link as any).show_trust_badges !== false && (
+            <div className="px-6 md:px-8 pb-6 md:pb-8">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Shield className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Privacy" : lang === "es" ? "Privacidad" : "Privacidade"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your information is 100% secure" : lang === "es" ? "Su información es 100% segura" : "Seus dados estão 100% seguros"}</p>
                 </div>
-                )}
-              </>
-            ) : (
-              <>
-                {/* Step 2: Payment */}
-                <div className="p-6 md:p-8 pb-0">
-                  <button
-                    type="button"
-                    onClick={() => setCheckoutStep(1)}
-                    className="text-sm text-primary font-medium mb-4 flex items-center gap-1 hover:underline"
-                  >
-                    ← {lang === "en" ? "Back" : lang === "es" ? "Volver" : "Voltar"}
-                  </button>
-                  <div className="flex items-center gap-3 bg-muted/40 rounded-xl p-4 border border-border">
-                    {link.logo_url ? (
-                      <img src={link.logo_url} alt={link.product_name} className="w-12 h-12 rounded-lg object-cover shrink-0" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center shrink-0">
-                        <Wallet className="w-6 h-6 text-white" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{link.product_name}</p>
-                      <p className="text-xs text-muted-foreground">{email}</p>
-                    </div>
-                    <p className="text-lg font-bold text-foreground shrink-0">
-                      {currencySymbol === "ZAR" ? "R" : currencySymbol} {totalAmount.toLocaleString(locale, { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Lock className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Secure Purchase" : lang === "es" ? "Compra Segura" : "Compra Segura"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
                 </div>
-
-                <div className="p-6 md:p-8">
-                  {clientSecret && stripeOptions && stripeInstance ? (
-                    <Elements stripe={stripeInstance} options={stripeOptions}>
-                      <StripeCheckoutForm
-                        totalAmount={totalAmount}
-                        currency={currencySymbol}
-                        lang={lang}
-                        transactionId={stripeTransactionId || ""}
-                        redirectUrl={link.redirect_url}
-                        customerName={customerName}
-                        customerEmail={email}
-                        customerPhone={phone}
-                        hideCustomerFields
-                        trackingParams={trackingParams}
-                        onSuccess={async () => {
-                          trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);
-                          const hasFlow = await checkAndRedirectToFlow(stripeTransactionId || "");
-                          if (!hasFlow) setPaymentState("success");
-                        }}
-                        onError={(msg) => {
-                          setErrorMessage(msg);
-                          // Trigger recovery popup on payment failure
-                          if (link?.recovery_enabled && !recoveryShownRef.current) {
-                            recoveryShownRef.current = true;
-                            setRecoveryTrigger("payment_failed");
-                          }
-                          setPaymentState("failed");
-                        }}
-                        orderBumpSlot={null}
-                      />
-                    </Elements>
-                  ) : (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    </div>
-                  )}
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Mail className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Delivered via Email" : lang === "es" ? "Entrega por Email" : "Entrega por Email"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Product access delivered by email" : lang === "es" ? "Acceso entregado por email" : "Acesso entregue por email"}</p>
                 </div>
-              </>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Award className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Approved Content" : lang === "es" ? "Contenido Aprobado" : "Conteudo Aprovado"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "100% reviewed and approved" : lang === "es" ? "100% revisado y aprobado" : "100% revisado e aprovado"}</p>
+                </div>
+              </div>
+            </div>
             )}
           </div>
 
@@ -1088,7 +947,7 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* Recovery Popup for Stripe */}
+        {/* Recovery Popup */}
         {link?.recovery_enabled && (
           <RecoveryPopup
             config={{
