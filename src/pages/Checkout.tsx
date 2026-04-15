@@ -811,10 +811,23 @@ export default function Checkout() {
   // --- STRIPE CHECKOUT: single-page with Elements ---
   if (isStripe) {
 
-    const phonePrefix = link.currency === "ZAR" ? "+27" : link.currency === "MZN" ? "+258" : "";
-    const phonePlaceholder = link.currency === "ZAR" ? "82 123 4567" : link.currency === "MZN" ? "84 123 4567" : "";
-    const phoneMaxLen = link.currency === "ZAR" ? 10 : link.currency === "MZN" ? 9 : 15;
-    const showPhone = link.currency === "MZN" || link.currency === "ZAR";
+    const PHONE_PREFIXES = [
+      { code: "+27", country: "🇿🇦 ZA", maxLen: 9 },
+      { code: "+258", country: "🇲🇿 MZ", maxLen: 9 },
+      { code: "+1", country: "🇺🇸 US", maxLen: 10 },
+      { code: "+44", country: "🇬🇧 UK", maxLen: 10 },
+      { code: "+351", country: "🇵🇹 PT", maxLen: 9 },
+      { code: "+55", country: "🇧🇷 BR", maxLen: 11 },
+      { code: "+244", country: "🇦🇴 AO", maxLen: 9 },
+      { code: "+91", country: "🇮🇳 IN", maxLen: 10 },
+      { code: "+234", country: "🇳🇬 NG", maxLen: 10 },
+      { code: "+254", country: "🇰🇪 KE", maxLen: 9 },
+    ];
+
+    const currentPrefix = PHONE_PREFIXES.find(p => p.code === phonePrefix) || PHONE_PREFIXES[0];
+    const phonePlaceholder = currentPrefix.code === "+27" ? "82 123 4567" : currentPrefix.code === "+258" ? "84 123 4567" : "123 456 7890";
+    const phoneMaxLen = currentPrefix.maxLen;
+    const showPhone = true;
 
     const handleStep1Continue = (e: React.FormEvent) => {
       e.preventDefault();
