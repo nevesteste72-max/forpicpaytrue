@@ -250,6 +250,7 @@ export default function Checkout() {
   const [errorMessage, setErrorMessage] = useState("");
   const [bumpsAccepted, setBumpsAccepted] = useState<boolean[]>([false, false, false]);
   const [selectedMethod, setSelectedMethod] = useState<SelectedMethod>("mpesa");
+  const [phonePrefix, setPhonePrefix] = useState("+27");
 
   // Stripe state
   const [checkoutStep, setCheckoutStep] = useState<1 | 2>(1);
