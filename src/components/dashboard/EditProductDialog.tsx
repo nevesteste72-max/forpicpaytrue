@@ -191,6 +191,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         show_trust_badges: showTrustBadges,
       };
 
+      // Logo: upload novo, ou setar null se removido
       if (imageFile) {
         const { data: userData } = await supabase.auth.getUser();
         const uid = userData.user?.id;
@@ -199,8 +200,11 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
           const url = await uploadImage(`${uid}/${product.id}.${ext}`, imageFile);
           if (url) updateData.logo_url = url;
         }
+      } else if (!imagePreview && product.logo_url) {
+        updateData.logo_url = null;
       }
 
+      // Banner: upload novo, ou setar null se removido
       if (bannerFile) {
         const { data: userData } = await supabase.auth.getUser();
         const uid = userData.user?.id;
@@ -209,6 +213,8 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
           const url = await uploadImage(`${uid}/${product.id}-banner.${ext}`, bannerFile);
           if (url) updateData.checkout_banner_url = url;
         }
+      } else if (!bannerPreview && product.checkout_banner_url) {
+        updateData.checkout_banner_url = null;
       }
 
       const { error } = await supabase
