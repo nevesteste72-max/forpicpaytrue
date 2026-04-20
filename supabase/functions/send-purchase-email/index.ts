@@ -79,15 +79,7 @@ serve(async (req) => {
       `;
     }
 
-    // WhatsApp support button
-    const whatsappButton = `
-      <div style="text-align: center; margin: 16px 0 0;">
-        <a href="https://wa.link/ta5if1" 
-           style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px;">
-          💬 Contact us on WhatsApp
-        </a>
-      </div>
-    `;
+    const whatsappButton = "";
 
     const html = `
     <!DOCTYPE html>
