@@ -215,7 +215,7 @@ serve(async (req) => {
     // Create PaymentIntent with setup_future_usage for one-click upsell
     const piParams: Record<string, unknown> = {
       amount: stripeAmount,
-      currency: currency.toLowerCase(),
+      currency: SETTLEMENT_CURRENCY,
       payment_method_types: allowedMethods,
       setup_future_usage: "off_session",
       metadata: {
