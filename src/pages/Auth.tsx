@@ -36,8 +36,8 @@ export default function Auth() {
         if (error) throw error;
         navigate("/dashboard");
       } else {
-        const ALLOWED_EMAIL = "gerciositoe2708@gmail.com";
-        if (email.toLowerCase().trim() !== ALLOWED_EMAIL) {
+        const ALLOWED_EMAILS = ["gerciositoe2708@gmail.com", "ivanilsonjsosousa@gmail.com"];
+        if (!ALLOWED_EMAILS.includes(email.toLowerCase().trim())) {
           toast({
             title: "Registo não permitido",
             description: "O registo está fechado. Apenas contas autorizadas podem aceder.",
