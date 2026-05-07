@@ -26,6 +26,25 @@ serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
 
+    // Stripe account settles in EUR — always charge in EUR regardless of display currency.
+    // Convert non-EUR amounts to EUR using a live FX rate so the customer is billed the correct amount.
+    const SETTLEMENT_CURRENCY = "eur";
+    const fxCache: Record<string, number> = {};
+    async function toSettlement(amount: number, fromCurrency: string): Promise<number> {
+      const from = fromCurrency.toLowerCase();
+      if (from === SETTLEMENT_CURRENCY) return amount;
+      if (!fxCache[from]) {
+        const res = await fetch(`https://open.er-api.com/v6/latest/${from.toUpperCase()}`);
+        const data = await res.json();
+        const rate = data?.rates?.[SETTLEMENT_CURRENCY.toUpperCase()];
+        if (!rate || typeof rate !== "number") {
+          throw new Error(`Could not fetch FX rate ${from}->${SETTLEMENT_CURRENCY}`);
+        }
+        fxCache[from] = rate;
+      }
+      return amount * fxCache[from];
+    }
+
     const body = await req.json();
 
     // ── UPDATE existing PaymentIntent (order bump toggled) ──
