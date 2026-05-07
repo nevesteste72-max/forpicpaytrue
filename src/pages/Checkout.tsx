@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { CheckoutTimer } from "@/components/checkout/CheckoutTimer";
-import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
+import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
 import cashpayIcon from "@/assets/cashpay-icon.png";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import emolaLogo from "@/assets/emola-logo.png";
