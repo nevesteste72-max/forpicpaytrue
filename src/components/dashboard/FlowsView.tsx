@@ -190,7 +190,7 @@ export function FlowsView({ products }: FlowsViewProps) {
 
   const copyEmbed = (step: FlowStep) => {
     const baseUrl = window.location.origin;
-    const code = `<!-- CashPay ${step.step_type === "upsell" ? "Upsell" : "Downsell"}: ${step.product_name} -->
+    const code = `<!-- PicPay ${step.step_type === "upsell" ? "Upsell" : "Downsell"}: ${step.product_name} -->
 <div id="cashpay-upsell-${step.id}"></div>
 <script>
 (function() {
@@ -241,7 +241,7 @@ export function FlowsView({ products }: FlowsViewProps) {
             {
               step: "1",
               title: "Compra",
-              desc: "Cliente compra no checkout do CashPay",
+              desc: "Cliente compra no checkout do PicPay",
             },
             {
               step: "2",

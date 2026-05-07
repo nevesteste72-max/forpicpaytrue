@@ -67,7 +67,7 @@ export function FunnelStepCard({
   };
 
   const baseUrl = window.location.origin;
-  const embedCode = `<!-- CashPay ${isUpsell ? "Upsell" : "Downsell"}: ${step.product_name} -->
+  const embedCode = `<!-- PicPay ${isUpsell ? "Upsell" : "Downsell"}: ${step.product_name} -->
 <div id="cashpay-upsell-${step.id}"></div>
 <script>
 (function() {

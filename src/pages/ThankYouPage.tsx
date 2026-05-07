@@ -169,7 +169,7 @@ export default function ThankYouPage() {
         </div>
 
         <div className="text-center mt-6">
-          <img src={cashpayLogoFull} alt="Cashpay" className="h-7 mx-auto opacity-60" />
+          <img src={cashpayLogoFull} alt="PicPay" className="h-7 mx-auto opacity-60" />
         </div>
       </div>
     </div>

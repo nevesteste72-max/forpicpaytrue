@@ -570,8 +570,8 @@ export default function Dashboard() {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
           <div className="flex items-center gap-2.5 text-white">
-            <img src={cashpayIcon} alt="Cashpay" className="w-6 h-6 rounded" />
-            <span className="font-semibold tracking-tight text-sm">Cashpay</span>
+            <img src={cashpayIcon} alt="PicPay" className="w-6 h-6 rounded" />
+            <span className="font-semibold tracking-tight text-sm">PicPay</span>
             <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-sidebar-accent text-sidebar-foreground border border-sidebar-border ml-auto">
               PRO
             </span>
@@ -612,8 +612,8 @@ export default function Dashboard() {
           <aside className="absolute left-0 top-0 h-full w-72 bg-sidebar flex flex-col animate-slide-in-right shadow-2xl">
             <div className="h-16 flex items-center justify-between px-6 border-b border-sidebar-border">
               <div className="flex items-center gap-2.5 text-white">
-                <img src={cashpayIcon} alt="Cashpay" className="w-6 h-6 rounded" />
-                <span className="font-semibold tracking-tight text-sm">Cashpay</span>
+                <img src={cashpayIcon} alt="PicPay" className="w-6 h-6 rounded" />
+                <span className="font-semibold tracking-tight text-sm">PicPay</span>
               </div>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -688,7 +688,7 @@ export default function Dashboard() {
         <div className="md:hidden sticky top-0 z-20 glass-panel border-b border-border/60 px-4 py-3 shrink-0">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <img src={cashpayIcon} alt="Cashpay" className="w-8 h-8 rounded-lg" />
+              <img src={cashpayIcon} alt="PicPay" className="w-8 h-8 rounded-lg" />
               <div>
                 <h1 className="text-sm font-bold text-foreground leading-tight">
                   {tabTitles[activeTab]}
