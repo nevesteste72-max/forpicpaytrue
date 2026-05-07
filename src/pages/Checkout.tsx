@@ -943,7 +943,7 @@ export default function Checkout() {
           </div>
 
           <div className="text-center py-4 md:mt-6">
-            <img src={cashpayLogoFull} alt="Picpay" className="h-12 w-12 mx-auto rounded-full object-contain" />
+            <img src={cashpayLogoFull} alt="Picpay" className="h-20 w-20 mx-auto rounded-full object-contain" />
           </div>
         </div>
 
@@ -1183,7 +1183,7 @@ export default function Checkout() {
         </div>
 
         <div className="text-center py-4 md:mt-6">
-          <img src={cashpayLogoFull} alt="Picpay" className="h-12 w-12 mx-auto rounded-full object-contain" />
+          <img src={cashpayLogoFull} alt="Picpay" className="h-20 w-20 mx-auto rounded-full object-contain" />
         </div>
 
         {/* Recovery Popup for M-Pesa */}
