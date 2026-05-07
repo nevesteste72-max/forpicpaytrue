@@ -228,7 +228,7 @@ export function FlowAddStepDialog({
             </div>
 
             <p className="text-[10px] text-muted-foreground">
-              Se deixar vazio, o cliente vai para a página de obrigado do CashPay.
+              Se deixar vazio, o cliente vai para a página de obrigado do PicPay.
             </p>
           </div>
 

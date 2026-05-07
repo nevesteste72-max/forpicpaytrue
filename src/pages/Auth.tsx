@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft, CreditCard } from "lucide-react";
-import cashpayIcon from "@/assets/cashpay-icon.png";
+import cashpayIcon from "@/assets/picpay-logo.jpeg";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ export default function Auth() {
 
         <div className="w-full max-w-sm mx-auto">
           <div className="mb-8">
-            <img src={cashpayIcon} alt="Cashpay" className="w-10 h-10 rounded-lg shadow-lg shadow-primary/30 mb-6" />
+            <img src={cashpayIcon} alt="PicPay" className="w-10 h-10 rounded-lg shadow-lg shadow-primary/30 mb-6" />
             <h2 className="text-2xl font-bold text-foreground tracking-tight">
               {isLogin ? "Bem-vindo de volta" : "Criar nova conta"}
             </h2>
@@ -175,7 +175,7 @@ export default function Auth() {
             Venda mais rápido com M-Pesa
           </h3>
           <p className="text-sidebar-foreground/60 text-lg leading-relaxed">
-            Junte-se a mais de 1.000 empreendedores moçambicanos que usam a Cashpay para escalar seus negócios digitais.
+            Junte-se a mais de 1.000 empreendedores moçambicanos que usam a PicPay para escalar seus negócios digitais.
           </p>
         </div>
         <div className="absolute bottom-0 right-0 w-64 h-64 bg-secondary/20 rounded-full blur-[100px]" />

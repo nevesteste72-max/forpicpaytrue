@@ -3,7 +3,7 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle, Zap, ArrowRight } from "lucide-react";
-import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
+import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
 
@@ -469,7 +469,7 @@ export default function UpsellPage() {
         </div>
 
         <div className="text-center mt-6">
-          <img src={cashpayLogoFull} alt="Cashpay" className="h-7 mx-auto opacity-60" />
+          <img src={cashpayLogoFull} alt="PicPay" className="h-7 mx-auto opacity-60" />
         </div>
       </div>
     </div>

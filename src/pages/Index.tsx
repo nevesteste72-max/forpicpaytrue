@@ -11,8 +11,8 @@ import {
   Zap,
   Play,
 } from "lucide-react";
-import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
-import cashpayIcon from "@/assets/cashpay-icon.png";
+import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
+import cashpayIcon from "@/assets/picpay-logo.jpeg";
 
 function useIsMobile() {
   return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) ||
@@ -52,7 +52,7 @@ const Index = () => {
       <nav className="fixed w-full z-50 top-0 glass border-b border-border/60">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center group">
-            <img src={cashpayLogoFull} alt="Cashpay" className="h-8 group-hover:scale-105 transition-transform" />
+            <img src={cashpayLogoFull} alt="PicPay" className="h-8 group-hover:scale-105 transition-transform" />
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/auth" className="text-muted-foreground hover:text-primary font-medium text-sm transition-colors hidden sm:inline-block">
@@ -220,7 +220,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-muted/30 border-t border-border py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-          <p>© 2024 Cashpay Lda. Todos os direitos reservados.</p>
+          <p>© 2024 PicPay Lda. Todos os direitos reservados.</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-primary transition-colors">Termos</a>
             <a href="#" className="hover:text-primary transition-colors">Privacidade</a>

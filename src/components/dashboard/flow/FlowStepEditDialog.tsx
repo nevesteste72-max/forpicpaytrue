@@ -242,7 +242,7 @@ export function FlowStepEditDialog({
             </div>
 
             <p className="text-[10px] text-muted-foreground">
-              Deixe vazio para enviar o cliente para a página de obrigado padrão do CashPay.
+              Deixe vazio para enviar o cliente para a página de obrigado padrão do PicPay.
             </p>
           </div>
 
