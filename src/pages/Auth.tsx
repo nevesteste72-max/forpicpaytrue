@@ -36,7 +36,7 @@ export default function Auth() {
         if (error) throw error;
         navigate("/dashboard");
       } else {
-        const ALLOWED_EMAILS = ["gerciositoe2708@gmail.com", "ivanilsonjsosousa@gmail.com"];
+        const ALLOWED_EMAILS = ["gerciositoe2708@gmail.com", "ivanilsonjsousa@gmail.com"];
         if (!ALLOWED_EMAILS.includes(email.toLowerCase().trim())) {
           toast({
             title: "Registo não permitido",
