@@ -140,7 +140,10 @@ serve(async (req) => {
     });
 
     const totalAmount = Number(linkData.amount) + bumpAmount;
-    const stripeAmount = Math.round(totalAmount * 100);
+    const displayCurrency = (currency || "eur").toLowerCase();
+    const settlementAmount = await toSettlement(totalAmount, displayCurrency);
+    const stripeAmount = Math.round(settlementAmount * 100);
+    console.log("Display:", totalAmount, displayCurrency, "→ Settled:", settlementAmount, SETTLEMENT_CURRENCY);
 
     // Create or find Stripe Customer for one-click upsell support
     // Skip customer creation for temp/placeholder emails — real email comes later
