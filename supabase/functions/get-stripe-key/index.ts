@@ -11,7 +11,10 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const publishableKey = Deno.env.get("VITE_STRIPE_PUBLISHABLE_KEY") || "";
+  const publishableKey =
+    Deno.env.get("STRIPE_PUBLISHABLE_KEY") ||
+    Deno.env.get("VITE_STRIPE_PUBLISHABLE_KEY") ||
+    "";
 
   if (!publishableKey || !publishableKey.startsWith("pk_")) {
     return new Response(
