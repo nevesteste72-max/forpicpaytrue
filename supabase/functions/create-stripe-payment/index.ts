@@ -26,6 +26,25 @@ serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
 
+    // Stripe account settles in EUR — always charge in EUR regardless of display currency.
+    // Convert non-EUR amounts to EUR using a live FX rate so the customer is billed the correct amount.
+    const SETTLEMENT_CURRENCY = "eur";
+    const fxCache: Record<string, number> = {};
+    async function toSettlement(amount: number, fromCurrency: string): Promise<number> {
+      const from = fromCurrency.toLowerCase();
+      if (from === SETTLEMENT_CURRENCY) return amount;
+      if (!fxCache[from]) {
+        const res = await fetch(`https://open.er-api.com/v6/latest/${from.toUpperCase()}`);
+        const data = await res.json();
+        const rate = data?.rates?.[SETTLEMENT_CURRENCY.toUpperCase()];
+        if (!rate || typeof rate !== "number") {
+          throw new Error(`Could not fetch FX rate ${from}->${SETTLEMENT_CURRENCY}`);
+        }
+        fxCache[from] = rate;
+      }
+      return amount * fxCache[from];
+    }
+
     const body = await req.json();
 
     // ── UPDATE existing PaymentIntent (order bump toggled) ──
@@ -55,11 +74,13 @@ serve(async (req) => {
       });
 
       const serverTotal = Number(linkData.amount) + bumpAmount;
-      const stripeAmount = Math.round(serverTotal * 100);
+      const displayCurrency = (body.currency || "eur").toLowerCase();
+      const settlementAmount = await toSettlement(serverTotal, displayCurrency);
+      const stripeAmount = Math.round(settlementAmount * 100);
 
-      console.log("Updating PaymentIntent:", payment_intent_id, "new amount:", serverTotal, "bump:", order_bump_accepted);
+      console.log("Updating PaymentIntent:", payment_intent_id, "display:", serverTotal, displayCurrency, "settled:", settlementAmount, SETTLEMENT_CURRENCY);
 
-      // Update Stripe PaymentIntent amount
+      // Update Stripe PaymentIntent amount (in settlement currency)
       await stripe.paymentIntents.update(payment_intent_id, {
         amount: stripeAmount,
       });
@@ -119,7 +140,10 @@ serve(async (req) => {
     });
 
     const totalAmount = Number(linkData.amount) + bumpAmount;
-    const stripeAmount = Math.round(totalAmount * 100);
+    const displayCurrency = (currency || "eur").toLowerCase();
+    const settlementAmount = await toSettlement(totalAmount, displayCurrency);
+    const stripeAmount = Math.round(settlementAmount * 100);
+    console.log("Display:", totalAmount, displayCurrency, "→ Settled:", settlementAmount, SETTLEMENT_CURRENCY);
 
     // Create or find Stripe Customer for one-click upsell support
     // Skip customer creation for temp/placeholder emails — real email comes later
@@ -191,7 +215,7 @@ serve(async (req) => {
     // Create PaymentIntent with setup_future_usage for one-click upsell
     const piParams: Record<string, unknown> = {
       amount: stripeAmount,
-      currency: currency.toLowerCase(),
+      currency: SETTLEMENT_CURRENCY,
       payment_method_types: allowedMethods,
       setup_future_usage: "off_session",
       metadata: {
