@@ -74,11 +74,13 @@ serve(async (req) => {
       });
 
       const serverTotal = Number(linkData.amount) + bumpAmount;
-      const stripeAmount = Math.round(serverTotal * 100);
+      const displayCurrency = (body.currency || "eur").toLowerCase();
+      const settlementAmount = await toSettlement(serverTotal, displayCurrency);
+      const stripeAmount = Math.round(settlementAmount * 100);
 
-      console.log("Updating PaymentIntent:", payment_intent_id, "new amount:", serverTotal, "bump:", order_bump_accepted);
+      console.log("Updating PaymentIntent:", payment_intent_id, "display:", serverTotal, displayCurrency, "settled:", settlementAmount, SETTLEMENT_CURRENCY);
 
-      // Update Stripe PaymentIntent amount
+      // Update Stripe PaymentIntent amount (in settlement currency)
       await stripe.paymentIntents.update(payment_intent_id, {
         amount: stripeAmount,
       });
