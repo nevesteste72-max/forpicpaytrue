@@ -11,8 +11,8 @@ import {
   Zap,
   Play,
 } from "lucide-react";
-import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
-import cashpayIcon from "@/assets/cashpay-icon.png";
+import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
+import cashpayIcon from "@/assets/picpay-logo.jpeg";
 
 function useIsMobile() {
   return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) ||

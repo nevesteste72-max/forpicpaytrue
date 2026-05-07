@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft, CreditCard } from "lucide-react";
-import cashpayIcon from "@/assets/cashpay-icon.png";
+import cashpayIcon from "@/assets/picpay-logo.jpeg";
 
 export default function Auth() {
   const navigate = useNavigate();

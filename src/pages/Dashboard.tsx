@@ -36,7 +36,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import cashpayIcon from "@/assets/cashpay-icon.png";
+import cashpayIcon from "@/assets/picpay-logo.jpeg";
 
 type DashboardTab = "overview" | "products" | "flows" | "transactions" | "clients" | "withdrawals" | "whatsapp" | "refunds";
 

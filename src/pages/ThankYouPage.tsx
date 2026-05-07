@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, PartyPopper, ExternalLink } from "lucide-react";
-import cashpayLogoFull from "@/assets/cashpay-logo-full.png";
+import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
 import { useUtmifyScript } from "@/hooks/useUtmifyScript";
 
 interface PaymentLinkInfo {
