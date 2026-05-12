@@ -94,7 +94,8 @@ export function StripeCheckoutForm({
   const [customerName, setCustomerName] = useState(initialName || "");
   const [customerEmail, setCustomerEmail] = useState(initialEmail || "");
   const [customerPhone, setCustomerPhone] = useState(initialPhone || "");
-  const [phonePrefix, setPhonePrefix] = useState(externalPrefix || "+27");
+  const defaultPrefix = externalPrefix || CURRENCY_TO_PREFIX[currency?.toUpperCase()] || "+27";
+  const [phonePrefix, setPhonePrefix] = useState(defaultPrefix);
 
   const currentPrefix = PHONE_PREFIXES.find(p => p.code === phonePrefix) || PHONE_PREFIXES[0];
   const phonePlaceholder = currentPrefix.code === "+27" ? "82 123 4567" : currentPrefix.code === "+258" ? "84 123 4567" : "123 456 7890";
