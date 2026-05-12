@@ -316,6 +316,9 @@ export function StripeCheckoutForm({
         <PaymentElement
           options={{
             layout: "accordion",
+            business: {
+              name: "CashPay",
+            },
             wallets: { applePay: "never", googlePay: "never", link: "never" },
             paymentMethodOrder: ["card"],
             fields: {
