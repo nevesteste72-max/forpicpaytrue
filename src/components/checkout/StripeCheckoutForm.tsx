@@ -33,6 +33,20 @@ const PHONE_PREFIXES = [
   { code: "+254", country: "🇰🇪 KE", maxLen: 9 },
 ];
 
+// Mapeia moeda → prefixo telefônico padrão do país
+const CURRENCY_TO_PREFIX: Record<string, string> = {
+  ZAR: "+27",
+  MZN: "+258",
+  USD: "+1",
+  GBP: "+44",
+  EUR: "+351",
+  BRL: "+55",
+  AOA: "+244",
+  INR: "+91",
+  NGN: "+234",
+  KES: "+254",
+};
+
 interface StripeCheckoutFormProps {
   totalAmount: number;
   currency: string;
