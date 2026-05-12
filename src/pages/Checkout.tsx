@@ -44,21 +44,31 @@ function getStripePromise(): Promise<Stripe | null> {
   
   stripePromise = (async () => {
     try {
-      const cachedKey = sessionStorage.getItem("stripe_pk");
-      if (cachedKey) return loadStripe(cachedKey);
-
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-stripe-key`,
         { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
       );
       const data = await res.json();
       if (data.publishable_key) {
-        sessionStorage.setItem("stripe_pk", data.publishable_key);
-        return loadStripe(data.publishable_key);
+        const latestKey = data.publishable_key as string;
+        const cachedKey = sessionStorage.getItem("stripe_pk");
+
+        if (cachedKey !== latestKey) {
+          sessionStorage.setItem("stripe_pk", latestKey);
+        }
+
+        return loadStripe(latestKey);
       }
+
+      const cachedKey = sessionStorage.getItem("stripe_pk");
+      if (cachedKey) return loadStripe(cachedKey);
+
       console.error("No Stripe publishable key returned");
       return null;
     } catch (err) {
+      const cachedKey = sessionStorage.getItem("stripe_pk");
+      if (cachedKey) return loadStripe(cachedKey);
+
       console.error("Failed to fetch Stripe key:", err);
       return null;
     }
