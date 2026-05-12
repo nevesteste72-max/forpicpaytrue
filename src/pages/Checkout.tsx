@@ -36,49 +36,65 @@ import cashpayIcon from "@/assets/cashpay-icon.png";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import emolaLogo from "@/assets/emola-logo.png";
 
-// Start loading stripe key immediately on module load (not waiting for component mount)
 let stripePromise: Promise<Stripe | null> | null = null;
+let stripePromiseKey: string | null = null;
 
-function getStripePromise(): Promise<Stripe | null> {
-  if (stripePromise) return stripePromise;
-  
-  stripePromise = (async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-stripe-key`,
-        { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
-      );
-      const data = await res.json();
-      if (data.publishable_key) {
-        const latestKey = data.publishable_key as string;
-        const cachedKey = sessionStorage.getItem("stripe_pk");
-
-        if (cachedKey !== latestKey) {
-          sessionStorage.setItem("stripe_pk", latestKey);
-        }
-
-        return loadStripe(latestKey);
-      }
-
-      const cachedKey = sessionStorage.getItem("stripe_pk");
-      if (cachedKey) return loadStripe(cachedKey);
-
-      console.error("No Stripe publishable key returned");
-      return null;
-    } catch (err) {
-      const cachedKey = sessionStorage.getItem("stripe_pk");
-      if (cachedKey) return loadStripe(cachedKey);
-
-      console.error("Failed to fetch Stripe key:", err);
-      return null;
-    }
-  })();
-  
-  return stripePromise;
+function isValidStripePublishableKey(key: string | null): key is string {
+  if (!key) return false;
+  const trimmed = key.trim();
+  return (trimmed.startsWith("pk_test_") || trimmed.startsWith("pk_live_")) && trimmed.length > 20;
 }
 
-// Eagerly start loading Stripe on module init
-getStripePromise();
+async function fetchStripePublishableKey(): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-stripe-key?t=${Date.now()}`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+      }
+    );
+
+    const data = await res.json();
+    const latestKey = typeof data.publishable_key === "string" ? data.publishable_key.trim() : null;
+
+    if (res.ok && isValidStripePublishableKey(latestKey)) {
+      sessionStorage.setItem("stripe_pk", latestKey);
+      return latestKey;
+    }
+
+    console.error("Invalid Stripe publishable key response:", data?.error || data);
+  } catch (err) {
+    console.error("Failed to fetch Stripe key:", err);
+  }
+
+  const cachedKey = sessionStorage.getItem("stripe_pk");
+  if (isValidStripePublishableKey(cachedKey)) {
+    return cachedKey;
+  }
+
+  return null;
+}
+
+async function getStripePromise(): Promise<Stripe | null> {
+  const publishableKey = await fetchStripePublishableKey();
+
+  if (!publishableKey) {
+    stripePromise = null;
+    stripePromiseKey = null;
+    return null;
+  }
+
+  if (!stripePromise || stripePromiseKey !== publishableKey) {
+    stripePromiseKey = publishableKey;
+    stripePromise = loadStripe(publishableKey);
+  }
+
+  return stripePromise;
+}
 
 interface PaymentLink {
   id: string;
