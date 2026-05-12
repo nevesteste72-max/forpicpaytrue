@@ -33,6 +33,20 @@ const PHONE_PREFIXES = [
   { code: "+254", country: "🇰🇪 KE", maxLen: 9 },
 ];
 
+// Mapeia moeda → prefixo telefônico padrão do país
+const CURRENCY_TO_PREFIX: Record<string, string> = {
+  ZAR: "+27",
+  MZN: "+258",
+  USD: "+1",
+  GBP: "+44",
+  EUR: "+351",
+  BRL: "+55",
+  AOA: "+244",
+  INR: "+91",
+  NGN: "+234",
+  KES: "+254",
+};
+
 interface StripeCheckoutFormProps {
   totalAmount: number;
   currency: string;
@@ -80,7 +94,8 @@ export function StripeCheckoutForm({
   const [customerName, setCustomerName] = useState(initialName || "");
   const [customerEmail, setCustomerEmail] = useState(initialEmail || "");
   const [customerPhone, setCustomerPhone] = useState(initialPhone || "");
-  const [phonePrefix, setPhonePrefix] = useState(externalPrefix || "+27");
+  const defaultPrefix = externalPrefix || CURRENCY_TO_PREFIX[currency?.toUpperCase()] || "+27";
+  const [phonePrefix, setPhonePrefix] = useState(defaultPrefix);
 
   const currentPrefix = PHONE_PREFIXES.find(p => p.code === phonePrefix) || PHONE_PREFIXES[0];
   const phonePlaceholder = currentPrefix.code === "+27" ? "82 123 4567" : currentPrefix.code === "+258" ? "84 123 4567" : "123 456 7890";
