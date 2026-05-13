@@ -26,13 +26,13 @@ serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
 
-    const SUPPORTED_STRIPE_CURRENCIES = new Set(["usd", "eur", "zar", "ngn"]);
+    // FORCED CURRENCY: Always charge in ZAR regardless of what DB/client sends
+    const FORCED_STRIPE_CURRENCY = "zar";
     function normalizeStripeCurrency(rawCurrency: string | null | undefined): string {
-      const normalized = (rawCurrency || "usd").toLowerCase();
-      if (!SUPPORTED_STRIPE_CURRENCIES.has(normalized)) {
-        throw new Error(`Unsupported Stripe currency: ${rawCurrency || "unknown"}`);
+      if (rawCurrency && rawCurrency.toLowerCase() !== FORCED_STRIPE_CURRENCY) {
+        console.warn(`Ignoring requested currency "${rawCurrency}" — forcing "${FORCED_STRIPE_CURRENCY}"`);
       }
-      return normalized;
+      return FORCED_STRIPE_CURRENCY;
     }
 
     const body = await req.json();
