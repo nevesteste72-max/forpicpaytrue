@@ -802,7 +802,7 @@ export default function Checkout() {
                   )}
                 </div>
               ) : (
-                <Button onClick={resetForm} className="gradient-primary text-white rounded-lg">
+                <Button onClick={() => window.location.reload()} className="gradient-primary text-white rounded-lg">
                   {t.tryAgain}
                 </Button>
               )}
