@@ -26,13 +26,16 @@ serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
 
-    // FORCED CURRENCY: Always charge in ZAR regardless of what DB/client sends
-    const FORCED_STRIPE_CURRENCY = "zar";
+    // Use the currency defined on the product (payment_link). Fallback to client-provided, then ZAR.
+    const DEFAULT_STRIPE_CURRENCY = "zar";
+    const SUPPORTED_STRIPE_CURRENCIES = new Set([
+      "usd","eur","gbp","zar","brl","mzn","aud","cad","chf","jpy","cny","inr","mxn","ngn","kes","ghs","aed","sek","nok","dkk","pln","czk","huf","ron","try","sgd","hkd","nzd","krw","thb","myr","idr","php","vnd","ils","sar","qar","ars","clp","cop","pen","uyu","twd","bgn","hrk","rsd","isk","egp","tnd","mad","xof","xaf"
+    ]);
     function normalizeStripeCurrency(rawCurrency: string | null | undefined): string {
-      if (rawCurrency && rawCurrency.toLowerCase() !== FORCED_STRIPE_CURRENCY) {
-        console.warn(`Ignoring requested currency "${rawCurrency}" — forcing "${FORCED_STRIPE_CURRENCY}"`);
-      }
-      return FORCED_STRIPE_CURRENCY;
+      const c = (rawCurrency || "").toLowerCase().trim();
+      if (c && SUPPORTED_STRIPE_CURRENCIES.has(c)) return c;
+      if (c) console.warn(`Unsupported currency "${rawCurrency}", falling back to "${DEFAULT_STRIPE_CURRENCY}"`);
+      return DEFAULT_STRIPE_CURRENCY;
     }
 
     const body = await req.json();
