@@ -345,10 +345,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
       toast({ title: t.selectFirst, variant: "destructive" });
       return;
     }
-    if (!email || !email.includes("@")) {
-      toast({ title: t.invalidEmail, variant: "destructive" });
-      return;
-    }
+    const fallbackEmail = email && email.includes("@") ? email : `donor-${Date.now()}@anon.local`;
     const digits = formatPhoneNumber(phone);
     const validMpesa = /^8[45]\d{7}$/.test(digits);
     const validEmola = /^8[67]\d{7}$/.test(digits);
