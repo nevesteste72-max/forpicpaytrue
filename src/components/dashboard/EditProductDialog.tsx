@@ -290,10 +290,24 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
             <Textarea value={productDescription} onChange={(e) => setProductDescription(e.target.value)} className="rounded-xl resize-none" rows={3} />
           </div>
 
-          <div className="space-y-2">
-            <Label>Preço ({product?.currency || "MZN"})</Label>
-            <Input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="h-12 rounded-xl" />
-          </div>
+          {isDonation ? (
+            <div className="space-y-2">
+              <Label>Valores sugeridos de doação ({product?.currency || "MZN"}, separados por vírgula)</Label>
+              <Input
+                value={donationAmounts}
+                onChange={(e) => setDonationAmounts(e.target.value)}
+                placeholder="100, 250, 500, 1000"
+                required
+                className="h-12 rounded-xl"
+              />
+              <p className="text-xs text-muted-foreground">Este produto é uma doação e não pode ser convertido em produto normal.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>Preço ({product?.currency || "MZN"})</Label>
+              <Input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="h-12 rounded-xl" />
+            </div>
+          )}
 
           {/* Checkout Language */}
           <div className="space-y-2">
