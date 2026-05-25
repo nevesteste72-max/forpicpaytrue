@@ -125,6 +125,8 @@ export function CreateProductDialog({
   const [donationStoryVideoUrl, setDonationStoryVideoUrl] = useState("");
   const [donationCtaText, setDonationCtaText] = useState("");
   const [donationAllowAnonymous, setDonationAllowAnonymous] = useState(true);
+  const [donationSocialProofEnabled, setDonationSocialProofEnabled] = useState(false);
+  const [donationTestimonials, setDonationTestimonials] = useState<Array<{ name: string; city: string; text: string; imageFile: File | null; imagePreview: string | null }>>([]);
 
   const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "BRL";
 
