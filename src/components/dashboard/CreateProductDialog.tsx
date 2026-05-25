@@ -200,10 +200,13 @@ export function CreateProductDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // For donations, use the first suggested amount as the base price
+    const firstDonation = donationAmounts.split(",").map(s => parseFloat(s.trim())).find(n => !isNaN(n) && n > 0);
+    const effectiveAmount = isDonation ? String(firstDonation ?? 1) : amount;
     await onCreate({
       productName,
       productDescription,
-      amount,
+      amount: effectiveAmount,
       imageFile,
       orderBumpName: orderBumpName.trim(),
       orderBumpDescription: orderBumpDescription.trim(),
@@ -645,20 +648,22 @@ export function CreateProductDialog({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount">Preço ({currency})</Label>
-            <Input
-              id="amount"
-              type="number"
-              min="1"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              required
-              className="h-12 rounded-xl"
-            />
-          </div>
+          {!isDonation && (
+            <div className="space-y-2">
+              <Label htmlFor="amount">Preço ({currency})</Label>
+              <Input
+                id="amount"
+                type="number"
+                min="1"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                required
+                className="h-12 rounded-xl"
+              />
+            </div>
+          )}
 
           {/* Checkout Language */}
           <div className="space-y-2">
