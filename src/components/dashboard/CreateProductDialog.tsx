@@ -58,6 +58,16 @@ interface CreateProductDialogProps {
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
+    isDonation: boolean;
+    donationAmounts: string;
+    donationGoalEnabled: boolean;
+    donationGoalAmount: string;
+    donationStoryTitle: string;
+    donationStoryText: string;
+    donationStoryImageFile: File | null;
+    donationStoryVideoUrl: string;
+    donationCtaText: string;
+    donationAllowAnonymous: boolean;
   }) => Promise<void>;
   creating: boolean;
 }
@@ -101,6 +111,18 @@ export function CreateProductDialog({
   const [recoveryCtaText, setRecoveryCtaText] = useState("");
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
+  // Donation mode
+  const [isDonation, setIsDonation] = useState(false);
+  const [donationAmounts, setDonationAmounts] = useState("100, 250, 500, 1000");
+  const [donationGoalEnabled, setDonationGoalEnabled] = useState(false);
+  const [donationGoalAmount, setDonationGoalAmount] = useState("");
+  const [donationStoryTitle, setDonationStoryTitle] = useState("");
+  const [donationStoryText, setDonationStoryText] = useState("");
+  const [donationStoryImageFile, setDonationStoryImageFile] = useState<File | null>(null);
+  const [donationStoryImagePreview, setDonationStoryImagePreview] = useState<string | null>(null);
+  const [donationStoryVideoUrl, setDonationStoryVideoUrl] = useState("");
+  const [donationCtaText, setDonationCtaText] = useState("");
+  const [donationAllowAnonymous, setDonationAllowAnonymous] = useState(true);
 
   const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN";
 
@@ -202,6 +224,16 @@ export function CreateProductDialog({
       recoveryCtaText: recoveryCtaText.trim(),
       recoveryRedirectUrl: recoveryRedirectUrl.trim(),
       showTrustBadges,
+      isDonation,
+      donationAmounts: donationAmounts.trim(),
+      donationGoalEnabled,
+      donationGoalAmount: donationGoalAmount.trim(),
+      donationStoryTitle: donationStoryTitle.trim(),
+      donationStoryText: donationStoryText.trim(),
+      donationStoryImageFile,
+      donationStoryVideoUrl: donationStoryVideoUrl.trim(),
+      donationCtaText: donationCtaText.trim(),
+      donationAllowAnonymous,
     });
     resetForm();
   };
