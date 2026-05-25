@@ -126,6 +126,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setBannerPreview(product.checkout_banner_url || null);
       setImageFile(null);
       setBannerFile(null);
+      setDonationAmounts(Array.isArray(product.donation_amounts) ? product.donation_amounts.join(", ") : "");
     }
   }, [product, open]);
 
