@@ -127,10 +127,12 @@ export type Database = {
           donation_cta_text: string | null
           donation_goal_amount: number | null
           donation_goal_enabled: boolean
+          donation_social_proof_enabled: boolean
           donation_story_image_url: string | null
           donation_story_text: string | null
           donation_story_title: string | null
           donation_story_video_url: string | null
+          donation_testimonials: Json
           facebook_pixel_id: string | null
           facebook_token: string | null
           id: string
@@ -176,10 +178,12 @@ export type Database = {
           donation_cta_text?: string | null
           donation_goal_amount?: number | null
           donation_goal_enabled?: boolean
+          donation_social_proof_enabled?: boolean
           donation_story_image_url?: string | null
           donation_story_text?: string | null
           donation_story_title?: string | null
           donation_story_video_url?: string | null
+          donation_testimonials?: Json
           facebook_pixel_id?: string | null
           facebook_token?: string | null
           id?: string
@@ -225,10 +229,12 @@ export type Database = {
           donation_cta_text?: string | null
           donation_goal_amount?: number | null
           donation_goal_enabled?: boolean
+          donation_social_proof_enabled?: boolean
           donation_story_image_url?: string | null
           donation_story_text?: string | null
           donation_story_title?: string | null
           donation_story_video_url?: string | null
+          donation_testimonials?: Json
           facebook_pixel_id?: string | null
           facebook_token?: string | null
           id?: string
