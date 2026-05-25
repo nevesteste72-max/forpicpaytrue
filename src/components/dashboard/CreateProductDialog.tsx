@@ -645,20 +645,22 @@ export function CreateProductDialog({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount">Preço ({currency})</Label>
-            <Input
-              id="amount"
-              type="number"
-              min="1"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              required
-              className="h-12 rounded-xl"
-            />
-          </div>
+          {!isDonation && (
+            <div className="space-y-2">
+              <Label htmlFor="amount">Preço ({currency})</Label>
+              <Input
+                id="amount"
+                type="number"
+                min="1"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                required
+                className="h-12 rounded-xl"
+              />
+            </div>
+          )}
 
           {/* Checkout Language */}
           <div className="space-y-2">
