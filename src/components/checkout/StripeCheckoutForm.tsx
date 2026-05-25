@@ -366,8 +366,8 @@ export function StripeCheckoutForm({
         ) : (
           <>
             {(() => {
-              const sym = currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency;
-              const loc = currency === "NGN" ? "en-NG" : isEn ? "en-ZA" : "pt-MZ";
+              const sym = currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency === "BRL" ? "R$" : currency;
+              const loc = currency === "NGN" ? "en-NG" : currency === "BRL" ? "pt-BR" : isEn ? "en-ZA" : "pt-MZ";
               const formatted = totalAmount.toLocaleString(loc, { minimumFractionDigits: 2 });
               return isEn ? `Pay Now - ${sym} ${formatted}` : isEs ? `Pagar Ahora - ${sym} ${formatted}` : `Pagar Agora - ${sym} ${formatted}`;
             })()}
