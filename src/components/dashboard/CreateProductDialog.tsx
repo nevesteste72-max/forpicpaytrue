@@ -200,10 +200,13 @@ export function CreateProductDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // For donations, use the first suggested amount as the base price
+    const firstDonation = donationAmounts.split(",").map(s => parseFloat(s.trim())).find(n => !isNaN(n) && n > 0);
+    const effectiveAmount = isDonation ? String(firstDonation ?? 1) : amount;
     await onCreate({
       productName,
       productDescription,
-      amount,
+      amount: effectiveAmount,
       imageFile,
       orderBumpName: orderBumpName.trim(),
       orderBumpDescription: orderBumpDescription.trim(),
