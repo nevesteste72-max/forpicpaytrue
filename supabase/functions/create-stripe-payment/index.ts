@@ -187,7 +187,7 @@ serve(async (req) => {
     console.log("Transaction created:", tx.id, "amount:", totalAmount, "customer:", stripeCustomerId);
 
     // Map UI payment method names to valid Stripe payment_method_types
-    const VALID_STRIPE_METHODS = new Set(["card"]);
+    const VALID_STRIPE_METHODS = new Set(["card", "pix"]);
     const rawMethods: string[] = Array.isArray(payment_methods) && payment_methods.length > 0
       ? payment_methods
       : ["card"];
