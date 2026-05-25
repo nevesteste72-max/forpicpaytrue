@@ -301,10 +301,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
       toast({ title: t.selectFirst, variant: "destructive" });
       return;
     }
-    if (!email || !email.includes("@")) {
-      toast({ title: t.invalidEmail, variant: "destructive" });
-      return;
-    }
+    const fallbackEmail = email && email.includes("@") ? email : `donor-${Date.now()}@anon.local`;
     try {
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-stripe-payment`,
