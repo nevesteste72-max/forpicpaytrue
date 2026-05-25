@@ -316,7 +316,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
             payment_link_id: link.id,
             amount: selectedAmount,
             currency: link.currency,
-            customer_email: email,
+            customer_email: fallbackEmail,
             customer_name: isAnonymous ? "Anonymous" : customerName || "Donor",
             payment_methods: link.stripe_payment_methods,
             order_bump_accepted: false,
