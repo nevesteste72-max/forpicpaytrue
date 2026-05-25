@@ -203,21 +203,24 @@ serve(async (req) => {
 
     if (allowedMethods.length === 0) allowedMethods.push("card");
 
-    // Create PaymentIntent with setup_future_usage for one-click upsell
+    // Create PaymentIntent
+    const cardOnly = allowedMethods.length === 1 && allowedMethods[0] === "card";
     const piParams: Record<string, unknown> = {
       amount: stripeAmount,
       currency: chargeCurrency,
       payment_method_types: allowedMethods,
-      setup_future_usage: "off_session",
       metadata: {
         transaction_id: tx.id,
         payment_link_id,
         customer_email,
         customer_name: customer_name || "",
       },
-      // receipt_email removed to prevent Stripe from sending automatic receipts
       description: `Payment for ${payment_link_id}`,
     };
+    // setup_future_usage (for one-click upsell) is card-only
+    if (cardOnly) {
+      piParams.setup_future_usage = "off_session";
+    }
 
     if (stripeCustomerId) {
       piParams.customer = stripeCustomerId;
