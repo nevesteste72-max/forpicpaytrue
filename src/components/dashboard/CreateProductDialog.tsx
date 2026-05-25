@@ -482,6 +482,94 @@ export function CreateProductDialog({
                   />
                   <span className="text-xs font-medium">Permitir doação anônima</span>
                 </label>
+
+                {/* Social Proof / Testimonials */}
+                <div className="space-y-2 pt-3 border-t border-border/50">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={donationSocialProofEnabled}
+                      onChange={(e) => setDonationSocialProofEnabled(e.target.checked)}
+                      className="w-4 h-4 accent-primary"
+                    />
+                    <span className="text-xs font-semibold">⭐ Mostrar depoimentos / prova social</span>
+                  </label>
+
+                  {donationSocialProofEnabled && (
+                    <div className="space-y-3 pl-2">
+                      {donationTestimonials.map((t, idx) => (
+                        <div key={idx} className="p-3 rounded-lg border border-border bg-background space-y-2 relative">
+                          <button
+                            type="button"
+                            onClick={() => setDonationTestimonials((arr) => arr.filter((_, i) => i !== idx))}
+                            className="absolute top-2 right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <div className="flex items-center gap-3">
+                            {t.imagePreview ? (
+                              <div className="relative">
+                                <img src={t.imagePreview} alt="" className="w-12 h-12 rounded-full object-cover border" />
+                                <button
+                                  type="button"
+                                  onClick={() => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, imageFile: null, imagePreview: null } : x))}
+                                  className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-white rounded-full flex items-center justify-center text-[10px]"
+                                >×</button>
+                              </div>
+                            ) : (
+                              <label className="w-12 h-12 rounded-full border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary text-muted-foreground">
+                                <ImagePlus className="w-4 h-4" />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (f && f.size <= 2 * 1024 * 1024) {
+                                      const url = URL.createObjectURL(f);
+                                      setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, imageFile: f, imagePreview: url } : x));
+                                    }
+                                  }}
+                                />
+                              </label>
+                            )}
+                            <div className="flex-1 grid grid-cols-2 gap-2">
+                              <Input
+                                value={t.name}
+                                onChange={(e) => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, name: e.target.value } : x))}
+                                placeholder="Nome (opcional)"
+                                className="h-8 rounded-lg text-xs"
+                              />
+                              <Input
+                                value={t.city}
+                                onChange={(e) => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, city: e.target.value } : x))}
+                                placeholder="Cidade (opcional)"
+                                className="h-8 rounded-lg text-xs"
+                              />
+                            </div>
+                          </div>
+                          <Textarea
+                            value={t.text}
+                            onChange={(e) => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, text: e.target.value } : x))}
+                            placeholder="Depoimento (opcional)"
+                            className="rounded-lg text-xs resize-none"
+                            rows={2}
+                          />
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDonationTestimonials((arr) => [...arr, { name: "", city: "", text: "", imageFile: null, imagePreview: null }])}
+                        className="w-full h-8 rounded-lg text-xs"
+                      >
+                        + Adicionar depoimento
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground">Imagem, nome, cidade e texto são todos opcionais. Pode usar apenas o texto, ou apenas a imagem, etc.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
