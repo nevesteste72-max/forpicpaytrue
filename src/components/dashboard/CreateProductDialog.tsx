@@ -124,7 +124,7 @@ export function CreateProductDialog({
   const [donationCtaText, setDonationCtaText] = useState("");
   const [donationAllowAnonymous, setDonationAllowAnonymous] = useState(true);
 
-  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN";
+  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "BRL";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
