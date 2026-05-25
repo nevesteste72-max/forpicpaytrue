@@ -68,6 +68,8 @@ interface CreateProductDialogProps {
     donationStoryVideoUrl: string;
     donationCtaText: string;
     donationAllowAnonymous: boolean;
+    donationSocialProofEnabled: boolean;
+    donationTestimonials: Array<{ name: string; city: string; text: string; imageFile: File | null }>;
   }) => Promise<void>;
   creating: boolean;
 }
