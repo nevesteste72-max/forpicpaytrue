@@ -394,8 +394,41 @@ export default function Dashboard() {
               .from("payment_links")
               .update({ checkout_banner_url: bannerUrl })
               .eq("id", newProduct.id);
+        }
+
+        // Upload donation story image
+        if (data.donationStoryImageFile) {
+          const storyImageUrl = await uploadImage(`${newProduct.id}-donation-story`, data.donationStoryImageFile);
+          if (storyImageUrl) {
+            await supabase
+              .from("payment_links")
+              .update({ donation_story_image_url: storyImageUrl })
+              .eq("id", newProduct.id);
           }
         }
+
+        // Upload testimonial images & save testimonials JSON
+        if (data.isDonation && data.donationTestimonials.length > 0) {
+          const testimonials = await Promise.all(
+            data.donationTestimonials.map(async (t, idx) => {
+              let image_url: string | null = null;
+              if (t.imageFile) {
+                image_url = await uploadImage(`${newProduct.id}-testimonial-${idx}`, t.imageFile);
+              }
+              return {
+                name: t.name || "",
+                city: t.city || "",
+                text: t.text || "",
+                image_url,
+              };
+            })
+          );
+          await supabase
+            .from("payment_links")
+            .update({ donation_testimonials: testimonials } as any)
+            .eq("id", newProduct.id);
+        }
+      }
       }
 
       toast({ title: "Produto criado!", description: "O link de pagamento está pronto." });
