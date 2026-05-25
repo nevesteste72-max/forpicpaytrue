@@ -605,17 +605,6 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="don-email" className="text-xs">{t.email}</Label>
-                <Input
-                  id="don-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl"
-                  required
-                />
-              </div>
 
               {/* M-Pesa flow */}
               {!isStripe && (
