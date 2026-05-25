@@ -124,7 +124,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
     }
   }, [product, open]);
 
-  const isStripe = product?.currency === "ZAR" || product?.currency === "USD" || product?.currency === "NGN";
+  const isStripe = product?.currency === "ZAR" || product?.currency === "USD" || product?.currency === "NGN" || product?.currency === "BRL";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

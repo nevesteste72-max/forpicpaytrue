@@ -124,7 +124,7 @@ export function CreateProductDialog({
   const [donationCtaText, setDonationCtaText] = useState("");
   const [donationAllowAnonymous, setDonationAllowAnonymous] = useState(true);
 
-  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN";
+  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "BRL";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -314,6 +314,21 @@ export function CreateProductDialog({
                 )}
               >
                 🇳🇬 NGN
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrency("BRL");
+                  setCheckoutLanguage("pt");
+                }}
+                className={cn(
+                  "p-3 rounded-xl border-2 text-center transition-all text-sm font-semibold col-span-2",
+                  currency === "BRL"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                🇧🇷 BRL (Real)
               </button>
             </div>
           </div>

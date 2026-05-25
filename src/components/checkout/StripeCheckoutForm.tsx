@@ -351,7 +351,7 @@ export function StripeCheckoutForm({
         <div className="flex justify-between text-lg font-bold text-foreground">
           <span>Total</span>
           <span>
-            {currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency} {totalAmount.toLocaleString(currency === "NGN" ? "en-NG" : isEn ? "en-ZA" : "pt-MZ", { minimumFractionDigits: 2 })}
+            {currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency === "BRL" ? "R$" : currency} {totalAmount.toLocaleString(currency === "NGN" ? "en-NG" : currency === "BRL" ? "pt-BR" : isEn ? "en-ZA" : "pt-MZ", { minimumFractionDigits: 2 })}
           </span>
         </div>
       </div>
@@ -366,8 +366,8 @@ export function StripeCheckoutForm({
         ) : (
           <>
             {(() => {
-              const sym = currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency;
-              const loc = currency === "NGN" ? "en-NG" : isEn ? "en-ZA" : "pt-MZ";
+              const sym = currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency === "BRL" ? "R$" : currency;
+              const loc = currency === "NGN" ? "en-NG" : currency === "BRL" ? "pt-BR" : isEn ? "en-ZA" : "pt-MZ";
               const formatted = totalAmount.toLocaleString(loc, { minimumFractionDigits: 2 });
               return isEn ? `Pay Now - ${sym} ${formatted}` : isEs ? `Pagar Ahora - ${sym} ${formatted}` : `Pagar Agora - ${sym} ${formatted}`;
             })()}

@@ -905,7 +905,7 @@ export default function Checkout() {
                 )}
                 <h2 className="text-lg font-bold text-foreground">{link.product_name}</h2>
                 <p className="text-3xl font-bold text-foreground mt-2">
-                  {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
+                  {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol === "BRL" ? "R$" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : currencySymbol === "BRL" ? "pt-BR" : locale, { minimumFractionDigits: 2 })}
                 </p>
               </div>
               <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
