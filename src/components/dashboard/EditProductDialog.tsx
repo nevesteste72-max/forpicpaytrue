@@ -92,6 +92,8 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [donationAmounts, setDonationAmounts] = useState("");
+  const isDonation = !!product?.is_donation;
 
   useEffect(() => {
     if (product && open) {
