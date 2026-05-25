@@ -710,6 +710,13 @@ export default function Checkout() {
     );
   }
 
+  // Donation campaign mode
+  if (link.is_donation) {
+    return <DonationCheckout link={link as any} />;
+  }
+
+
+
   if (notFound || !link) {
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center p-4">
