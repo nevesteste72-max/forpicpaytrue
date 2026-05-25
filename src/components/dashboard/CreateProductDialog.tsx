@@ -238,6 +238,8 @@ export function CreateProductDialog({
       donationStoryVideoUrl: donationStoryVideoUrl.trim(),
       donationCtaText: donationCtaText.trim(),
       donationAllowAnonymous,
+      donationSocialProofEnabled,
+      donationTestimonials: donationTestimonials.map(({ name, city, text, imageFile }) => ({ name, city, text, imageFile })),
     });
     resetForm();
   };
