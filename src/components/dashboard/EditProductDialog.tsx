@@ -37,10 +37,13 @@ interface Product {
   recovery_message?: string | null;
   recovery_cta_text?: string | null;
   recovery_redirect_url?: string | null;
+  is_donation?: boolean;
+  donation_amounts?: number[] | null;
 }
 
 const STRIPE_METHODS = [
   { value: "card", label: "Card (Visa/Mastercard)" },
+  { value: "pix", label: "PIX (Brasil, somente BRL)" },
   { value: "apple_pay", label: "Apple Pay" },
   { value: "google_pay", label: "Google Pay" },
   { value: "link", label: "Link (Stripe)" },
