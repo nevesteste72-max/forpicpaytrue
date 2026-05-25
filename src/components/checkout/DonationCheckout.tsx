@@ -301,10 +301,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
       toast({ title: t.selectFirst, variant: "destructive" });
       return;
     }
-    if (!email || !email.includes("@")) {
-      toast({ title: t.invalidEmail, variant: "destructive" });
-      return;
-    }
+    const fallbackEmail = email && email.includes("@") ? email : `donor-${Date.now()}@anon.local`;
     try {
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-stripe-payment`,
@@ -319,7 +316,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
             payment_link_id: link.id,
             amount: selectedAmount,
             currency: link.currency,
-            customer_email: email,
+            customer_email: fallbackEmail,
             customer_name: isAnonymous ? "Anonymous" : customerName || "Donor",
             payment_methods: link.stripe_payment_methods,
             order_bump_accepted: false,
@@ -348,10 +345,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
       toast({ title: t.selectFirst, variant: "destructive" });
       return;
     }
-    if (!email || !email.includes("@")) {
-      toast({ title: t.invalidEmail, variant: "destructive" });
-      return;
-    }
+    const fallbackEmail = email && email.includes("@") ? email : `donor-${Date.now()}@anon.local`;
     const digits = formatPhoneNumber(phone);
     const validMpesa = /^8[45]\d{7}$/.test(digits);
     const validEmola = /^8[67]\d{7}$/.test(digits);
@@ -367,7 +361,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
         msisdn: digits,
         reference_description: link.product_name.slice(0, 20),
         payment_link_id: link.id,
-        customer_email: email,
+        customer_email: fallbackEmail,
         customer_name: isAnonymous ? "Anonymous" : customerName,
         customer_phone: digits,
       });
@@ -605,17 +599,6 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="don-email" className="text-xs">{t.email}</Label>
-                <Input
-                  id="don-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl"
-                  required
-                />
-              </div>
 
               {/* M-Pesa flow */}
               {!isStripe && (
@@ -678,7 +661,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
                     <Button
                       type="button"
                       onClick={createIntent}
-                      disabled={!selectedAmount || !email}
+                      disabled={!selectedAmount}
                       className="w-full h-14 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
                     >
                       <Heart className="w-5 h-5 mr-2 fill-current" />
