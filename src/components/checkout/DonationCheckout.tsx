@@ -29,6 +29,8 @@ export interface DonationLink {
   donation_story_video_url: string | null;
   donation_cta_text: string | null;
   donation_allow_anonymous: boolean;
+  donation_social_proof_enabled?: boolean;
+  donation_testimonials?: Array<{ name?: string; city?: string; text?: string; image_url?: string | null }>;
   redirect_url: string | null;
   show_trust_badges: boolean;
 }
