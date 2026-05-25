@@ -493,6 +493,30 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
                 />
               </div>
             )}
+            {link.donation_social_proof_enabled && link.donation_testimonials && link.donation_testimonials.length > 0 && (
+              <div className="space-y-3 pt-4 border-t border-border">
+                <h3 className="text-sm font-semibold text-foreground">⭐ Quem já apoiou</h3>
+                {link.donation_testimonials.map((tst, i) => (
+                  <div key={i} className="flex gap-3 p-3 rounded-xl bg-muted/40 border border-border">
+                    {tst.image_url && (
+                      <img src={tst.image_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      {(tst.name || tst.city) && (
+                        <p className="text-xs font-semibold text-foreground">
+                          {tst.name}
+                          {tst.name && tst.city && <span className="text-muted-foreground font-normal"> · {tst.city}</span>}
+                          {!tst.name && tst.city}
+                        </p>
+                      )}
+                      {tst.text && (
+                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">"{tst.text}"</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {link.show_trust_badges && (
               <div className="flex items-center gap-3 pt-4 border-t border-border text-xs text-muted-foreground">
                 <ShieldCheck className="w-4 h-4 text-primary" />
