@@ -169,10 +169,18 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
     setSaving(true);
 
     try {
+      const parsedDonationAmounts = donationAmounts
+        .split(",")
+        .map((s) => parseFloat(s.trim()))
+        .filter((n) => !isNaN(n) && n > 0);
+      const effectiveAmount = isDonation
+        ? (parsedDonationAmounts[0] ?? 1)
+        : parseFloat(amount);
+
       const updateData: Record<string, unknown> = {
         product_name: productName,
         product_description: productDescription || null,
-        amount: parseFloat(amount),
+        amount: effectiveAmount,
         checkout_language: checkoutLanguage,
         stripe_payment_methods: isStripe ? stripePaymentMethods : product.stripe_payment_methods,
         order_bump_name: orderBumpName || null,
@@ -196,6 +204,9 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         recovery_redirect_url: recoveryRedirectUrl || null,
         show_trust_badges: showTrustBadges,
       };
+      if (isDonation) {
+        updateData.donation_amounts = parsedDonationAmounts;
+      }
 
       // Logo: upload novo, ou setar null se removido
       if (imageFile) {
