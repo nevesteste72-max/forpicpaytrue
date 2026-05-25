@@ -58,6 +58,16 @@ interface CreateProductDialogProps {
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
+    isDonation: boolean;
+    donationAmounts: string;
+    donationGoalEnabled: boolean;
+    donationGoalAmount: string;
+    donationStoryTitle: string;
+    donationStoryText: string;
+    donationStoryImageFile: File | null;
+    donationStoryVideoUrl: string;
+    donationCtaText: string;
+    donationAllowAnonymous: boolean;
   }) => Promise<void>;
   creating: boolean;
 }
@@ -101,6 +111,18 @@ export function CreateProductDialog({
   const [recoveryCtaText, setRecoveryCtaText] = useState("");
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
+  // Donation mode
+  const [isDonation, setIsDonation] = useState(false);
+  const [donationAmounts, setDonationAmounts] = useState("100, 250, 500, 1000");
+  const [donationGoalEnabled, setDonationGoalEnabled] = useState(false);
+  const [donationGoalAmount, setDonationGoalAmount] = useState("");
+  const [donationStoryTitle, setDonationStoryTitle] = useState("");
+  const [donationStoryText, setDonationStoryText] = useState("");
+  const [donationStoryImageFile, setDonationStoryImageFile] = useState<File | null>(null);
+  const [donationStoryImagePreview, setDonationStoryImagePreview] = useState<string | null>(null);
+  const [donationStoryVideoUrl, setDonationStoryVideoUrl] = useState("");
+  const [donationCtaText, setDonationCtaText] = useState("");
+  const [donationAllowAnonymous, setDonationAllowAnonymous] = useState(true);
 
   const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN";
 
@@ -202,6 +224,16 @@ export function CreateProductDialog({
       recoveryCtaText: recoveryCtaText.trim(),
       recoveryRedirectUrl: recoveryRedirectUrl.trim(),
       showTrustBadges,
+      isDonation,
+      donationAmounts: donationAmounts.trim(),
+      donationGoalEnabled,
+      donationGoalAmount: donationGoalAmount.trim(),
+      donationStoryTitle: donationStoryTitle.trim(),
+      donationStoryText: donationStoryText.trim(),
+      donationStoryImageFile,
+      donationStoryVideoUrl: donationStoryVideoUrl.trim(),
+      donationCtaText: donationCtaText.trim(),
+      donationAllowAnonymous,
     });
     resetForm();
   };
@@ -285,6 +317,155 @@ export function CreateProductDialog({
               </button>
             </div>
           </div>
+
+          {/* Donation Mode */}
+          <div className="space-y-3 p-4 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isDonation}
+                onChange={(e) => setIsDonation(e.target.checked)}
+                className="w-4 h-4 accent-primary"
+              />
+              <span className="text-sm font-semibold">❤️ É uma campanha de doação?</span>
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Ativa um checkout otimizado para doações (com história, meta e botões de valores fixos). Order bumps e timer são ignorados.
+            </p>
+
+            {isDonation && (
+              <div className="space-y-3 pt-2 border-t border-primary/20">
+                <div className="space-y-1">
+                  <Label className="text-xs">Valores fixos sugeridos (separados por vírgula)</Label>
+                  <Input
+                    value={donationAmounts}
+                    onChange={(e) => setDonationAmounts(e.target.value)}
+                    placeholder="100, 250, 500, 1000"
+                    className="h-10 rounded-lg text-sm"
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={donationGoalEnabled}
+                    onChange={(e) => setDonationGoalEnabled(e.target.checked)}
+                    className="w-4 h-4 accent-primary"
+                  />
+                  <span className="text-xs font-medium">Mostrar barra de meta</span>
+                </label>
+                {donationGoalEnabled && (
+                  <div className="space-y-1">
+                    <Label className="text-xs">Meta da campanha ({currency})</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={donationGoalAmount}
+                      onChange={(e) => setDonationGoalAmount(e.target.value)}
+                      placeholder="10000"
+                      className="h-10 rounded-lg text-sm"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <Label className="text-xs">Título da história (headline)</Label>
+                  <Input
+                    value={donationStoryTitle}
+                    onChange={(e) => setDonationStoryTitle(e.target.value)}
+                    placeholder="Ajude as crianças do Bairro X"
+                    className="h-10 rounded-lg text-sm"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs">Texto da história (suporta quebras de linha)</Label>
+                  <Textarea
+                    value={donationStoryText}
+                    onChange={(e) => setDonationStoryText(e.target.value)}
+                    placeholder="Conte a história da sua causa..."
+                    className="rounded-lg text-sm resize-none"
+                    rows={4}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs">Imagem da campanha (opcional)</Label>
+                  <div className="flex items-center gap-3">
+                    {donationStoryImagePreview ? (
+                      <div className="relative">
+                        <img
+                          src={donationStoryImagePreview}
+                          alt="Story"
+                          className="w-20 h-20 rounded-lg object-cover border-2 border-border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDonationStoryImageFile(null);
+                            setDonationStoryImagePreview(null);
+                          }}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary text-muted-foreground">
+                        <ImagePlus className="w-5 h-5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f && f.size <= 2 * 1024 * 1024) {
+                              setDonationStoryImageFile(f);
+                              setDonationStoryImagePreview(URL.createObjectURL(f));
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                    <p className="text-xs text-muted-foreground">JPG/PNG, máx 2MB</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs">URL do vídeo (YouTube/Vimeo, opcional)</Label>
+                  <Input
+                    value={donationStoryVideoUrl}
+                    onChange={(e) => setDonationStoryVideoUrl(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=..."
+                    className="h-10 rounded-lg text-sm"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs">Texto do botão de doar (opcional)</Label>
+                  <Input
+                    value={donationCtaText}
+                    onChange={(e) => setDonationCtaText(e.target.value)}
+                    placeholder="Doar agora"
+                    className="h-10 rounded-lg text-sm"
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={donationAllowAnonymous}
+                    onChange={(e) => setDonationAllowAnonymous(e.target.checked)}
+                    className="w-4 h-4 accent-primary"
+                  />
+                  <span className="text-xs font-medium">Permitir doação anônima</span>
+                </label>
+              </div>
+            )}
+          </div>
+
+
 
           {/* Image Upload */}
           <div className="space-y-2">

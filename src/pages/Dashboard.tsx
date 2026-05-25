@@ -304,6 +304,16 @@ export default function Dashboard() {
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
+    isDonation: boolean;
+    donationAmounts: string;
+    donationGoalEnabled: boolean;
+    donationGoalAmount: string;
+    donationStoryTitle: string;
+    donationStoryText: string;
+    donationStoryImageFile: File | null;
+    donationStoryVideoUrl: string;
+    donationCtaText: string;
+    donationAllowAnonymous: boolean;
   }) => {
     if (!user) return;
     setCreating(true);
@@ -337,6 +347,20 @@ export default function Dashboard() {
         recovery_cta_text: data.recoveryCtaText || null,
         recovery_redirect_url: data.recoveryRedirectUrl || null,
         show_trust_badges: data.showTrustBadges,
+        is_donation: data.isDonation,
+        donation_amounts: data.isDonation
+          ? data.donationAmounts
+              .split(",")
+              .map((s) => parseFloat(s.trim()))
+              .filter((n) => !isNaN(n) && n > 0)
+          : [],
+        donation_goal_enabled: data.donationGoalEnabled,
+        donation_goal_amount: data.donationGoalAmount ? parseFloat(data.donationGoalAmount) : null,
+        donation_story_title: data.donationStoryTitle || null,
+        donation_story_text: data.donationStoryText || null,
+        donation_story_video_url: data.donationStoryVideoUrl || null,
+        donation_cta_text: data.donationCtaText || null,
+        donation_allow_anonymous: data.donationAllowAnonymous,
       };
 
       const { data: newProduct, error } = await supabase
