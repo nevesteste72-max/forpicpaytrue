@@ -363,6 +363,7 @@ export default function Dashboard() {
         donation_story_video_url: data.donationStoryVideoUrl || null,
         donation_cta_text: data.donationCtaText || null,
         donation_allow_anonymous: data.donationAllowAnonymous,
+        donation_social_proof_enabled: data.donationSocialProofEnabled,
       };
 
       const { data: newProduct, error } = await supabase
