@@ -361,7 +361,7 @@ export function DonationCheckout({ link }: { link: DonationLink }) {
         msisdn: digits,
         reference_description: link.product_name.slice(0, 20),
         payment_link_id: link.id,
-        customer_email: email,
+        customer_email: fallbackEmail,
         customer_name: isAnonymous ? "Anonymous" : customerName,
         customer_phone: digits,
       });
