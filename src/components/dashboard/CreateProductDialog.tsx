@@ -20,7 +20,6 @@ interface Product {
 
 const STRIPE_METHODS = [
   { value: "card", label: "Card (Visa/Mastercard)" },
-  { value: "pix", label: "PIX (Brasil, somente BRL)" },
   { value: "apple_pay", label: "Apple Pay" },
   { value: "google_pay", label: "Google Pay" },
   { value: "link", label: "Link (Stripe)" },
@@ -59,18 +58,6 @@ interface CreateProductDialogProps {
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
-    isDonation: boolean;
-    donationAmounts: string;
-    donationGoalEnabled: boolean;
-    donationGoalAmount: string;
-    donationStoryTitle: string;
-    donationStoryText: string;
-    donationStoryImageFile: File | null;
-    donationStoryVideoUrl: string;
-    donationCtaText: string;
-    donationAllowAnonymous: boolean;
-    donationSocialProofEnabled: boolean;
-    donationTestimonials: Array<{ name: string; city: string; text: string; imageFile: File | null }>;
   }) => Promise<void>;
   creating: boolean;
 }
@@ -114,22 +101,8 @@ export function CreateProductDialog({
   const [recoveryCtaText, setRecoveryCtaText] = useState("");
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
-  // Donation mode
-  const [isDonation, setIsDonation] = useState(false);
-  const [donationAmounts, setDonationAmounts] = useState("100, 250, 500, 1000");
-  const [donationGoalEnabled, setDonationGoalEnabled] = useState(false);
-  const [donationGoalAmount, setDonationGoalAmount] = useState("");
-  const [donationStoryTitle, setDonationStoryTitle] = useState("");
-  const [donationStoryText, setDonationStoryText] = useState("");
-  const [donationStoryImageFile, setDonationStoryImageFile] = useState<File | null>(null);
-  const [donationStoryImagePreview, setDonationStoryImagePreview] = useState<string | null>(null);
-  const [donationStoryVideoUrl, setDonationStoryVideoUrl] = useState("");
-  const [donationCtaText, setDonationCtaText] = useState("");
-  const [donationAllowAnonymous, setDonationAllowAnonymous] = useState(true);
-  const [donationSocialProofEnabled, setDonationSocialProofEnabled] = useState(false);
-  const [donationTestimonials, setDonationTestimonials] = useState<Array<{ name: string; city: string; text: string; imageFile: File | null; imagePreview: string | null }>>([]);
 
-  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "BRL";
+  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -200,13 +173,10 @@ export function CreateProductDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For donations, use the first suggested amount as the base price
-    const firstDonation = donationAmounts.split(",").map(s => parseFloat(s.trim())).find(n => !isNaN(n) && n > 0);
-    const effectiveAmount = isDonation ? String(firstDonation ?? 1) : amount;
     await onCreate({
       productName,
       productDescription,
-      amount: effectiveAmount,
+      amount,
       imageFile,
       orderBumpName: orderBumpName.trim(),
       orderBumpDescription: orderBumpDescription.trim(),
@@ -232,18 +202,6 @@ export function CreateProductDialog({
       recoveryCtaText: recoveryCtaText.trim(),
       recoveryRedirectUrl: recoveryRedirectUrl.trim(),
       showTrustBadges,
-      isDonation,
-      donationAmounts: donationAmounts.trim(),
-      donationGoalEnabled,
-      donationGoalAmount: donationGoalAmount.trim(),
-      donationStoryTitle: donationStoryTitle.trim(),
-      donationStoryText: donationStoryText.trim(),
-      donationStoryImageFile,
-      donationStoryVideoUrl: donationStoryVideoUrl.trim(),
-      donationCtaText: donationCtaText.trim(),
-      donationAllowAnonymous,
-      donationSocialProofEnabled,
-      donationTestimonials: donationTestimonials.map(({ name, city, text, imageFile }) => ({ name, city, text, imageFile })),
     });
     resetForm();
   };
@@ -325,260 +283,8 @@ export function CreateProductDialog({
               >
                 🇳🇬 NGN
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrency("BRL");
-                  setCheckoutLanguage("pt");
-                }}
-                className={cn(
-                  "p-3 rounded-xl border-2 text-center transition-all text-sm font-semibold col-span-2",
-                  currency === "BRL"
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted-foreground hover:border-primary/40"
-                )}
-              >
-                🇧🇷 BRL (Real)
-              </button>
             </div>
           </div>
-
-          {/* Donation Mode */}
-          <div className="space-y-3 p-4 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isDonation}
-                onChange={(e) => setIsDonation(e.target.checked)}
-                className="w-4 h-4 accent-primary"
-              />
-              <span className="text-sm font-semibold">❤️ É uma campanha de doação?</span>
-            </label>
-            <p className="text-xs text-muted-foreground">
-              Ativa um checkout otimizado para doações (com história, meta e botões de valores fixos). Order bumps e timer são ignorados.
-            </p>
-
-            {isDonation && (
-              <div className="space-y-3 pt-2 border-t border-primary/20">
-                <div className="space-y-1">
-                  <Label className="text-xs">Valores fixos sugeridos (separados por vírgula)</Label>
-                  <Input
-                    value={donationAmounts}
-                    onChange={(e) => setDonationAmounts(e.target.value)}
-                    placeholder="100, 250, 500, 1000"
-                    className="h-10 rounded-lg text-sm"
-                  />
-                </div>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={donationGoalEnabled}
-                    onChange={(e) => setDonationGoalEnabled(e.target.checked)}
-                    className="w-4 h-4 accent-primary"
-                  />
-                  <span className="text-xs font-medium">Mostrar barra de meta</span>
-                </label>
-                {donationGoalEnabled && (
-                  <div className="space-y-1">
-                    <Label className="text-xs">Meta da campanha ({currency})</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={donationGoalAmount}
-                      onChange={(e) => setDonationGoalAmount(e.target.value)}
-                      placeholder="10000"
-                      className="h-10 rounded-lg text-sm"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1">
-                  <Label className="text-xs">Título da história (headline)</Label>
-                  <Input
-                    value={donationStoryTitle}
-                    onChange={(e) => setDonationStoryTitle(e.target.value)}
-                    placeholder="Ajude as crianças do Bairro X"
-                    className="h-10 rounded-lg text-sm"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs">Texto da história (suporta quebras de linha)</Label>
-                  <Textarea
-                    value={donationStoryText}
-                    onChange={(e) => setDonationStoryText(e.target.value)}
-                    placeholder="Conte a história da sua causa..."
-                    className="rounded-lg text-sm resize-none"
-                    rows={4}
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs">Imagem da campanha (opcional)</Label>
-                  <div className="flex items-center gap-3">
-                    {donationStoryImagePreview ? (
-                      <div className="relative">
-                        <img
-                          src={donationStoryImagePreview}
-                          alt="Story"
-                          className="w-20 h-20 rounded-lg object-cover border-2 border-border"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDonationStoryImageFile(null);
-                            setDonationStoryImagePreview(null);
-                          }}
-                          className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary text-muted-foreground">
-                        <ImagePlus className="w-5 h-5" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f && f.size <= 2 * 1024 * 1024) {
-                              setDonationStoryImageFile(f);
-                              setDonationStoryImagePreview(URL.createObjectURL(f));
-                            }
-                          }}
-                        />
-                      </label>
-                    )}
-                    <p className="text-xs text-muted-foreground">JPG/PNG, máx 2MB</p>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs">URL do vídeo (YouTube/Vimeo, opcional)</Label>
-                  <Input
-                    value={donationStoryVideoUrl}
-                    onChange={(e) => setDonationStoryVideoUrl(e.target.value)}
-                    placeholder="https://youtube.com/watch?v=..."
-                    className="h-10 rounded-lg text-sm"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs">Texto do botão de doar (opcional)</Label>
-                  <Input
-                    value={donationCtaText}
-                    onChange={(e) => setDonationCtaText(e.target.value)}
-                    placeholder="Doar agora"
-                    className="h-10 rounded-lg text-sm"
-                  />
-                </div>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={donationAllowAnonymous}
-                    onChange={(e) => setDonationAllowAnonymous(e.target.checked)}
-                    className="w-4 h-4 accent-primary"
-                  />
-                  <span className="text-xs font-medium">Permitir doação anônima</span>
-                </label>
-
-                {/* Social Proof / Testimonials */}
-                <div className="space-y-2 pt-3 border-t border-border/50">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={donationSocialProofEnabled}
-                      onChange={(e) => setDonationSocialProofEnabled(e.target.checked)}
-                      className="w-4 h-4 accent-primary"
-                    />
-                    <span className="text-xs font-semibold">⭐ Mostrar depoimentos / prova social</span>
-                  </label>
-
-                  {donationSocialProofEnabled && (
-                    <div className="space-y-3 pl-2">
-                      {donationTestimonials.map((t, idx) => (
-                        <div key={idx} className="p-3 rounded-lg border border-border bg-background space-y-2 relative">
-                          <button
-                            type="button"
-                            onClick={() => setDonationTestimonials((arr) => arr.filter((_, i) => i !== idx))}
-                            className="absolute top-2 right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                          <div className="flex items-center gap-3">
-                            {t.imagePreview ? (
-                              <div className="relative">
-                                <img src={t.imagePreview} alt="" className="w-12 h-12 rounded-full object-cover border" />
-                                <button
-                                  type="button"
-                                  onClick={() => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, imageFile: null, imagePreview: null } : x))}
-                                  className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-white rounded-full flex items-center justify-center text-[10px]"
-                                >×</button>
-                              </div>
-                            ) : (
-                              <label className="w-12 h-12 rounded-full border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary text-muted-foreground">
-                                <ImagePlus className="w-4 h-4" />
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const f = e.target.files?.[0];
-                                    if (f && f.size <= 2 * 1024 * 1024) {
-                                      const url = URL.createObjectURL(f);
-                                      setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, imageFile: f, imagePreview: url } : x));
-                                    }
-                                  }}
-                                />
-                              </label>
-                            )}
-                            <div className="flex-1 grid grid-cols-2 gap-2">
-                              <Input
-                                value={t.name}
-                                onChange={(e) => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, name: e.target.value } : x))}
-                                placeholder="Nome (opcional)"
-                                className="h-8 rounded-lg text-xs"
-                              />
-                              <Input
-                                value={t.city}
-                                onChange={(e) => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, city: e.target.value } : x))}
-                                placeholder="Cidade (opcional)"
-                                className="h-8 rounded-lg text-xs"
-                              />
-                            </div>
-                          </div>
-                          <Textarea
-                            value={t.text}
-                            onChange={(e) => setDonationTestimonials((arr) => arr.map((x, i) => i === idx ? { ...x, text: e.target.value } : x))}
-                            placeholder="Depoimento (opcional)"
-                            className="rounded-lg text-xs resize-none"
-                            rows={2}
-                          />
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDonationTestimonials((arr) => [...arr, { name: "", city: "", text: "", imageFile: null, imagePreview: null }])}
-                        className="w-full h-8 rounded-lg text-xs"
-                      >
-                        + Adicionar depoimento
-                      </Button>
-                      <p className="text-[10px] text-muted-foreground">Imagem, nome, cidade e texto são todos opcionais. Pode usar apenas o texto, ou apenas a imagem, etc.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-
 
           {/* Image Upload */}
           <div className="space-y-2">
@@ -648,22 +354,20 @@ export function CreateProductDialog({
             />
           </div>
 
-          {!isDonation && (
-            <div className="space-y-2">
-              <Label htmlFor="amount">Preço ({currency})</Label>
-              <Input
-                id="amount"
-                type="number"
-                min="1"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                required
-                className="h-12 rounded-xl"
-              />
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="amount">Preço ({currency})</Label>
+            <Input
+              id="amount"
+              type="number"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              required
+              className="h-12 rounded-xl"
+            />
+          </div>
 
           {/* Checkout Language */}
           <div className="space-y-2">

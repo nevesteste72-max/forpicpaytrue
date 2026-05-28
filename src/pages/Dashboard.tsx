@@ -304,18 +304,6 @@ export default function Dashboard() {
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
-    isDonation: boolean;
-    donationAmounts: string;
-    donationGoalEnabled: boolean;
-    donationGoalAmount: string;
-    donationStoryTitle: string;
-    donationStoryText: string;
-    donationStoryImageFile: File | null;
-    donationStoryVideoUrl: string;
-    donationCtaText: string;
-    donationAllowAnonymous: boolean;
-    donationSocialProofEnabled: boolean;
-    donationTestimonials: Array<{ name: string; city: string; text: string; imageFile: File | null }>;
   }) => {
     if (!user) return;
     setCreating(true);
@@ -349,21 +337,6 @@ export default function Dashboard() {
         recovery_cta_text: data.recoveryCtaText || null,
         recovery_redirect_url: data.recoveryRedirectUrl || null,
         show_trust_badges: data.showTrustBadges,
-        is_donation: data.isDonation,
-        donation_amounts: data.isDonation
-          ? data.donationAmounts
-              .split(",")
-              .map((s) => parseFloat(s.trim()))
-              .filter((n) => !isNaN(n) && n > 0)
-          : [],
-        donation_goal_enabled: data.donationGoalEnabled,
-        donation_goal_amount: data.donationGoalAmount ? parseFloat(data.donationGoalAmount) : null,
-        donation_story_title: data.donationStoryTitle || null,
-        donation_story_text: data.donationStoryText || null,
-        donation_story_video_url: data.donationStoryVideoUrl || null,
-        donation_cta_text: data.donationCtaText || null,
-        donation_allow_anonymous: data.donationAllowAnonymous,
-        donation_social_proof_enabled: data.donationSocialProofEnabled,
       };
 
       const { data: newProduct, error } = await supabase
@@ -394,41 +367,8 @@ export default function Dashboard() {
               .from("payment_links")
               .update({ checkout_banner_url: bannerUrl })
               .eq("id", newProduct.id);
-        }
-
-        // Upload donation story image
-        if (data.donationStoryImageFile) {
-          const storyImageUrl = await uploadImage(`${newProduct.id}-donation-story`, data.donationStoryImageFile);
-          if (storyImageUrl) {
-            await supabase
-              .from("payment_links")
-              .update({ donation_story_image_url: storyImageUrl })
-              .eq("id", newProduct.id);
           }
         }
-
-        // Upload testimonial images & save testimonials JSON
-        if (data.isDonation && data.donationTestimonials.length > 0) {
-          const testimonials = await Promise.all(
-            data.donationTestimonials.map(async (t, idx) => {
-              let image_url: string | null = null;
-              if (t.imageFile) {
-                image_url = await uploadImage(`${newProduct.id}-testimonial-${idx}`, t.imageFile);
-              }
-              return {
-                name: t.name || "",
-                city: t.city || "",
-                text: t.text || "",
-                image_url,
-              };
-            })
-          );
-          await supabase
-            .from("payment_links")
-            .update({ donation_testimonials: testimonials } as any)
-            .eq("id", newProduct.id);
-        }
-      }
       }
 
       toast({ title: "Produto criado!", description: "O link de pagamento está pronto." });

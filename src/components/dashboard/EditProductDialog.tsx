@@ -37,13 +37,10 @@ interface Product {
   recovery_message?: string | null;
   recovery_cta_text?: string | null;
   recovery_redirect_url?: string | null;
-  is_donation?: boolean;
-  donation_amounts?: number[] | null;
 }
 
 const STRIPE_METHODS = [
   { value: "card", label: "Card (Visa/Mastercard)" },
-  { value: "pix", label: "PIX (Brasil, somente BRL)" },
   { value: "apple_pay", label: "Apple Pay" },
   { value: "google_pay", label: "Google Pay" },
   { value: "link", label: "Link (Stripe)" },
@@ -92,8 +89,6 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-  const [donationAmounts, setDonationAmounts] = useState("");
-  const isDonation = !!product?.is_donation;
 
   useEffect(() => {
     if (product && open) {
@@ -126,11 +121,10 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setBannerPreview(product.checkout_banner_url || null);
       setImageFile(null);
       setBannerFile(null);
-      setDonationAmounts(Array.isArray(product.donation_amounts) ? product.donation_amounts.join(", ") : "");
     }
   }, [product, open]);
 
-  const isStripe = product?.currency === "ZAR" || product?.currency === "USD" || product?.currency === "NGN" || product?.currency === "BRL";
+  const isStripe = product?.currency === "ZAR" || product?.currency === "USD" || product?.currency === "NGN";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -169,18 +163,10 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
     setSaving(true);
 
     try {
-      const parsedDonationAmounts = donationAmounts
-        .split(",")
-        .map((s) => parseFloat(s.trim()))
-        .filter((n) => !isNaN(n) && n > 0);
-      const effectiveAmount = isDonation
-        ? (parsedDonationAmounts[0] ?? 1)
-        : parseFloat(amount);
-
       const updateData: Record<string, unknown> = {
         product_name: productName,
         product_description: productDescription || null,
-        amount: effectiveAmount,
+        amount: parseFloat(amount),
         checkout_language: checkoutLanguage,
         stripe_payment_methods: isStripe ? stripePaymentMethods : product.stripe_payment_methods,
         order_bump_name: orderBumpName || null,
@@ -204,9 +190,6 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         recovery_redirect_url: recoveryRedirectUrl || null,
         show_trust_badges: showTrustBadges,
       };
-      if (isDonation) {
-        updateData.donation_amounts = parsedDonationAmounts;
-      }
 
       // Logo: upload novo, ou setar null se removido
       if (imageFile) {
@@ -290,24 +273,10 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
             <Textarea value={productDescription} onChange={(e) => setProductDescription(e.target.value)} className="rounded-xl resize-none" rows={3} />
           </div>
 
-          {isDonation ? (
-            <div className="space-y-2">
-              <Label>Valores sugeridos de doação ({product?.currency || "MZN"}, separados por vírgula)</Label>
-              <Input
-                value={donationAmounts}
-                onChange={(e) => setDonationAmounts(e.target.value)}
-                placeholder="100, 250, 500, 1000"
-                required
-                className="h-12 rounded-xl"
-              />
-              <p className="text-xs text-muted-foreground">Este produto é uma doação e não pode ser convertido em produto normal.</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label>Preço ({product?.currency || "MZN"})</Label>
-              <Input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="h-12 rounded-xl" />
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label>Preço ({product?.currency || "MZN"})</Label>
+            <Input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="h-12 rounded-xl" />
+          </div>
 
           {/* Checkout Language */}
           <div className="space-y-2">

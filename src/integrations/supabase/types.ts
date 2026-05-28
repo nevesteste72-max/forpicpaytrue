@@ -122,22 +122,10 @@ export type Database = {
           checkout_timer_minutes: number | null
           created_at: string
           currency: string
-          donation_allow_anonymous: boolean
-          donation_amounts: number[]
-          donation_cta_text: string | null
-          donation_goal_amount: number | null
-          donation_goal_enabled: boolean
-          donation_social_proof_enabled: boolean
-          donation_story_image_url: string | null
-          donation_story_text: string | null
-          donation_story_title: string | null
-          donation_story_video_url: string | null
-          donation_testimonials: Json
           facebook_pixel_id: string | null
           facebook_token: string | null
           id: string
           is_active: boolean
-          is_donation: boolean
           logo_url: string | null
           order_bump_2_description: string | null
           order_bump_2_name: string | null
@@ -173,22 +161,10 @@ export type Database = {
           checkout_timer_minutes?: number | null
           created_at?: string
           currency?: string
-          donation_allow_anonymous?: boolean
-          donation_amounts?: number[]
-          donation_cta_text?: string | null
-          donation_goal_amount?: number | null
-          donation_goal_enabled?: boolean
-          donation_social_proof_enabled?: boolean
-          donation_story_image_url?: string | null
-          donation_story_text?: string | null
-          donation_story_title?: string | null
-          donation_story_video_url?: string | null
-          donation_testimonials?: Json
           facebook_pixel_id?: string | null
           facebook_token?: string | null
           id?: string
           is_active?: boolean
-          is_donation?: boolean
           logo_url?: string | null
           order_bump_2_description?: string | null
           order_bump_2_name?: string | null
@@ -224,22 +200,10 @@ export type Database = {
           checkout_timer_minutes?: number | null
           created_at?: string
           currency?: string
-          donation_allow_anonymous?: boolean
-          donation_amounts?: number[]
-          donation_cta_text?: string | null
-          donation_goal_amount?: number | null
-          donation_goal_enabled?: boolean
-          donation_social_proof_enabled?: boolean
-          donation_story_image_url?: string | null
-          donation_story_text?: string | null
-          donation_story_title?: string | null
-          donation_story_video_url?: string | null
-          donation_testimonials?: Json
           facebook_pixel_id?: string | null
           facebook_token?: string | null
           id?: string
           is_active?: boolean
-          is_donation?: boolean
           logo_url?: string | null
           order_bump_2_description?: string | null
           order_bump_2_name?: string | null
@@ -385,7 +349,6 @@ export type Database = {
           debito_reference: string | null
           flow_step_id: string | null
           id: string
-          is_anonymous: boolean
           order_bump_accepted: boolean
           order_bump_amount: number | null
           parent_transaction_id: string | null
@@ -407,7 +370,6 @@ export type Database = {
           debito_reference?: string | null
           flow_step_id?: string | null
           id?: string
-          is_anonymous?: boolean
           order_bump_accepted?: boolean
           order_bump_amount?: number | null
           parent_transaction_id?: string | null
@@ -429,7 +391,6 @@ export type Database = {
           debito_reference?: string | null
           flow_step_id?: string | null
           id?: string
-          is_anonymous?: boolean
           order_bump_accepted?: boolean
           order_bump_amount?: number | null
           parent_transaction_id?: string | null

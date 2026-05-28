@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderBump } from "@/components/checkout/OrderBump";
 import { RecoveryPopup, useExitIntent } from "@/components/checkout/RecoveryPopup";
 import { StripeCheckoutForm } from "@/components/checkout/StripeCheckoutForm";
-import { DonationCheckout } from "@/components/checkout/DonationCheckout";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
 import {
@@ -127,16 +126,6 @@ interface PaymentLink {
   recovery_cta_text?: string | null;
   recovery_redirect_url?: string | null;
   show_trust_badges?: boolean;
-  is_donation?: boolean;
-  donation_amounts?: number[];
-  donation_goal_amount?: number | null;
-  donation_goal_enabled?: boolean;
-  donation_story_title?: string | null;
-  donation_story_text?: string | null;
-  donation_story_image_url?: string | null;
-  donation_story_video_url?: string | null;
-  donation_cta_text?: string | null;
-  donation_allow_anonymous?: boolean;
 }
 
 type PaymentState = "form" | "processing" | "pending" | "success" | "failed";
@@ -575,7 +564,7 @@ export default function Checkout() {
     try {
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, is_donation, donation_amounts, donation_goal_amount, donation_goal_enabled, donation_story_title, donation_story_text, donation_story_image_url, donation_story_video_url, donation_cta_text, donation_allow_anonymous, donation_social_proof_enabled, donation_testimonials")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, facebook_token, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -709,13 +698,6 @@ export default function Checkout() {
       </div>
     );
   }
-
-  // Donation campaign mode
-  if (link.is_donation) {
-    return <DonationCheckout link={link as any} />;
-  }
-
-
 
   if (notFound || !link) {
     return (
@@ -905,7 +887,7 @@ export default function Checkout() {
                 )}
                 <h2 className="text-lg font-bold text-foreground">{link.product_name}</h2>
                 <p className="text-3xl font-bold text-foreground mt-2">
-                  {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol === "BRL" ? "R$" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : currencySymbol === "BRL" ? "pt-BR" : locale, { minimumFractionDigits: 2 })}
+                  {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
                 </p>
               </div>
               <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
