@@ -26,6 +26,7 @@ import {
   Lock,
   Shield,
   Award,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
@@ -1021,9 +1022,9 @@ export default function Checkout() {
                   <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Mail className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Delivered via Email" : lang === "es" ? "Entrega por Email" : "Entrega por Email"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Product access delivered by email" : lang === "es" ? "Acceso entregado por email" : "Acesso entregue por email"}</p>
+                  <Truck className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Fast Delivery" : lang === "es" ? "Entrega Rápida" : "Entrega Rápida"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your order is processed right away" : lang === "es" ? "Tu pedido se procesa de inmediato" : "Seu pedido é processado na hora"}</p>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                   <Award className="w-6 h-6 text-primary mb-2" />
@@ -1311,9 +1312,9 @@ export default function Checkout() {
                   <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Mail className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Delivered via Email" : lang === "es" ? "Entrega por Email" : "Entrega por Email"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Product access delivered by email" : lang === "es" ? "Acceso entregado por email" : "Acesso entregue por email"}</p>
+                  <Truck className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Fast Delivery" : lang === "es" ? "Entrega Rápida" : "Entrega Rápida"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your order is processed right away" : lang === "es" ? "Tu pedido se procesa de inmediato" : "Seu pedido é processado na hora"}</p>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                   <Award className="w-6 h-6 text-primary mb-2" />
