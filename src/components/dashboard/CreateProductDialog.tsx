@@ -103,7 +103,7 @@ export function CreateProductDialog({
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
 
-  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN";
+  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "EUR";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -245,7 +245,7 @@ export function CreateProductDialog({
               {/* Currency Selector */}
               <div className="space-y-2">
                 <Label>Moeda</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => {
@@ -305,6 +305,21 @@ export function CreateProductDialog({
                     )}
                   >
                     🇳🇬 NGN
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrency("EUR");
+                      setCheckoutLanguage("pt");
+                    }}
+                    className={cn(
+                      "p-3 rounded-xl border-2 text-center transition-all text-sm font-semibold",
+                      currency === "EUR"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    🇪🇺 EUR
                   </button>
                 </div>
               </div>
