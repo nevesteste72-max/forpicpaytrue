@@ -52,7 +52,6 @@ interface StripeCheckoutFormProps {
   currency: string;
   lang: string;
   transactionId: string;
-  redirectUrl: string | null;
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string;
@@ -74,7 +73,6 @@ export function StripeCheckoutForm({
   currency,
   lang,
   transactionId,
-  redirectUrl,
   customerName: initialName,
   customerEmail: initialEmail,
   customerPhone: initialPhone,
@@ -240,9 +238,6 @@ export function StripeCheckoutForm({
 
         if (status === "succeeded") {
           onSuccess();
-          if (redirectUrl) {
-            setTimeout(() => window.open(redirectUrl, "_blank"), 1500);
-          }
         } else if (status === "processing") {
           onError(t("Pagamento em processamento. Será notificado.", "Payment is processing. You will be notified.", "Pago en procesamiento. Será notificado."));
         } else {

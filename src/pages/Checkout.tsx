@@ -583,6 +583,19 @@ export default function Checkout() {
     };
   }, [paymentState, debitoReference, internalTxId, isStripe]);
 
+  // Auto-redirect straight to the merchant's page after a successful payment,
+  // instead of relying on the customer to tap a button. window.location.href
+  // (same-tab navigation) is used instead of window.open, since mobile browsers
+  // block window.open calls that aren't triggered by a direct user gesture.
+  useEffect(() => {
+    if (paymentState === "success" && link?.redirect_url) {
+      const timer = setTimeout(() => {
+        window.location.href = link.redirect_url!;
+      }, 1800);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentState, link?.redirect_url]);
+
   const fetchLink = async () => {
     try {
       const { data, error } = await supabase
@@ -815,7 +828,7 @@ export default function Checkout() {
               <p className="text-muted-foreground mb-6">{t.receiptSent}</p>
               {link?.redirect_url && (
                 <Button
-                  onClick={() => window.open(link.redirect_url!, "_blank")}
+                  onClick={() => { window.location.href = link.redirect_url!; }}
                   className="gradient-primary text-white rounded-lg"
                 >
                   {t.accessContent}
@@ -972,7 +985,6 @@ export default function Checkout() {
                     currency={currencySymbol}
                     lang={lang}
                     transactionId={stripeTransactionId || ""}
-                    redirectUrl={link.redirect_url}
                     stripePaymentMethods={link.stripe_payment_methods}
                     customerName={customerName}
                     customerEmail={email}
