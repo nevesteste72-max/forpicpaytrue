@@ -1087,6 +1087,18 @@ export default function Checkout() {
                   )}
                 </div>
               </div>
+              {buyerCount && buyerCount > 0 && (
+                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                  <span aria-hidden>🔥</span>
+                  <span>
+                    {lang === "en"
+                      ? `${buyerCount.toLocaleString(locale)} people already bought this`
+                      : lang === "es"
+                      ? `${buyerCount.toLocaleString(locale)} personas ya compraron`
+                      : `${buyerCount.toLocaleString(locale)} pessoas já compraram`}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="p-6 md:p-8 space-y-6">
