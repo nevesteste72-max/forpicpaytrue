@@ -943,6 +943,18 @@ export default function Checkout() {
                 <p className="text-3xl font-bold text-foreground mt-2">
                   {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
                 </p>
+                {buyerCount && buyerCount > 0 && (
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                    <span aria-hidden>🔥</span>
+                    <span>
+                      {lang === "en"
+                        ? `${buyerCount.toLocaleString(locale)} people already bought this`
+                        : lang === "es"
+                        ? `${buyerCount.toLocaleString(locale)} personas ya compraron`
+                        : `${buyerCount.toLocaleString(locale)} pessoas já compraram`}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> SSL Encrypted</span>
