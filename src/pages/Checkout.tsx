@@ -763,6 +763,38 @@ export default function Checkout() {
                   {totalAmount.toLocaleString(locale)} {currencySymbol}
                 </p>
               </div>
+              {(() => {
+                const method = isEmola ? "eMola" : "M-Pesa";
+                const steps = lang === "en"
+                  ? [
+                      "Check your phone",
+                      `Enter your ${method} PIN`,
+                      "Wait for confirmation (may take a few seconds)",
+                    ]
+                  : lang === "es"
+                  ? [
+                      "Revise su teléfono",
+                      `Ingrese su PIN de ${method}`,
+                      "Espere la confirmación (puede tardar unos segundos)",
+                    ]
+                  : [
+                      "Verifique o seu telemóvel",
+                      `Introduza o PIN do ${method}`,
+                      "Aguarde a confirmação (pode demorar alguns segundos)",
+                    ];
+                return (
+                  <ol className="text-left space-y-2 mb-6 bg-muted/30 rounded-xl p-4 border border-border">
+                    {steps.map((s, i) => (
+                      <li key={i} className="flex gap-3 text-sm text-foreground">
+                        <span className="shrink-0 w-6 h-6 rounded-full gradient-primary text-white text-xs font-bold flex items-center justify-center">
+                          {i + 1}
+                        </span>
+                        <span className="pt-0.5">{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+                );
+              })()}
               <div className="flex items-center justify-center gap-2 mb-4 text-sm text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>{t.waiting}</span>
