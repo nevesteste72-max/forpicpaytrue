@@ -1148,6 +1148,8 @@ export default function Checkout() {
                   </div>
                   <Input
                     type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
                     value={phone}
                     onChange={(e) => {
                       setPhone(e.target.value.replace(/\D/g, "").slice(0, 9));
