@@ -291,6 +291,28 @@ export default function Checkout() {
   const [internalTxId, setInternalTxId] = useState<string | null>(null);
   const pollingRef = useRef<number | null>(null);
 
+  // Social proof — real count of successful purchases for this link
+  const [buyerCount, setBuyerCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!link?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { count, error } = await supabase
+          .from("transactions")
+          .select("id", { count: "exact", head: true })
+          .eq("payment_link_id", link.id)
+          .in("status", ["successful", "completed"]);
+        if (cancelled) return;
+        if (error) { setBuyerCount(null); return; }
+        setBuyerCount(typeof count === "number" && count > 0 ? count : null);
+      } catch {
+        if (!cancelled) setBuyerCount(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [link?.id]);
+
   // Recovery popup state
   const [recoveryTrigger, setRecoveryTrigger] = useState<"exit_intent" | "payment_failed" | null>(null);
   const recoveryShownRef = useRef(false);
@@ -741,6 +763,38 @@ export default function Checkout() {
                   {totalAmount.toLocaleString(locale)} {currencySymbol}
                 </p>
               </div>
+              {(() => {
+                const method = isEmola ? "eMola" : "M-Pesa";
+                const steps = lang === "en"
+                  ? [
+                      "Check your phone",
+                      `Enter your ${method} PIN`,
+                      "Wait for confirmation (may take a few seconds)",
+                    ]
+                  : lang === "es"
+                  ? [
+                      "Revise su teléfono",
+                      `Ingrese su PIN de ${method}`,
+                      "Espere la confirmación (puede tardar unos segundos)",
+                    ]
+                  : [
+                      "Verifique o seu telemóvel",
+                      `Introduza o PIN do ${method}`,
+                      "Aguarde a confirmação (pode demorar alguns segundos)",
+                    ];
+                return (
+                  <ol className="text-left space-y-2 mb-6 bg-muted/30 rounded-xl p-4 border border-border">
+                    {steps.map((s, i) => (
+                      <li key={i} className="flex gap-3 text-sm text-foreground">
+                        <span className="shrink-0 w-6 h-6 rounded-full gradient-primary text-white text-xs font-bold flex items-center justify-center">
+                          {i + 1}
+                        </span>
+                        <span className="pt-0.5">{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+                );
+              })()}
               <div className="flex items-center justify-center gap-2 mb-4 text-sm text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>{t.waiting}</span>
@@ -889,6 +943,18 @@ export default function Checkout() {
                 <p className="text-3xl font-bold text-foreground mt-2">
                   {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
                 </p>
+                {buyerCount && buyerCount > 0 && (
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                    <span aria-hidden>🔥</span>
+                    <span>
+                      {lang === "en"
+                        ? `${buyerCount.toLocaleString(locale)} people already bought this`
+                        : lang === "es"
+                        ? `${buyerCount.toLocaleString(locale)} personas ya compraron`
+                        : `${buyerCount.toLocaleString(locale)} pessoas já compraram`}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> SSL Encrypted</span>
@@ -1033,6 +1099,18 @@ export default function Checkout() {
                   )}
                 </div>
               </div>
+              {buyerCount && buyerCount > 0 && (
+                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                  <span aria-hidden>🔥</span>
+                  <span>
+                    {lang === "en"
+                      ? `${buyerCount.toLocaleString(locale)} people already bought this`
+                      : lang === "es"
+                      ? `${buyerCount.toLocaleString(locale)} personas ya compraron`
+                      : `${buyerCount.toLocaleString(locale)} pessoas já compraram`}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="p-6 md:p-8 space-y-6">
@@ -1082,6 +1160,8 @@ export default function Checkout() {
                   </div>
                   <Input
                     type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
                     value={phone}
                     onChange={(e) => {
                       setPhone(e.target.value.replace(/\D/g, "").slice(0, 9));
@@ -1195,7 +1275,15 @@ export default function Checkout() {
                 className="w-full h-12 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] transition-all group relative overflow-hidden"
               >
                 <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <span className="relative z-10">{isEmola ? t.payEmola : t.payMpesa}</span>
+                <span className="relative z-10">
+                  {(() => {
+                    const method = isEmola ? "eMola" : "M-Pesa";
+                    const amt = `${totalAmount.toLocaleString(locale)} ${currencySymbol}`;
+                    if (lang === "en") return `Pay ${amt} with ${method}`;
+                    if (lang === "es") return `Pagar ${amt} con ${method}`;
+                    return `Pagar ${amt} com ${method}`;
+                  })()}
+                </span>
               </Button>
 
               <div className="text-center">
@@ -1206,6 +1294,34 @@ export default function Checkout() {
               </div>
             </form>
           </div>
+
+          {/* Trust Badges */}
+          {(link as any).show_trust_badges !== false && (
+            <div className="px-6 md:px-8 pb-6 md:pb-8">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Shield className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Privacy" : lang === "es" ? "Privacidad" : "Privacidade"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your information is 100% secure" : lang === "es" ? "Su información es 100% segura" : "Seus dados estão 100% seguros"}</p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Lock className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Secure Purchase" : lang === "es" ? "Compra Segura" : "Compra Segura"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Mail className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Delivered via Email" : lang === "es" ? "Entrega por Email" : "Entrega por Email"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Product access delivered by email" : lang === "es" ? "Acceso entregado por email" : "Acesso entregue por email"}</p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Award className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Approved Content" : lang === "es" ? "Contenido Aprobado" : "Conteudo Aprovado"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "100% reviewed and approved" : lang === "es" ? "100% revisado y aprobado" : "100% revisado e aprovado"}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="text-center py-4 md:mt-6">
