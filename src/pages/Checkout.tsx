@@ -937,7 +937,7 @@ export default function Checkout() {
             <div className="p-6 md:p-8 pb-0">
               <div className="bg-muted/40 rounded-2xl p-6 border border-border text-center">
                 {link.logo_url && (
-                  <img src={link.logo_url} alt={link.product_name} className="w-32 h-32 sm:w-36 sm:h-36 object-cover mx-auto mb-4 rounded-2xl shadow-md" />
+                  <img src={link.logo_url} alt={link.product_name} className="w-full max-w-[280px] aspect-square object-cover mx-auto mb-4 rounded-2xl shadow-md" />
                 )}
                 <h2 className="text-lg font-bold text-foreground">{link.product_name}</h2>
                 <p className="text-3xl font-bold text-foreground mt-2">
