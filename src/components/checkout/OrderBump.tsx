@@ -52,7 +52,7 @@ export function OrderBump({
           <div className="flex justify-between items-center mb-1">
             <span className="font-bold text-foreground text-sm">{productName}</span>
             <span className="text-sm font-bold text-foreground">
-              +{currency === "ZAR" ? `R ${amount.toLocaleString(locale)}` : `${amount.toLocaleString(locale)} MZN`}
+              +{currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency} {amount.toLocaleString(locale)}
             </span>
           </div>
           {productDescription && (
