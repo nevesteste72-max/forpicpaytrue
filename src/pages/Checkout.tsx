@@ -291,6 +291,28 @@ export default function Checkout() {
   const [internalTxId, setInternalTxId] = useState<string | null>(null);
   const pollingRef = useRef<number | null>(null);
 
+  // Social proof — real count of successful purchases for this link
+  const [buyerCount, setBuyerCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!link?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { count, error } = await supabase
+          .from("transactions")
+          .select("id", { count: "exact", head: true })
+          .eq("payment_link_id", link.id)
+          .in("status", ["successful", "completed"]);
+        if (cancelled) return;
+        if (error) { setBuyerCount(null); return; }
+        setBuyerCount(typeof count === "number" && count > 0 ? count : null);
+      } catch {
+        if (!cancelled) setBuyerCount(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [link?.id]);
+
   // Recovery popup state
   const [recoveryTrigger, setRecoveryTrigger] = useState<"exit_intent" | "payment_failed" | null>(null);
   const recoveryShownRef = useRef(false);
