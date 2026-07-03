@@ -1263,7 +1263,15 @@ export default function Checkout() {
                 className="w-full h-12 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] transition-all group relative overflow-hidden"
               >
                 <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <span className="relative z-10">{isEmola ? t.payEmola : t.payMpesa}</span>
+                <span className="relative z-10">
+                  {(() => {
+                    const method = isEmola ? "eMola" : "M-Pesa";
+                    const amt = `${totalAmount.toLocaleString(locale)} ${currencySymbol}`;
+                    if (lang === "en") return `Pay ${amt} with ${method}`;
+                    if (lang === "es") return `Pagar ${amt} con ${method}`;
+                    return `Pagar ${amt} com ${method}`;
+                  })()}
+                </span>
               </Button>
 
               <div className="text-center">
@@ -1274,6 +1282,34 @@ export default function Checkout() {
               </div>
             </form>
           </div>
+
+          {/* Trust Badges */}
+          {(link as any).show_trust_badges !== false && (
+            <div className="px-6 md:px-8 pb-6 md:pb-8">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Shield className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Privacy" : lang === "es" ? "Privacidad" : "Privacidade"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your information is 100% secure" : lang === "es" ? "Su información es 100% segura" : "Seus dados estão 100% seguros"}</p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Lock className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Secure Purchase" : lang === "es" ? "Compra Segura" : "Compra Segura"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Mail className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Delivered via Email" : lang === "es" ? "Entrega por Email" : "Entrega por Email"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Product access delivered by email" : lang === "es" ? "Acceso entregado por email" : "Acesso entregue por email"}</p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <Award className="w-6 h-6 text-primary mb-2" />
+                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Approved Content" : lang === "es" ? "Contenido Aprobado" : "Conteudo Aprovado"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "100% reviewed and approved" : lang === "es" ? "100% revisado y aprobado" : "100% revisado e aprovado"}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="text-center py-4 md:mt-6">
