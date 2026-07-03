@@ -9,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, ImagePlus, X, ExternalLink, RotateCcw } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -241,250 +242,300 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         <DialogHeader>
           <DialogTitle>Editar Produto</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {/* Image */}
-          <div className="space-y-2">
-            <Label>Imagem</Label>
-            <div className="flex items-center gap-4">
-              {imagePreview ? (
-                <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-xl object-cover border-2 border-border" />
-                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center">
-                    <X className="w-4 h-4" />
+        <form onSubmit={handleSubmit} className="mt-4">
+          <Tabs defaultValue="produto" className="w-full">
+            <TabsList className="grid grid-cols-4 w-full h-auto p-1">
+              <TabsTrigger value="produto" className="flex flex-col gap-1 py-2 text-[11px]">
+                <Package className="w-4 h-4" />
+                Produto
+              </TabsTrigger>
+              <TabsTrigger value="bumps" className="flex flex-col gap-1 py-2 text-[11px]">
+                <Gift className="w-4 h-4" />
+                Bumps
+              </TabsTrigger>
+              <TabsTrigger value="checkout" className="flex flex-col gap-1 py-2 text-[11px]">
+                <Sparkles className="w-4 h-4" />
+                Checkout
+              </TabsTrigger>
+              <TabsTrigger value="rastreio" className="flex flex-col gap-1 py-2 text-[11px]">
+                <BarChart3 className="w-4 h-4" />
+                Rastreio
+              </TabsTrigger>
+            </TabsList>
+
+            {/* ABA: PRODUTO — identidade, preço, idioma, pagamento */}
+            <TabsContent value="produto" className="space-y-4 mt-4">
+              {/* Image */}
+              <div className="space-y-2">
+                <Label>Imagem</Label>
+                <div className="flex items-center gap-4">
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-xl object-cover border-2 border-border" />
+                      <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+                      <ImagePlus className="w-6 h-6 mb-1" />
+                      <span className="text-xs">Adicionar</span>
+                    </button>
+                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Nome do Produto</Label>
+                <Input value={productName} onChange={(e) => setProductName(e.target.value)} required className="h-12 rounded-xl" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Textarea value={productDescription} onChange={(e) => setProductDescription(e.target.value)} className="rounded-xl resize-none" rows={3} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Preço ({product?.currency || "MZN"})</Label>
+                <Input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="h-12 rounded-xl" />
+              </div>
+
+              {/* Checkout Language */}
+              <div className="space-y-2">
+                <Label>Idioma do Checkout</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button type="button" onClick={() => setCheckoutLanguage("pt")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "pt" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
+                    🇵🇹 Português
+                  </button>
+                  <button type="button" onClick={() => setCheckoutLanguage("en")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "en" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
+                    🇬🇧 English
+                  </button>
+                  <button type="button" onClick={() => setCheckoutLanguage("es")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "es" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
+                    🇪🇸 Español
                   </button>
                 </div>
-              ) : (
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors">
-                  <ImagePlus className="w-6 h-6 mb-1" />
-                  <span className="text-xs">Adicionar</span>
-                </button>
+              </div>
+
+              {/* Stripe Methods */}
+              {isStripe && (
+                <div className="space-y-2">
+                  <Label>Métodos de Pagamento (Stripe)</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {STRIPE_METHODS.map((m) => (
+                      <button type="button" key={m.value} onClick={() => toggleMethod(m.value)} className={cn("p-2.5 rounded-xl border-2 text-left transition-all text-xs font-medium", stripePaymentMethods.includes(m.value) ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label>Nome do Produto</Label>
-            <Input value={productName} onChange={(e) => setProductName(e.target.value)} required className="h-12 rounded-xl" />
-          </div>
+              {/* Redirect URL */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Link de Redirecionamento
+                </Label>
+                <Input type="url" value={redirectUrl} onChange={(e) => setRedirectUrl(e.target.value)} placeholder="https://exemplo.com/obrigado" className="h-12 rounded-xl" />
+              </div>
+            </TabsContent>
 
-          <div className="space-y-2">
-            <Label>Descrição</Label>
-            <Textarea value={productDescription} onChange={(e) => setProductDescription(e.target.value)} className="rounded-xl resize-none" rows={3} />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Preço ({product?.currency || "MZN"})</Label>
-            <Input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="h-12 rounded-xl" />
-          </div>
-
-          {/* Checkout Language */}
-          <div className="space-y-2">
-            <Label>Idioma do Checkout</Label>
-            <div className="grid grid-cols-3 gap-2">
-              <button type="button" onClick={() => setCheckoutLanguage("pt")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "pt" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
-                🇵🇹 Português
-              </button>
-              <button type="button" onClick={() => setCheckoutLanguage("en")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "en" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
-                🇬🇧 English
-              </button>
-              <button type="button" onClick={() => setCheckoutLanguage("es")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "es" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
-                🇪🇸 Español
-              </button>
-            </div>
-          </div>
-
-          {/* Stripe Methods */}
-          {isStripe && (
-            <div className="space-y-2">
-              <Label>Métodos de Pagamento (Stripe)</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {STRIPE_METHODS.map((m) => (
-                  <button type="button" key={m.value} onClick={() => toggleMethod(m.value)} className={cn("p-2.5 rounded-xl border-2 text-left transition-all text-xs font-medium", stripePaymentMethods.includes(m.value) ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
-                    {m.label}
-                  </button>
+            {/* ABA: BUMPS — ofertas extras no checkout */}
+            <TabsContent value="bumps" className="mt-4">
+              <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+                <Label className="text-sm font-semibold">Order Bumps (até 3)</Label>
+                {[
+                  { label: "Order Bump 1", name: orderBumpName, setName: setOrderBumpName, desc: orderBumpDescription, setDesc: setOrderBumpDescription, price: orderBumpPrice, setPrice: setOrderBumpPrice },
+                  { label: "Order Bump 2", name: orderBump2Name, setName: setOrderBump2Name, desc: orderBump2Description, setDesc: setOrderBump2Description, price: orderBump2Price, setPrice: setOrderBump2Price },
+                  { label: "Order Bump 3", name: orderBump3Name, setName: setOrderBump3Name, desc: orderBump3Description, setDesc: setOrderBump3Description, price: orderBump3Price, setPrice: setOrderBump3Price },
+                ].map((bump, idx) => (
+                  <div key={idx} className="space-y-2 pt-3 border-t border-border first:border-t-0 first:pt-0">
+                    <Label className="text-xs font-semibold text-muted-foreground">{bump.label}</Label>
+                    <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-10 rounded-lg text-sm" />
+                    <Input value={bump.desc} onChange={(e) => bump.setDesc(e.target.value)} placeholder="Descrição" className="h-10 rounded-lg text-sm" />
+                    <Input type="number" min="0" step="0.01" value={bump.price} onChange={(e) => bump.setPrice(e.target.value)} placeholder={`Preço (${product?.currency || "MZN"})`} className="h-10 rounded-lg text-sm" />
+                  </div>
                 ))}
               </div>
-            </div>
-          )}
+            </TabsContent>
 
-          {/* Redirect URL */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-1.5">
-              <ExternalLink className="w-3.5 h-3.5" />
-              Link de Redirecionamento
-            </Label>
-            <Input type="url" value={redirectUrl} onChange={(e) => setRedirectUrl(e.target.value)} placeholder="https://exemplo.com/obrigado" className="h-12 rounded-xl" />
-          </div>
-
-          {/* Order Bumps (até 3) */}
-          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
-            <Label className="text-sm font-semibold">Order Bumps (até 3)</Label>
-            {[
-              { label: "Order Bump 1", name: orderBumpName, setName: setOrderBumpName, desc: orderBumpDescription, setDesc: setOrderBumpDescription, price: orderBumpPrice, setPrice: setOrderBumpPrice },
-              { label: "Order Bump 2", name: orderBump2Name, setName: setOrderBump2Name, desc: orderBump2Description, setDesc: setOrderBump2Description, price: orderBump2Price, setPrice: setOrderBump2Price },
-              { label: "Order Bump 3", name: orderBump3Name, setName: setOrderBump3Name, desc: orderBump3Description, setDesc: setOrderBump3Description, price: orderBump3Price, setPrice: setOrderBump3Price },
-            ].map((bump, idx) => (
-              <div key={idx} className="space-y-2 pt-3 border-t border-border first:border-t-0 first:pt-0">
-                <Label className="text-xs font-semibold text-muted-foreground">{bump.label}</Label>
-                <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-10 rounded-lg text-sm" />
-                <Input value={bump.desc} onChange={(e) => bump.setDesc(e.target.value)} placeholder="Descrição" className="h-10 rounded-lg text-sm" />
-                <Input type="number" min="0" step="0.01" value={bump.price} onChange={(e) => bump.setPrice(e.target.value)} placeholder={`Preço (${product?.currency || "MZN"})`} className="h-10 rounded-lg text-sm" />
-              </div>
-            ))}
-          </div>
-
-          {/* Checkout Appearance */}
-          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
-            <div className="flex items-center gap-2 mb-1">
-              <ImagePlus className="w-4 h-4 text-muted-foreground" />
-              <Label className="text-sm font-semibold">Aparência do Checkout</Label>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Banner</Label>
-              <div className="flex items-center gap-4">
-                {bannerPreview ? (
-                  <div className="relative w-full">
-                    <img src={bannerPreview} alt="Banner" className="w-full h-24 rounded-lg object-cover border-2 border-border" />
-                    <button type="button" onClick={() => { setBannerFile(null); setBannerPreview(null); }} className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center">
-                      <X className="w-4 h-4" />
-                    </button>
+            {/* ABA: CHECKOUT — aparência e recuperação de vendas */}
+            <TabsContent value="checkout" className="space-y-4 mt-4">
+              <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 mb-1">
+                  <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                  <Label className="text-sm font-semibold">Aparência do Checkout</Label>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Banner</Label>
+                  <div className="flex items-center gap-4">
+                    {bannerPreview ? (
+                      <div className="relative w-full">
+                        <img src={bannerPreview} alt="Banner" className="w-full h-24 rounded-lg object-cover border-2 border-border" />
+                        <button type="button" onClick={() => { setBannerFile(null); setBannerPreview(null); }} className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => bannerInputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+                        <ImagePlus className="w-5 h-5 mb-1" />
+                        <span className="text-xs">Adicionar Banner</span>
+                      </button>
+                    )}
+                    <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerSelect} className="hidden" />
                   </div>
-                ) : (
-                  <button type="button" onClick={() => bannerInputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors">
-                    <ImagePlus className="w-5 h-5 mb-1" />
-                    <span className="text-xs">Adicionar Banner</span>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Contagem Regressiva (minutos)</Label>
+                  <Input type="number" min="0" max="1440" value={checkoutTimerMinutes} onChange={(e) => setCheckoutTimerMinutes(e.target.value)} placeholder="Ex: 15" className="h-10 rounded-lg text-sm" />
+                </div>
+
+                {/* Trust Badges Toggle */}
+                <div className="space-y-2 pt-3 border-t border-border">
+                  <Label className="text-xs">Selos de Confiança</Label>
+                  <p className="text-xs text-muted-foreground">Mostrar selos de privacidade, segurança e entrega no checkout</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowTrustBadges(!showTrustBadges)}
+                      className={cn(
+                        "w-10 h-6 rounded-full transition-colors relative",
+                        showTrustBadges ? "bg-[hsl(145,60%,40%)]" : "bg-border"
+                      )}
+                    >
+                      <span className={cn(
+                        "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
+                        showTrustBadges ? "translate-x-4" : "translate-x-0.5"
+                      )} />
+                    </button>
+                    <span className="text-sm text-foreground">{showTrustBadges ? "Ativado" : "Desativado"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recovery / Sales Recovery */}
+              <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 mb-1">
+                  <RotateCcw className="w-4 h-4 text-[hsl(145,60%,40%)]" />
+                  <Label className="text-sm font-semibold">Recuperação de Vendas</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Popup inteligente ativado ao tentar sair da página ou quando o pagamento falha
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRecoveryEnabled(!recoveryEnabled)}
+                    className={cn(
+                      "w-10 h-6 rounded-full transition-colors relative",
+                      recoveryEnabled ? "bg-[hsl(145,60%,40%)]" : "bg-border"
+                    )}
+                  >
+                    <span className={cn(
+                      "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
+                      recoveryEnabled ? "translate-x-4" : "translate-x-0.5"
+                    )} />
                   </button>
+                  <span className="text-sm text-foreground">{recoveryEnabled ? "Ativado" : "Desativado"}</span>
+                </div>
+                {recoveryEnabled && (
+                  <div className="space-y-3 mt-2">
+                    <div className="space-y-2">
+                      <Label className="text-xs">Desconto (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="90"
+                        value={recoveryDiscountPercent}
+                        onChange={(e) => setRecoveryDiscountPercent(e.target.value)}
+                        placeholder="Ex: 20"
+                        className="h-10 rounded-lg text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">Título (opcional)</Label>
+                      <Input
+                        value={recoveryHeadline}
+                        onChange={(e) => setRecoveryHeadline(e.target.value)}
+                        placeholder="Ex: Espere um momento!"
+                        className="h-10 rounded-lg text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">Mensagem (opcional)</Label>
+                      <Textarea
+                        value={recoveryMessage}
+                        onChange={(e) => setRecoveryMessage(e.target.value)}
+                        placeholder="Mensagem personalizada para recuperar a venda..."
+                        className="rounded-lg text-sm resize-none"
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">Texto do Botão (opcional)</Label>
+                      <Input
+                        value={recoveryCtaText}
+                        onChange={(e) => setRecoveryCtaText(e.target.value)}
+                        placeholder="Ex: Aproveitar oferta agora"
+                        className="h-10 rounded-lg text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">Link do Desconto (URL)</Label>
+                      <Input
+                        type="url"
+                        value={recoveryRedirectUrl}
+                        onChange={(e) => setRecoveryRedirectUrl(e.target.value)}
+                        placeholder="https://cashpaysa.lovable.app/checkout/..."
+                        className="h-10 rounded-lg text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Link de pagamento com o preço reduzido
+                      </p>
+                    </div>
+                  </div>
                 )}
-                <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerSelect} className="hidden" />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Contagem Regressiva (minutos)</Label>
-              <Input type="number" min="0" max="1440" value={checkoutTimerMinutes} onChange={(e) => setCheckoutTimerMinutes(e.target.value)} placeholder="Ex: 15" className="h-10 rounded-lg text-sm" />
-            </div>
+            </TabsContent>
 
-            {/* Trust Badges Toggle */}
-            <div className="space-y-2 pt-3 border-t border-border">
-              <Label className="text-xs">Selos de Confiança</Label>
-              <p className="text-xs text-muted-foreground">Mostrar selos de privacidade, segurança e entrega no checkout</p>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowTrustBadges(!showTrustBadges)}
-                  className={cn(
-                    "w-10 h-6 rounded-full transition-colors relative",
-                    showTrustBadges ? "bg-[hsl(145,60%,40%)]" : "bg-border"
-                  )}
-                >
-                  <span className={cn(
-                    "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
-                    showTrustBadges ? "translate-x-4" : "translate-x-0.5"
-                  )} />
-                </button>
-                <span className="text-sm text-foreground">{showTrustBadges ? "Ativado" : "Desativado"}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Recovery / Sales Recovery */}
-          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
-            <div className="flex items-center gap-2 mb-1">
-              <RotateCcw className="w-4 h-4 text-[hsl(145,60%,40%)]" />
-              <Label className="text-sm font-semibold">Recuperação de Vendas</Label>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Popup inteligente ativado ao tentar sair da página ou quando o pagamento falha
-            </p>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setRecoveryEnabled(!recoveryEnabled)}
-                className={cn(
-                  "w-10 h-6 rounded-full transition-colors relative",
-                  recoveryEnabled ? "bg-[hsl(145,60%,40%)]" : "bg-border"
-                )}
-              >
-                <span className={cn(
-                  "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
-                  recoveryEnabled ? "translate-x-4" : "translate-x-0.5"
-                )} />
-              </button>
-              <span className="text-sm text-foreground">{recoveryEnabled ? "Ativado" : "Desativado"}</span>
-            </div>
-            {recoveryEnabled && (
-              <div className="space-y-3 mt-2">
+            {/* ABA: RASTREIO — Facebook Pixel/API + UTMify */}
+            <TabsContent value="rastreio" className="space-y-4 mt-4">
+              <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-[hsl(220,80%,50%)]" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                  <Label className="text-sm font-semibold">Facebook Pixel & API</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Pixel ID e Token de Conversão usados para rastrear vendas deste produto no Facebook/Meta Ads
+                </p>
                 <div className="space-y-2">
-                  <Label className="text-xs">Desconto (%)</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="90"
-                    value={recoveryDiscountPercent}
-                    onChange={(e) => setRecoveryDiscountPercent(e.target.value)}
-                    placeholder="Ex: 20"
-                    className="h-10 rounded-lg text-sm"
-                  />
+                  <Label className="text-xs">Pixel ID</Label>
+                  <Input value={facebookPixelId} onChange={(e) => setFacebookPixelId(e.target.value)} placeholder="Ex: 123456789" className="h-10 rounded-lg font-mono text-sm" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">Título (opcional)</Label>
-                  <Input
-                    value={recoveryHeadline}
-                    onChange={(e) => setRecoveryHeadline(e.target.value)}
-                    placeholder="Ex: Espere um momento!"
-                    className="h-10 rounded-lg text-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Mensagem (opcional)</Label>
-                  <Textarea
-                    value={recoveryMessage}
-                    onChange={(e) => setRecoveryMessage(e.target.value)}
-                    placeholder="Mensagem personalizada para recuperar a venda..."
-                    className="rounded-lg text-sm resize-none"
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Texto do Botão (opcional)</Label>
-                  <Input
-                    value={recoveryCtaText}
-                    onChange={(e) => setRecoveryCtaText(e.target.value)}
-                    placeholder="Ex: Aproveitar oferta agora"
-                    className="h-10 rounded-lg text-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Link do Desconto (URL)</Label>
-                  <Input
-                    type="url"
-                    value={recoveryRedirectUrl}
-                    onChange={(e) => setRecoveryRedirectUrl(e.target.value)}
-                    placeholder="https://cashpaysa.lovable.app/checkout/..."
-                    className="h-10 rounded-lg text-sm"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Link de pagamento com o preço reduzido
-                  </p>
+                  <Label className="text-xs">Conversions API Token</Label>
+                  <Input value={facebookToken} onChange={(e) => setFacebookToken(e.target.value)} placeholder="Token da API" className="h-10 rounded-lg font-mono text-sm" />
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Facebook */}
-          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
-            <Label className="text-sm font-semibold">Facebook Pixel</Label>
-            <div className="space-y-2">
-              <Label className="text-xs">Pixel ID</Label>
-              <Input value={facebookPixelId} onChange={(e) => setFacebookPixelId(e.target.value)} placeholder="Ex: 123456789" className="h-10 rounded-lg text-sm" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Conversions API Token</Label>
-              <Input value={facebookToken} onChange={(e) => setFacebookToken(e.target.value)} placeholder="Token da API" className="h-10 rounded-lg text-sm" />
-            </div>
-          </div>
+              <div className="space-y-2 p-4 rounded-xl bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="w-4 h-4 text-[hsl(45,90%,45%)]" />
+                  <Label className="text-sm font-semibold">UTMify</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  O rastreamento de UTMs (origem, campanha, mídia) já é feito automaticamente para
+                  todos os produtos da conta — não precisa configurar nada aqui. Cada venda deste
+                  produto é enviada ao UTMify com o nome e o valor corretos assim que é aprovada.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
 
-          <Button type="submit" disabled={saving} className="w-full h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90">
+          <Button type="submit" disabled={saving} className="w-full h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90 mt-4">
             {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Salvar Alterações
           </Button>
