@@ -920,7 +920,7 @@ export default function Checkout() {
         <div className="w-full md:max-w-lg md:p-4">
           <div className="bg-card md:rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden md:border border-border min-h-screen md:min-h-0">
             {/* Countdown Timer */}
-            {link.checkout_timer_minutes && link.checkout_timer_minutes > 0 && (
+            {Number(link.checkout_timer_minutes) > 0 && (
               <CheckoutTimer minutes={link.checkout_timer_minutes} lang={lang} />
             )}
 
@@ -943,7 +943,7 @@ export default function Checkout() {
                 <p className="text-3xl font-bold text-foreground mt-2">
                   {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
                 </p>
-                {buyerCount && buyerCount > 0 && (
+                {typeof buyerCount === "number" && buyerCount > 0 && (
                   <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
                     <span aria-hidden>🔥</span>
                     <span>
@@ -1069,7 +1069,7 @@ export default function Checkout() {
       <div className="w-full md:max-w-lg md:p-4">
         <div className="bg-card md:rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden md:border border-border min-h-screen md:min-h-0">
           {/* Countdown Timer */}
-          {link.checkout_timer_minutes && link.checkout_timer_minutes > 0 && (
+          {Number(link.checkout_timer_minutes) > 0 && (
             <CheckoutTimer minutes={link.checkout_timer_minutes} lang={lang} />
           )}
 
@@ -1099,7 +1099,7 @@ export default function Checkout() {
                   )}
                 </div>
               </div>
-              {buyerCount && buyerCount > 0 && (
+              {typeof buyerCount === "number" && buyerCount > 0 && (
                 <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
                   <span aria-hidden>🔥</span>
                   <span>
