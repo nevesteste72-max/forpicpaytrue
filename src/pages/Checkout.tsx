@@ -857,7 +857,7 @@ export default function Checkout() {
                   )}
                 </div>
               ) : (
-                <Button onClick={() => window.location.reload()} className="gradient-primary text-white rounded-lg">
+                <Button onClick={resetForm} className="gradient-primary text-white rounded-lg">
                   {t.tryAgain}
                 </Button>
               )}
@@ -991,11 +991,11 @@ export default function Checkout() {
                     }}
                     onError={(msg) => {
                       setErrorMessage(msg);
+                      toast({ title: t.paymentFailed, description: msg, variant: "destructive" });
                       if (link?.recovery_enabled && !recoveryShownRef.current) {
                         recoveryShownRef.current = true;
                         setRecoveryTrigger("payment_failed");
                       }
-                      setPaymentState("failed");
                     }}
                     orderBumpSlot={orderBumpSlot}
                   />
