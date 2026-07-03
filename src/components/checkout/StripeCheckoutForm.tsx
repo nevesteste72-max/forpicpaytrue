@@ -66,6 +66,7 @@ interface StripeCheckoutFormProps {
   orderBumpSlot?: React.ReactNode;
   trackingParams?: TrackingParams;
   hideCustomerFields?: boolean;
+  stripePaymentMethods?: string[];
 }
 
 export function StripeCheckoutForm({
@@ -87,7 +88,11 @@ export function StripeCheckoutForm({
   orderBumpSlot,
   trackingParams,
   hideCustomerFields,
+  stripePaymentMethods,
 }: StripeCheckoutFormProps) {
+  const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
+  const walletOrNever = (method: string) => (enabledMethods.includes(method) ? "auto" : "never") as "auto" | "never";
+  const paymentMethodOrder = enabledMethods.includes("link") ? ["card", "link"] : ["card"];
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -334,8 +339,8 @@ export function StripeCheckoutForm({
             business: {
               name: "CashPay",
             },
-            wallets: { applePay: "never", googlePay: "never", link: "never" },
-            paymentMethodOrder: ["card"],
+            wallets: { applePay: walletOrNever("apple_pay"), googlePay: walletOrNever("google_pay"), link: walletOrNever("link") },
+            paymentMethodOrder,
             fields: {
               billingDetails: "auto",
             },
