@@ -201,12 +201,20 @@ serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error("Supabase credentials not configured");
     }
 
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Prefer the key configured in Settings (app_settings), fall back to the env secret.
+    const { data: appSettings } = await supabaseAdmin
+      .from("app_settings")
+      .select("stripe_secret_key")
+      .eq("id", 1)
+      .maybeSingle();
+    const STRIPE_SECRET_KEY = appSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY");
+
     const body = await req.json();
     const { transaction_id, payment_intent_id, update_customer, customer_email, customer_name, customer_phone, payment_status, tracking_params } = body;
 

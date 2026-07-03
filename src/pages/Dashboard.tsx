@@ -15,6 +15,7 @@ import { WithdrawalsView } from "@/components/dashboard/WithdrawalsView";
 import { FlowsView } from "@/components/dashboard/FlowsView";
 import { WhatsAppView } from "@/components/dashboard/WhatsAppView";
 import { RefundsView } from "@/components/dashboard/RefundsView";
+import { SettingsView } from "@/components/dashboard/SettingsView";
 import { DashboardDateFilter, getDateRange, type DateFilterOption } from "@/components/dashboard/DashboardDateFilter";
 import { useSaleNotifications } from "@/hooks/useSaleNotifications";
 import {
@@ -34,11 +35,12 @@ import {
   HelpCircle,
   MessageSquare,
   RotateCcw,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import cashpayIcon from "@/assets/picpay-logo.jpeg";
 
-type DashboardTab = "overview" | "products" | "flows" | "transactions" | "clients" | "withdrawals" | "whatsapp" | "refunds";
+type DashboardTab = "overview" | "products" | "flows" | "transactions" | "clients" | "withdrawals" | "whatsapp" | "refunds" | "settings";
 
 interface Product {
   id: string;
@@ -96,6 +98,7 @@ const financeLinks: { icon: typeof Wallet; label: string; tab: DashboardTab }[] 
   { icon: Zap, label: "Funil de Vendas", tab: "flows" },
   { icon: MessageSquare, label: "WhatsApp", tab: "whatsapp" },
   { icon: RotateCcw, label: "Reembolsos", tab: "refunds" },
+  { icon: Settings, label: "Definições", tab: "settings" },
 ];
 
 export default function Dashboard() {
@@ -430,6 +433,7 @@ export default function Dashboard() {
     withdrawals: "Saldo & Saques",
     whatsapp: "WhatsApp",
     refunds: "Reembolsos",
+    settings: "Definições",
   };
 
   const tabDescriptions: Record<DashboardTab, string> = {
@@ -441,6 +445,7 @@ export default function Dashboard() {
     withdrawals: "Solicite a transferência do seu saldo.",
     whatsapp: "Automatize entrega, recuperação e suporte via WhatsApp.",
     refunds: "Gerencie pedidos de reembolso dos clientes.",
+    settings: "Configure as chaves da Stripe e outras definições da conta.",
   };
 
   const pendingTxRevenue = transactions
@@ -511,6 +516,8 @@ export default function Dashboard() {
         return <WhatsAppView />;
       case "refunds":
         return <RefundsView />;
+      case "settings":
+        return <SettingsView />;
       case "transactions":
         return <TransactionsView transactions={enrichedTransactions} />;
       case "clients":
