@@ -200,7 +200,7 @@ const labels = {
     waiting: "Waiting for confirmation...",
     cancel: "Cancel",
     paymentReceived: "Payment Received!",
-    receiptSent: "We sent the receipt to your email.",
+    receiptSent: "We sent the receipt to your email. If you don't see it, please check your spam/junk folder.",
     accessContent: "Access Content",
     paymentFailed: "Payment Failed",
     tryAgain: "Try Again",
