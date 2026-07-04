@@ -99,7 +99,14 @@ serve(async (req) => {
               <span style="font-size: 32px;">✅</span>
             </div>
             <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Payment Confirmed!</h1>
-            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">Thank you for your purchase, ${displayName}.</p>
+            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">Thank you, ${displayName} — your payment was successfully received and your order is confirmed.</p>
+          </div>
+
+          <!-- Amount Paid -->
+          <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
+            <div style="font-size: 12px; font-weight: 600; color: #047857; text-transform: uppercase; letter-spacing: 0.05em;">Amount Paid</div>
+            <div style="font-size: 28px; font-weight: 700; color: #047857; margin: 8px 0;">${formattedAmount}</div>
+            <div style="font-size: 12px; color: #059669;">Confirmed on ${purchaseDate}</div>
           </div>
 
           <!-- Order Summary -->
@@ -112,7 +119,7 @@ serve(async (req) => {
               </tr>
               ${orderBumpRow}
               <tr style="border-top: 1px solid #e5e7eb;">
-                <td style="padding: 12px 0 0; color: #111827; font-size: 16px; font-weight: 700;">Total</td>
+                <td style="padding: 12px 0 0; color: #111827; font-size: 16px; font-weight: 700;">Total Paid</td>
                 <td style="padding: 12px 0 0; text-align: right; color: #111827; font-size: 16px; font-weight: 700;">${formattedAmount}</td>
               </tr>
             </table>
