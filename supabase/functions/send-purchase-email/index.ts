@@ -54,6 +54,7 @@ serve(async (req) => {
 
     const displayName = customer_name || customer_email.split("@")[0];
     const formattedAmount = `${currency} ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`;
+    const purchaseDate = new Date().toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Maputo" });
 
     // Build order bump row if applicable
     let orderBumpRow = "";
@@ -98,7 +99,14 @@ serve(async (req) => {
               <span style="font-size: 32px;">✅</span>
             </div>
             <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Payment Confirmed!</h1>
-            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">Thank you for your purchase, ${displayName}.</p>
+            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">Thank you, ${displayName} — your payment was successfully received and your order is confirmed.</p>
+          </div>
+
+          <!-- Amount Paid -->
+          <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
+            <div style="font-size: 12px; font-weight: 600; color: #047857; text-transform: uppercase; letter-spacing: 0.05em;">Amount Paid</div>
+            <div style="font-size: 28px; font-weight: 700; color: #047857; margin: 8px 0;">${formattedAmount}</div>
+            <div style="font-size: 12px; color: #059669;">Confirmed on ${purchaseDate}</div>
           </div>
 
           <!-- Order Summary -->
@@ -111,7 +119,7 @@ serve(async (req) => {
               </tr>
               ${orderBumpRow}
               <tr style="border-top: 1px solid #e5e7eb;">
-                <td style="padding: 12px 0 0; color: #111827; font-size: 16px; font-weight: 700;">Total</td>
+                <td style="padding: 12px 0 0; color: #111827; font-size: 16px; font-weight: 700;">Total Paid</td>
                 <td style="padding: 12px 0 0; text-align: right; color: #111827; font-size: 16px; font-weight: 700;">${formattedAmount}</td>
               </tr>
             </table>
@@ -143,7 +151,10 @@ serve(async (req) => {
       `Payment Confirmed!`,
       ``,
       `Hi ${displayName},`,
-      `Thank you for your purchase.`,
+      `Your payment was successfully received and your order is confirmed.`,
+      ``,
+      `Amount Paid: ${formattedAmount}`,
+      `Confirmed on: ${purchaseDate}`,
       ``,
       `Order Summary:`,
       `${product_name}: ${formattedAmount}`,
@@ -160,7 +171,7 @@ serve(async (req) => {
       from: "CashPay <noreply@tecnhogar.store>",
       reply_to: "noreply@tecnhogar.store",
       to: [customer_email],
-      subject: `Your order confirmation - ${product_name}`,
+      subject: `Payment confirmed: ${product_name} - ${formattedAmount}`,
       html,
       text: textContent,
       headers: {

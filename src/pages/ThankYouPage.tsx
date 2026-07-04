@@ -102,8 +102,8 @@ export default function ThankYouPage() {
 
   const title = linkInfo?.thank_you_title || (lang === "en" ? "Thank you for your purchase!" : "Obrigado pela sua compra!");
   const message = linkInfo?.thank_you_message || (lang === "en"
-    ? "Your purchase was successful. You will receive an email with all the details."
-    : "A sua compra foi realizada com sucesso. Você receberá um email com todos os detalhes.");
+    ? "Your purchase was successful. You will receive an email with all the details — if you don't see it, please check your spam/junk folder."
+    : "A sua compra foi realizada com sucesso. Você receberá um email com todos os detalhes — se não encontrar, verifique a caixa de spam.");
 
   return (
     <div className="min-h-screen bg-muted flex items-center justify-center p-4">
