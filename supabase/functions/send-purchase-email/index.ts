@@ -54,7 +54,11 @@ serve(async (req) => {
 
     const displayName = customer_name || customer_email.split("@")[0];
     const formattedAmount = `${currency} ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`;
-    const purchaseDate = new Date().toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Maputo" });
+    const purchaseDate = new Date().toLocaleString("en-ZA", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Africa/Maputo",
+    });
 
     // Build order bump row if applicable
     let orderBumpRow = "";
@@ -72,7 +76,7 @@ serve(async (req) => {
     if (redirect_url) {
       accessButton = `
         <div style="text-align: center; margin: 32px 0 16px;">
-          <a href="${redirect_url}" 
+          <a href="${redirect_url}"
              style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
             Access Your Product
           </a>
@@ -81,6 +85,17 @@ serve(async (req) => {
     }
 
     const whatsappButton = "";
+
+    const origin = req.headers.get("origin") || "https://forpicpaytrue.lovable.app";
+    const trackingUrl = `${origin}/rastreio/${transaction_id}`;
+    const trackButton = `
+      <div style="text-align: center; margin-bottom: 8px;">
+        <a href="${trackingUrl}"
+           style="display: inline-block; background-color: #ffffff; color: #2563eb; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid #2563eb;">
+          Track Your Order
+        </a>
+      </div>
+    `;
 
     const html = `
     <!DOCTYPE html>
@@ -92,9 +107,9 @@ serve(async (req) => {
     <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
       <div style="max-width: 560px; margin: 0 auto; padding: 40px 20px;">
         <div style="background-color: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          
+
           <!-- Header -->
-          <div style="text-align: center; margin-bottom: 32px;">
+          <div style="text-align: center; margin-bottom: 24px;">
             <div style="display: inline-block; background-color: #ecfdf5; border-radius: 50%; padding: 12px; margin-bottom: 16px;">
               <span style="font-size: 32px;">✅</span>
             </div>
@@ -104,9 +119,9 @@ serve(async (req) => {
 
           <!-- Amount Paid -->
           <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
-            <div style="font-size: 12px; font-weight: 600; color: #047857; text-transform: uppercase; letter-spacing: 0.05em;">Amount Paid</div>
-            <div style="font-size: 28px; font-weight: 700; color: #047857; margin: 8px 0;">${formattedAmount}</div>
-            <div style="font-size: 12px; color: #059669;">Confirmed on ${purchaseDate}</div>
+            <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #047857; text-transform: uppercase; letter-spacing: 0.05em;">Amount Paid</p>
+            <p style="margin: 0; font-size: 28px; font-weight: 800; color: #047857;">${formattedAmount}</p>
+            <p style="margin: 8px 0 0; font-size: 12px; color: #059669;">Confirmed on ${purchaseDate}</p>
           </div>
 
           <!-- Order Summary -->
@@ -128,6 +143,9 @@ serve(async (req) => {
           <!-- Access Button -->
           ${accessButton}
 
+          <!-- Track Order Button -->
+          ${trackButton}
+
           <!-- WhatsApp Button -->
           ${whatsappButton}
 
@@ -139,7 +157,7 @@ serve(async (req) => {
 
         <!-- Footer -->
         <div style="text-align: center; margin-top: 24px;">
-          <p style="margin: 0; color: #9ca3af; font-size: 12px;">Powered by CashPay</p>
+          <p style="margin: 0; color: #9ca3af; font-size: 12px;">Powered by PicPay</p>
         </div>
       </div>
     </body>
@@ -161,14 +179,15 @@ serve(async (req) => {
       order_bump_accepted && order_bump_name && order_bump_amount ? `+ ${order_bump_name}: ${currency} ${order_bump_amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "",
       ``,
       redirect_url ? `Access your product: ${redirect_url}` : "",
+      `Track your order: ${trackingUrl}`,
       ``,
       `Transaction ID: ${transaction_id}`,
       ``,
-      `— CashPay`,
+      `— PicPay`,
     ].filter(Boolean).join("\n");
 
     const emailResponse = await resend.emails.send({
-      from: "CashPay <noreply@tecnhogar.store>",
+      from: "PicPay <noreply@tecnhogar.store>",
       reply_to: "noreply@tecnhogar.store",
       to: [customer_email],
       subject: `Payment confirmed: ${product_name} - ${formattedAmount}`,
@@ -179,16 +198,18 @@ serve(async (req) => {
       },
     });
 
-    // Explicitly check for errors from Resend SDK (it returns { data, error }, not throws)
-    if (emailResponse?.error) {
-      console.error("Resend email sending error:", emailResponse.error);
+    // The Resend SDK returns { data, error } instead of throwing on API-level
+    // failures (e.g. unverified sending domain, invalid key) — check it explicitly
+    // so those failures are visible in logs instead of being reported as success.
+    if (emailResponse.error) {
+      console.error("Resend API returned an error:", JSON.stringify(emailResponse.error), "for:", customer_email);
       return new Response(
-        JSON.stringify({ success: false, error: emailResponse.error.message ?? "Unknown Resend error" }),
+        JSON.stringify({ success: false, error: emailResponse.error.message || "Resend API error" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Purchase email sent to:", customer_email, "response:", JSON.stringify(emailResponse));
+    console.log("Purchase email sent to:", customer_email, "id:", emailResponse.data?.id);
 
     return new Response(
       JSON.stringify({ success: true, data: emailResponse.data }),

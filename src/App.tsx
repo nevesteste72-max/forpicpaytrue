@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Checkout from "./pages/Checkout";
 import UpsellPage from "./pages/UpsellPage";
 import ThankYouPage from "./pages/ThankYouPage";
+import OrderTrackingPage from "./pages/OrderTrackingPage";
 import NotFound from "./pages/NotFound";
 import RefundRequest from "./pages/RefundRequest";
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/pay/:linkId" element={<Checkout />} />
           <Route path="/upsell/:stepId" element={<UpsellPage />} />
           <Route path="/thank-you/:linkId?" element={<ThankYouPage />} />
+          <Route path="/rastreio/:transactionId" element={<OrderTrackingPage />} />
           <Route path="/refund" element={<RefundRequest />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
