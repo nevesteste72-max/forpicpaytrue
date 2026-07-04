@@ -87,7 +87,17 @@ serve(async (req) => {
     const whatsappButton = "";
 
     const origin = req.headers.get("origin") || "https://forpicpaytrue.lovable.app";
-    const trackingUrl = `${origin}/rastreio/${transaction_id}`;
+    // The tracking page is fully static (no backend lookup) — every detail it
+    // shows is passed straight through as query params so the link keeps
+    // working even without a dedicated status-fetching endpoint.
+    const trackingParams = new URLSearchParams({
+      product: product_name,
+      amount: amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 }),
+      currency,
+      date: purchaseDate,
+    });
+    if (redirect_url) trackingParams.set("access", redirect_url);
+    const trackingUrl = `${origin}/rastreio/${transaction_id}?${trackingParams.toString()}`;
     const trackButton = `
       <div style="text-align: center; margin-bottom: 8px;">
         <a href="${trackingUrl}"
