@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: number
+          stripe_publishable_key: string | null
+          stripe_secret_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          stripe_publishable_key?: string | null
+          stripe_secret_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          stripe_publishable_key?: string | null
+          stripe_secret_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       flow_steps: {
         Row: {
           accept_redirect_url: string | null
