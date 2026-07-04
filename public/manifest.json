@@ -1,6 +1,6 @@
 {
-  "name": "Cashpay",
-  "short_name": "Cashpay",
+  "name": "PicPay",
+  "short_name": "PicPay",
   "description": "Plataforma de vendas e pagamentos M-Pesa para empreendedores moçambicanos",
   "start_url": "/",
   "display": "standalone",

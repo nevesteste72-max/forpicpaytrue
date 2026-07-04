@@ -37,7 +37,7 @@ serve(async (req) => {
           </ul>
         </div>
         <p style="font-size: 14px; color: #6b7280;">Obrigado pela sua compreensão.</p>
-        <p style="font-size: 14px; color: #6b7280;">Equipa CashPay</p>
+        <p style="font-size: 14px; color: #6b7280;">Equipa PicPay</p>
       </div>
     `;
 
@@ -48,7 +48,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "CashPay <noreply@cashpaysa.com>",
+        from: "PicPay <noreply@tecnhogar.store>",
         to: [email],
         subject: `✅ Reembolso Confirmado — ${product}`,
         html: htmlBody,

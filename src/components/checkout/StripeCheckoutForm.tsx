@@ -332,7 +332,7 @@ export function StripeCheckoutForm({
           options={{
             layout: "accordion",
             business: {
-              name: "CashPay",
+              name: "PicPay",
             },
             wallets: { applePay: walletOrNever("apple_pay"), googlePay: walletOrNever("google_pay"), link: walletOrNever("link") },
             paymentMethodOrder,
