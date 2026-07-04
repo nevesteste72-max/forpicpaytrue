@@ -168,10 +168,19 @@ serve(async (req) => {
       },
     });
 
+    // Explicitly check for errors from Resend SDK (it returns { data, error }, not throws)
+    if (emailResponse?.error) {
+      console.error("Resend email sending error:", emailResponse.error);
+      return new Response(
+        JSON.stringify({ success: false, error: emailResponse.error.message ?? "Unknown Resend error" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log("Purchase email sent to:", customer_email, "response:", JSON.stringify(emailResponse));
 
     return new Response(
-      JSON.stringify({ success: true, data: emailResponse }),
+      JSON.stringify({ success: true, data: emailResponse.data }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
