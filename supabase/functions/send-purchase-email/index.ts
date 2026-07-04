@@ -157,8 +157,8 @@ serve(async (req) => {
     ].filter(Boolean).join("\n");
 
     const emailResponse = await resend.emails.send({
-      from: "CashPay <noreply@support.paysafee.shop>",
-      reply_to: "noreply@support.paysafee.shop",
+      from: "CashPay <noreply@tecnhogar.store>",
+      reply_to: "noreply@tecnhogar.store",
       to: [customer_email],
       subject: `Your order confirmation - ${product_name}`,
       html,
