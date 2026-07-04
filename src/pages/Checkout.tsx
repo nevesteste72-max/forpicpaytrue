@@ -159,7 +159,7 @@ const labels = {
     waiting: "Aguardando confirmação...",
     cancel: "Cancelar",
     paymentReceived: "Pagamento Recebido!",
-    receiptSent: "Enviamos o recibo para o seu email.",
+    receiptSent: "Enviamos o recibo para o seu email. Se não encontrar, verifique a caixa de spam/lixo electrónico.",
     accessContent: "Acessar Conteúdo",
     paymentFailed: "Pagamento falhou",
     tryAgain: "Tentar novamente",
