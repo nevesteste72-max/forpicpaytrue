@@ -54,6 +54,7 @@ serve(async (req) => {
 
     const displayName = customer_name || customer_email.split("@")[0];
     const formattedAmount = `${currency} ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`;
+    const purchaseDate = new Date().toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Maputo" });
 
     // Build order bump row if applicable
     let orderBumpRow = "";
