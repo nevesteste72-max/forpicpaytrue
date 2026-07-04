@@ -647,6 +647,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_transactions_by_email: {
+        Args: {
+          p_email: string
+        }
+        Returns: {
+          id: string
+          customer_email: string
+          customer_name: string
+          amount: number
+          currency: string
+          payment_link_id: string
+          product_name: string
+          created_at: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user"

@@ -51,13 +51,9 @@ export default function RefundRequest() {
     setLoading(true);
     setError("");
 
-    const { data, error: err } = await supabase
-      .from("transactions")
-      .select("id, customer_email, customer_name, amount, currency, payment_link_id, created_at")
-      .eq("customer_email", email.trim().toLowerCase())
-      .in("status", ["successful", "completed", "success"])
-      .order("created_at", { ascending: false })
-      .limit(20);
+    const { data, error: err } = await supabase.rpc("search_transactions_by_email", {
+      p_email: email.trim().toLowerCase(),
+    });
 
     if (err || !data || data.length === 0) {
       setError("No purchases found with this email. Please check and try again.");
@@ -65,28 +61,7 @@ export default function RefundRequest() {
       return;
     }
 
-    const linkIds = [...new Set(data.map((t) => t.payment_link_id))];
-    const { data: links } = await supabase
-      .from("payment_links")
-      .select("id, product_name, user_id")
-      .in("id", linkIds);
-
-    const linkMap = new Map(links?.map((l) => [l.id, l]) || []);
-
-    const enriched: FoundTransaction[] = data
-      .filter((t) => linkMap.has(t.payment_link_id))
-      .map((t) => ({
-        ...t,
-        product_name: linkMap.get(t.payment_link_id)?.product_name || "Product",
-      }));
-
-    if (enriched.length === 0) {
-      setError("No purchases found with this email.");
-      setLoading(false);
-      return;
-    }
-
-    setTransactions(enriched);
+    setTransactions(data as FoundTransaction[]);
     setStep(1);
     setLoading(false);
   };
