@@ -241,7 +241,7 @@ const labels = {
     waiting: "Esperando confirmación...",
     cancel: "Cancelar",
     paymentReceived: "¡Pago Recibido!",
-    receiptSent: "Enviamos el recibo a su email.",
+    receiptSent: "Enviamos el recibo a su email. Si no lo encuentra, revise su carpeta de spam/correo no deseado.",
     accessContent: "Acceder al Contenido",
     paymentFailed: "Pago Fallido",
     tryAgain: "Intentar de nuevo",
