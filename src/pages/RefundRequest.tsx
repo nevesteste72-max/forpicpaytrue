@@ -38,30 +38,31 @@ interface FoundTransaction {
 export default function RefundRequest() {
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [transactions, setTransactions] = useState<FoundTransaction[]>([]);
   const [selectedTx, setSelectedTx] = useState<FoundTransaction | null>(null);
   const [reason, setReason] = useState("");
   const [reasonDetails, setReasonDetails] = useState("");
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const searchTransactions = async () => {
-    if (!email.trim()) return;
+  const findTransaction = async () => {
+    if (!email.trim() || !transactionId.trim()) return;
     setLoading(true);
     setError("");
 
-    const { data, error: err } = await supabase.rpc("search_transactions_by_email", {
+    const { data, error: err } = await supabase.rpc("get_transaction_for_refund", {
+      p_transaction_id: transactionId.trim(),
       p_email: email.trim().toLowerCase(),
     });
 
     if (err || !data || data.length === 0) {
-      setError("No purchases found with this email. Please check and try again.");
+      setError("We couldn't find a purchase with this email and transaction ID. Please check both and try again.");
       setLoading(false);
       return;
     }
 
-    setTransactions(data as FoundTransaction[]);
+    setSelectedTx(data[0] as FoundTransaction);
     setStep(1);
     setLoading(false);
   };
@@ -161,20 +162,30 @@ export default function RefundRequest() {
             {step === 0 && (
               <Card>
                 <CardContent className="p-6 space-y-5">
-                  <h2 className="text-xl font-semibold">Enter your purchase email</h2>
+                  <h2 className="text-xl font-semibold">Enter your purchase details</h2>
                   <p className="text-sm text-muted-foreground">
-                    Enter the email you used to make the purchase. We will locate your transactions.
+                    Enter the email you used to make the purchase and the transaction ID from your
+                    confirmation email. We will locate your order.
                   </p>
-                  <Input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && searchTransactions()}
-                  />
+                  <div className="space-y-3">
+                    <Input
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Transaction ID (from your confirmation email)"
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && findTransaction()}
+                      className="font-mono text-sm"
+                    />
+                  </div>
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <div className="flex justify-end">
-                    <Button onClick={searchTransactions} disabled={loading || !email.trim()}>
+                    <Button onClick={findTransaction} disabled={loading || !email.trim() || !transactionId.trim()}>
                       {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                       Next <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
@@ -183,39 +194,23 @@ export default function RefundRequest() {
               </Card>
             )}
 
-            {step === 1 && (
+            {step === 1 && selectedTx && (
               <Card>
                 <CardContent className="p-6 space-y-5">
-                  <h2 className="text-xl font-semibold">Select the product and reason</h2>
+                  <h2 className="text-xl font-semibold">Confirm your purchase and pick a reason</h2>
 
-                  {/* Product selection */}
-                  <div>
-                    <p className="text-sm font-medium mb-2">Product *</p>
-                    <div className="space-y-2">
-                      {transactions.map((tx) => (
-                        <button
-                          key={tx.id}
-                          onClick={() => setSelectedTx(tx)}
-                          className={cn(
-                            "w-full text-left p-3 rounded-lg border transition-all",
-                            selectedTx?.id === tx.id
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:border-primary/50"
-                          )}
-                        >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-medium text-sm">{tx.product_name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(tx.created_at).toLocaleDateString("en-US")}
-                              </p>
-                            </div>
-                            <Badge variant="outline">
-                              {tx.currency} {tx.amount.toFixed(2)}
-                            </Badge>
-                          </div>
-                        </button>
-                      ))}
+                  {/* Found purchase */}
+                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-sm">{selectedTx.product_name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(selectedTx.created_at).toLocaleDateString("en-US")}
+                        </p>
+                      </div>
+                      <Badge variant="outline">
+                        {selectedTx.currency} {selectedTx.amount.toFixed(2)}
+                      </Badge>
                     </div>
                   </div>
 

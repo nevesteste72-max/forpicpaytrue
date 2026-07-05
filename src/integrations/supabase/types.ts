@@ -647,8 +647,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      search_transactions_by_email: {
+      get_transaction_for_refund: {
         Args: {
+          p_transaction_id: string
           p_email: string
         }
         Returns: {
