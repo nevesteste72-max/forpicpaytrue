@@ -133,6 +133,13 @@ export type Database = {
             referencedRelation: "payment_links"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "flow_steps_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payment_links: {
@@ -300,6 +307,13 @@ export type Database = {
             referencedRelation: "payment_links"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payment_links_order_bump_id_fkey"
+            columns: ["order_bump_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -387,6 +401,13 @@ export type Database = {
             columns: ["payment_link_id"]
             isOneToOne: false
             referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_requests_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links_public"
             referencedColumns: ["id"]
           },
           {
@@ -485,6 +506,13 @@ export type Database = {
             columns: ["payment_link_id"]
             isOneToOne: false
             referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links_public"
             referencedColumns: ["id"]
           },
         ]
@@ -640,10 +668,122 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      payment_links_public: {
+        Row: {
+          amount: number | null
+          checkout_banner_url: string | null
+          checkout_language: string | null
+          checkout_timer_minutes: number | null
+          created_at: string | null
+          currency: string | null
+          facebook_pixel_id: string | null
+          id: string | null
+          is_active: boolean | null
+          logo_url: string | null
+          order_bump_2_description: string | null
+          order_bump_2_name: string | null
+          order_bump_2_price: number | null
+          order_bump_3_description: string | null
+          order_bump_3_name: string | null
+          order_bump_3_price: number | null
+          order_bump_description: string | null
+          order_bump_name: string | null
+          order_bump_price: number | null
+          product_description: string | null
+          product_name: string | null
+          product_type: string | null
+          recovery_cta_text: string | null
+          recovery_discount_percent: number | null
+          recovery_enabled: boolean | null
+          recovery_headline: string | null
+          recovery_message: string | null
+          recovery_redirect_url: string | null
+          redirect_url: string | null
+          show_trust_badges: boolean | null
+          stripe_payment_methods: string[] | null
+          thank_you_message: string | null
+          thank_you_title: string | null
+          thank_you_video_url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          checkout_banner_url?: string | null
+          checkout_language?: string | null
+          checkout_timer_minutes?: number | null
+          created_at?: string | null
+          currency?: string | null
+          facebook_pixel_id?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          order_bump_2_description?: string | null
+          order_bump_2_name?: string | null
+          order_bump_2_price?: number | null
+          order_bump_3_description?: string | null
+          order_bump_3_name?: string | null
+          order_bump_3_price?: number | null
+          order_bump_description?: string | null
+          order_bump_name?: string | null
+          order_bump_price?: number | null
+          product_description?: string | null
+          product_name?: string | null
+          product_type?: string | null
+          recovery_cta_text?: string | null
+          recovery_discount_percent?: number | null
+          recovery_enabled?: boolean | null
+          recovery_headline?: string | null
+          recovery_message?: string | null
+          recovery_redirect_url?: string | null
+          redirect_url?: string | null
+          show_trust_badges?: boolean | null
+          stripe_payment_methods?: string[] | null
+          thank_you_message?: string | null
+          thank_you_title?: string | null
+          thank_you_video_url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          checkout_banner_url?: string | null
+          checkout_language?: string | null
+          checkout_timer_minutes?: number | null
+          created_at?: string | null
+          currency?: string | null
+          facebook_pixel_id?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          order_bump_2_description?: string | null
+          order_bump_2_name?: string | null
+          order_bump_2_price?: number | null
+          order_bump_3_description?: string | null
+          order_bump_3_name?: string | null
+          order_bump_3_price?: number | null
+          order_bump_description?: string | null
+          order_bump_name?: string | null
+          order_bump_price?: number | null
+          product_description?: string | null
+          product_name?: string | null
+          product_type?: string | null
+          recovery_cta_text?: string | null
+          recovery_discount_percent?: number | null
+          recovery_enabled?: boolean | null
+          recovery_headline?: string | null
+          recovery_message?: string | null
+          recovery_redirect_url?: string | null
+          redirect_url?: string | null
+          show_trust_badges?: boolean | null
+          stripe_payment_methods?: string[] | null
+          thank_you_message?: string | null
+          thank_you_title?: string | null
+          thank_you_video_url?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      get_owner_facebook_token: { Args: { _link_id: string }; Returns: string }
       get_transaction_for_refund: {
         Args: { p_email: string; p_transaction_id: string }
         Returns: {
