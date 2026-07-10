@@ -43,10 +43,10 @@ serve(async (req) => {
       );
     }
 
-    // Fetch parent transaction to get saved payment method
+    // Fetch parent transaction and require it to be a completed sale.
     const { data: parentTx, error: parentErr } = await supabaseAdmin
       .from("transactions")
-      .select("stripe_customer_id, stripe_payment_method_id, customer_email, customer_name, customer_phone, payment_link_id, currency")
+      .select("stripe_customer_id, stripe_payment_method_id, customer_email, customer_name, customer_phone, payment_link_id, currency, status")
       .eq("id", parent_transaction_id)
       .single();
 
@@ -54,6 +54,13 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ success: false, error: "Parent transaction not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (parentTx.status !== "successful") {
+      return new Response(
+        JSON.stringify({ success: false, error: "Parent transaction is not in a successful state" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -77,6 +84,17 @@ serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // The flow step MUST belong to the same payment link as the parent transaction —
+    // otherwise anyone with a leaked transaction id could trigger charges from
+    // arbitrary upsell flows on someone else's saved card.
+    if (step.payment_link_id !== parentTx.payment_link_id) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Flow step does not belong to this transaction" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
 
     const stripeAmount = Math.round(Number(step.amount) * 100);
     const currency = (parentTx.currency || "ZAR").toLowerCase();

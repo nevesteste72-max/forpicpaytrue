@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,17 +12,60 @@ serve(async (req) => {
   }
 
   try {
-    const { email, name, product, amount, currency } = await req.json();
+    const { refund_request_id } = await req.json();
 
+    if (!refund_request_id || typeof refund_request_id !== "string") {
+      return new Response(JSON.stringify({ error: "refund_request_id is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: "RESEND_API_KEY not configured" }), {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !RESEND_API_KEY) {
+      return new Response(JSON.stringify({ error: "Server not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const customerName = name || "Cliente";
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Look up the refund request server-side. Only send if it is genuinely approved.
+    const { data: refund, error: refundErr } = await supabaseAdmin
+      .from("refund_requests")
+      .select("id, status, customer_email, customer_name, product_name, amount, currency")
+      .eq("id", refund_request_id)
+      .maybeSingle();
+
+    if (refundErr || !refund) {
+      return new Response(JSON.stringify({ error: "Refund request not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (refund.status !== "approved") {
+      return new Response(JSON.stringify({ error: "Refund request is not approved" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const email = refund.customer_email;
+    const customerName = refund.customer_name || "Cliente";
+    const product = refund.product_name || "Produto";
+    const amount = refund.amount;
+    const currency = refund.currency || "";
+
+    if (!email) {
+      return new Response(JSON.stringify({ error: "Refund request has no recipient email" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -63,7 +107,8 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("Error sending refund email:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
