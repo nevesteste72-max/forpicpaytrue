@@ -294,38 +294,52 @@ serve(async (req) => {
       );
     }
 
-    // Determine the transaction status
-    const resolvedStatus = payment_status === "failed" ? "failed"
-      : payment_status === "pending" ? "pending"
-      : "successful";
-
+    // Determine the transaction status by ALWAYS retrieving the PaymentIntent from Stripe.
+    // Never trust the client-supplied `payment_status` value.
+    let resolvedStatus: "successful" | "failed" | "pending" = "pending";
     const updateData: Record<string, unknown> = {
-      status: resolvedStatus,
       stripe_payment_intent_id: payment_intent_id || null,
     };
     if (customer_email) updateData.customer_email = customer_email;
 
-    // Retrieve the PaymentIntent from Stripe to get payment method for one-click upsell
-    if (payment_intent_id && STRIPE_SECRET_KEY) {
-      try {
-        const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-        const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
-        const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
-        if (pi.payment_method) {
-          updateData.stripe_payment_method_id = typeof pi.payment_method === "string" 
-            ? pi.payment_method 
-            : pi.payment_method.id;
-        }
-        if (pi.customer) {
-          updateData.stripe_customer_id = typeof pi.customer === "string"
-            ? pi.customer
-            : pi.customer.id;
-        }
-        console.log("Captured payment method:", updateData.stripe_payment_method_id, "customer:", updateData.stripe_customer_id);
-      } catch (stripeErr) {
-        console.error("Failed to retrieve PaymentIntent from Stripe:", stripeErr);
-      }
+    if (!payment_intent_id || !STRIPE_SECRET_KEY) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing payment_intent_id or Stripe not configured" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+
+    try {
+      const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+      const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
+      const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
+
+      // Derive status ONLY from Stripe's authoritative PaymentIntent state.
+      if (pi.status === "succeeded") resolvedStatus = "successful";
+      else if (pi.status === "canceled" || pi.status === "requires_payment_method") resolvedStatus = "failed";
+      else resolvedStatus = "pending";
+
+      if (pi.payment_method) {
+        updateData.stripe_payment_method_id = typeof pi.payment_method === "string"
+          ? pi.payment_method
+          : pi.payment_method.id;
+      }
+      if (pi.customer) {
+        updateData.stripe_customer_id = typeof pi.customer === "string"
+          ? pi.customer
+          : pi.customer.id;
+      }
+      console.log("Stripe PI status:", pi.status, "-> resolved:", resolvedStatus);
+    } catch (stripeErr) {
+      console.error("Failed to retrieve PaymentIntent from Stripe:", stripeErr);
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to verify payment with Stripe" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    updateData.status = resolvedStatus;
+
 
     const { error } = await supabaseAdmin
       .from("transactions")
