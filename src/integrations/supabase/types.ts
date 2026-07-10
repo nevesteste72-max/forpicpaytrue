@@ -640,28 +640,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_owner_facebook_token: { Args: { _link_id: string }; Returns: string }
+      get_transaction_for_refund: {
+        Args: { p_email: string; p_transaction_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string
+          customer_name: string
+          id: string
+          payment_link_id: string
+          product_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
-      }
-      get_transaction_for_refund: {
-        Args: {
-          p_transaction_id: string
-          p_email: string
-        }
-        Returns: {
-          id: string
-          customer_email: string
-          customer_name: string
-          amount: number
-          currency: string
-          payment_link_id: string
-          product_name: string
-          created_at: string
-        }[]
       }
     }
     Enums: {
