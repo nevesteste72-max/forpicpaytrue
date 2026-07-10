@@ -44,6 +44,32 @@ serve(async (req) => {
   }
 
   try {
+    // Require a shared secret so only the configured Evolution webhook can post here.
+    // Configure Evolution to send this header (or ?secret=... query param) with the value
+    // of the WHATSAPP_WEBHOOK_SECRET environment secret.
+    const WHATSAPP_WEBHOOK_SECRET = Deno.env.get("WHATSAPP_WEBHOOK_SECRET");
+    if (WHATSAPP_WEBHOOK_SECRET) {
+      const providedSecret =
+        req.headers.get("x-webhook-secret") ||
+        req.headers.get("x-evolution-webhook-secret") ||
+        new URL(req.url).searchParams.get("secret") ||
+        "";
+      if (providedSecret !== WHATSAPP_WEBHOOK_SECRET) {
+        console.warn("Rejected whatsapp-webhook call: missing or invalid shared secret");
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      console.error("WHATSAPP_WEBHOOK_SECRET is not configured; rejecting inbound webhook.");
+      return new Response(JSON.stringify({ error: "Webhook not configured" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const EVOLUTION_API_URL = Deno.env.get("EVOLUTION_API_URL");
