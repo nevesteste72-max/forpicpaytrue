@@ -7,32 +7,41 @@ const translations = {
   pt: {
     title: "Pedido Confirmado",
     subtitle: "O seu pagamento foi recebido e o seu pedido está a ser processado.",
+    subtitlePhysical: "O seu pagamento foi recebido e o seu pedido está a ser preparado para envio.",
     steps: ["Pedido Criado", "Pagamento Confirmado", "Em Processamento"],
+    stepsPhysical: ["Pedido Criado", "Pagamento Confirmado", "Em Preparação"],
     orderDate: "Data do pedido",
     amountPaid: "Valor Pago",
     order: "Pedido",
     accessProduct: "Acessar Produto",
     footerNote: "Vamos entrar em contacto assim que o seu pedido for concluído. Guarde este link para consultar o estado do seu pedido quando quiser.",
+    footerNotePhysical: "Vamos entrar em contacto assim que o seu pedido for enviado. Guarde este link para consultar o estado do seu pedido quando quiser.",
   },
   en: {
     title: "Order Confirmed",
     subtitle: "Your payment was received and your order is being processed.",
+    subtitlePhysical: "Your payment was received and your order is being prepared for shipping.",
     steps: ["Order Created", "Payment Confirmed", "Processing"],
+    stepsPhysical: ["Order Created", "Payment Confirmed", "Preparing"],
     orderDate: "Order date",
     amountPaid: "Amount Paid",
     order: "Order",
     accessProduct: "Access Product",
     footerNote: "We'll reach out as soon as your order is complete. Keep this link to check your order status anytime.",
+    footerNotePhysical: "We'll reach out as soon as your order ships. Keep this link to check your order status anytime.",
   },
   es: {
     title: "Pedido Confirmado",
     subtitle: "Su pago fue recibido y su pedido está siendo procesado.",
+    subtitlePhysical: "Su pago fue recibido y su pedido está siendo preparado para el envío.",
     steps: ["Pedido Creado", "Pago Confirmado", "En Procesamiento"],
+    stepsPhysical: ["Pedido Creado", "Pago Confirmado", "En Preparación"],
     orderDate: "Fecha del pedido",
     amountPaid: "Monto Pagado",
     order: "Pedido",
     accessProduct: "Acceder al Producto",
     footerNote: "Nos pondremos en contacto en cuanto su pedido esté completo. Guarde este enlace para consultar el estado de su pedido cuando quiera.",
+    footerNotePhysical: "Nos pondremos en contacto en cuanto su pedido sea enviado. Guarde este enlace para consultar el estado de su pedido cuando quiera.",
   },
 } as const;
 
@@ -47,9 +56,13 @@ export default function OrderTrackingPage() {
   const currency = searchParams.get("currency") || "";
   const date = searchParams.get("date");
   const redirectUrl = searchParams.get("access");
+  const isPhysical = searchParams.get("product_type") === "physical";
   const langParam = searchParams.get("lang");
   const lang: Lang = langParam && langParam in translations ? (langParam as Lang) : "pt";
   const t = translations[lang];
+  const subtitle = isPhysical ? t.subtitlePhysical : t.subtitle;
+  const steps = isPhysical ? t.stepsPhysical : t.steps;
+  const footerNote = isPhysical ? t.footerNotePhysical : t.footerNote;
 
   return (
     <div className="min-h-screen bg-muted flex items-center justify-center p-4">
@@ -61,7 +74,7 @@ export default function OrderTrackingPage() {
               <CheckCircle2 className="w-10 h-10 text-success" />
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">{t.title}</h1>
-            <p className="text-muted-foreground text-sm">{t.subtitle}</p>
+            <p className="text-muted-foreground text-sm">{subtitle}</p>
           </div>
 
           <div className="p-6 md:p-8 space-y-6">
@@ -71,8 +84,8 @@ export default function OrderTrackingPage() {
             <div className="flex items-start justify-between relative px-2">
               <div className="absolute top-4 left-8 right-8 h-0.5 bg-border" />
               <div className="absolute top-4 left-8 h-0.5 bg-success" style={{ width: "calc(100% - 4rem)" }} />
-              {t.steps.map((label, i) => {
-                const isLast = i === t.steps.length - 1;
+              {steps.map((label, i) => {
+                const isLast = i === steps.length - 1;
                 return (
                   <div key={label} className="relative z-10 flex flex-col items-center gap-2 flex-1">
                     <div
@@ -117,7 +130,7 @@ export default function OrderTrackingPage() {
               )}
             </div>
 
-            <p className="text-xs text-muted-foreground text-center">{t.footerNote}</p>
+            <p className="text-xs text-muted-foreground text-center">{footerNote}</p>
 
             {redirectUrl && (
               <Button

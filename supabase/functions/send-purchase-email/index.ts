@@ -104,8 +104,11 @@ serve(async (req) => {
       amount: amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 }),
       currency,
       date: purchaseDate,
+      product_type: isPhysical ? "physical" : "digital",
     });
-    if (redirect_url) trackingParams.set("access", redirect_url);
+    // Physical products have nothing to "access" — only digital products carry
+    // the deliverable link through to the tracking page.
+    if (!isPhysical && redirect_url) trackingParams.set("access", redirect_url);
     const trackingUrl = `${origin}/rastreio/${transaction_id}?${trackingParams.toString()}`;
     const trackButton = `
       <div style="text-align: center; margin-bottom: 8px;">
