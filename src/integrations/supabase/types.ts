@@ -647,22 +647,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      get_transaction_for_refund: {
-        Args: {
-          p_transaction_id: string
-          p_email: string
-        }
-        Returns: {
-          id: string
-          customer_email: string
-          customer_name: string
-          amount: number
-          currency: string
-          payment_link_id: string
-          product_name: string
-          created_at: string
-        }[]
-      }
     }
     Enums: {
       app_role: "admin" | "user"
