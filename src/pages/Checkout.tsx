@@ -159,7 +159,8 @@ const labels = {
     waiting: "Aguardando confirmação...",
     cancel: "Cancelar",
     paymentReceived: "Pagamento Recebido!",
-    receiptSent: "Enviamos o recibo para o seu email. Se não encontrar, verifique a caixa de spam/lixo electrónico.",
+    receiptSent: "Enviamos o recibo para o seu email.",
+    receiptSentSpamNotice: "Não recebeu? Verifique a pasta de Spam ou a aba Promoções do seu email.",
     accessContent: "Acessar Conteúdo",
     paymentFailed: "Pagamento falhou",
     tryAgain: "Tentar novamente",
@@ -200,7 +201,8 @@ const labels = {
     waiting: "Waiting for confirmation...",
     cancel: "Cancel",
     paymentReceived: "Payment Received!",
-    receiptSent: "We sent the receipt to your email. If you don't see it, please check your spam/junk folder.",
+    receiptSent: "We sent the receipt to your email.",
+    receiptSentSpamNotice: "Didn't get it? Check your Spam folder or the Promotions tab in your inbox.",
     accessContent: "Access Content",
     paymentFailed: "Payment Failed",
     tryAgain: "Try Again",
@@ -241,7 +243,8 @@ const labels = {
     waiting: "Esperando confirmación...",
     cancel: "Cancelar",
     paymentReceived: "¡Pago Recibido!",
-    receiptSent: "Enviamos el recibo a su email. Si no lo encuentra, revise su carpeta de spam/correo no deseado.",
+    receiptSent: "Enviamos el recibo a su email.",
+    receiptSentSpamNotice: "¿No lo recibió? Revise su carpeta de Spam o la pestaña de Promociones de su correo.",
     accessContent: "Acceder al Contenido",
     paymentFailed: "Pago Fallido",
     tryAgain: "Intentar de nuevo",
@@ -825,7 +828,11 @@ export default function Checkout() {
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h2 className="text-xl font-bold mb-2 text-foreground">{t.paymentReceived}</h2>
-              <p className="text-muted-foreground mb-6">{t.receiptSent}</p>
+              <p className="text-muted-foreground mb-3">{t.receiptSent}</p>
+              <div className="flex items-start gap-2 bg-[hsl(45,90%,55%)]/10 border border-[hsl(45,90%,55%)]/30 rounded-xl p-3 mb-6 text-left">
+                <Mail className="w-4 h-4 text-[hsl(38,80%,40%)] shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-[hsl(38,80%,35%)]">{t.receiptSentSpamNotice}</p>
+              </div>
               {link?.redirect_url && (
                 <Button
                   onClick={() => { window.location.href = link.redirect_url!; }}

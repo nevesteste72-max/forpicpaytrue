@@ -180,7 +180,6 @@ serve(async (req) => {
           <!-- Transaction ID -->
           <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
             <p style="margin: 0; color: #9ca3af; font-size: 12px;">Transaction ID: ${transaction_id}</p>
-            <p style="margin: 8px 0 0; color: #9ca3af; font-size: 11px;">Didn't get an email from us before? Check your spam/promotions folder and mark it as "not spam" so future updates land in your inbox.</p>
           </div>
         </div>
 
@@ -213,8 +212,6 @@ serve(async (req) => {
       isPhysical ? `Track your order: ${trackingUrl}` : "",
       ``,
       `Transaction ID: ${transaction_id}`,
-      ``,
-      `Didn't get an email from us before? Check your spam/promotions folder and mark it as "not spam" so future updates land in your inbox.`,
       ``,
       `— PicPay`,
     ].filter(Boolean).join("\n");
