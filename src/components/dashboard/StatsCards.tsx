@@ -1,4 +1,4 @@
-import { DollarSign, ShoppingCart, TrendingUp } from "lucide-react";
+import { ShoppingCart, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type CurrencyView = "MZN" | "ZAR" | "USD" | "EUR" | "NGN";
@@ -14,6 +14,10 @@ interface StatsCardsProps {
   conversionRate: number;
   currencyView: CurrencyView;
   onCurrencyViewChange: (c: CurrencyView) => void;
+  /** Revenue for the last few periods (oldest first) in the active currency, for the mini trend */
+  sparklineData: number[];
+  /** % change in completed orders vs. the immediately preceding period; null when not applicable (e.g. "Máximo") */
+  ordersChangePercent: number | null;
 }
 
 export function StatsCards({
@@ -27,7 +31,11 @@ export function StatsCards({
   conversionRate,
   currencyView,
   onCurrencyViewChange,
+  sparklineData,
+  ordersChangePercent,
 }: StatsCardsProps) {
+  const maxSpark = Math.max(1, ...sparklineData);
+  const hasSparkData = sparklineData.some((v) => v > 0);
   const displayRevenue =
     currencyView === "MZN"
       ? `${revenueMZN.toLocaleString("pt-MZ")} MZN`
@@ -71,17 +79,26 @@ export function StatsCards({
             ))}
           </div>
         </div>
-        {/* Mini bar chart */}
+        {/* Mini trend — real revenue for the last periods, not decorative */}
         <div className="mt-5 md:mt-6 h-8 flex items-end gap-1">
-          <div className="w-full bg-muted/50 h-full rounded-sm flex items-end gap-0.5 px-1 pb-0.5">
-            <div className="flex-1 bg-border rounded-[1px] h-[40%]" />
-            <div className="flex-1 bg-border rounded-[1px] h-[70%]" />
-            <div className="flex-1 bg-border rounded-[1px] h-[50%]" />
-            <div className="flex-1 bg-border rounded-[1px] h-[80%]" />
-            <div className="flex-1 bg-border rounded-[1px] h-[60%]" />
-            <div className="flex-1 bg-border rounded-[1px] h-[90%]" />
-            <div className="flex-1 bg-foreground rounded-[1px] h-[75%]" />
-          </div>
+          {hasSparkData ? (
+            <div className="w-full bg-muted/50 h-full rounded-sm flex items-end gap-0.5 px-1 pb-0.5">
+              {sparklineData.map((v, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex-1 rounded-[1px] transition-all",
+                    i === sparklineData.length - 1 ? "bg-foreground" : "bg-border"
+                  )}
+                  style={{ height: `${Math.max(8, Math.round((v / maxSpark) * 100))}%` }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="w-full h-full rounded-sm bg-muted/30 flex items-center px-2">
+              <span className="text-[10px] text-muted-foreground">Sem vendas neste período</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -103,15 +120,22 @@ export function StatsCards({
             <ShoppingCart className="w-5 h-5" />
           </div>
         </div>
-        {/* Progress bar */}
+        {/* Real comparison vs. the previous equivalent period */}
         <div className="mt-6 md:mt-8">
-          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-foreground rounded-full transition-all" style={{ width: `${Math.min(conversionRate * 10, 100)}%` }} />
-          </div>
-          <p className="text-[10px] md:text-[11px] text-muted-foreground mt-2 flex justify-between">
-            <span>Meta mensal</span>
-            <span className="text-foreground font-medium">{Math.min(Math.round(conversionRate * 10), 100)}%</span>
-          </p>
+          {ordersChangePercent === null ? (
+            <p className="text-[10px] md:text-[11px] text-muted-foreground">
+              {totalOrders} venda{totalOrders !== 1 ? "s" : ""} no total
+            </p>
+          ) : (
+            <p className={cn(
+              "text-[10px] md:text-[11px] font-medium flex items-center gap-1",
+              ordersChangePercent > 0 ? "text-[hsl(145,60%,35%)]" : ordersChangePercent < 0 ? "text-destructive" : "text-muted-foreground"
+            )}>
+              {ordersChangePercent > 0 ? <TrendingUp className="w-3 h-3" /> : ordersChangePercent < 0 ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+              {ordersChangePercent > 0 ? "+" : ""}{Math.round(ordersChangePercent)}%
+              <span className="text-muted-foreground font-normal">vs. período anterior</span>
+            </p>
+          )}
         </div>
       </div>
 

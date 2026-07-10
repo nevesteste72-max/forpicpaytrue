@@ -199,6 +199,24 @@ export default function Dashboard() {
   const conversionRate =
     filteredTransactions.length > 0 ? (completedTx.length / filteredTransactions.length) * 100 : 0;
 
+  // Compare orders against the immediately preceding period of the same length
+  // (e.g. "Hoje" vs yesterday, "Semana" vs the week before) so the summary shows
+  // real movement instead of a made-up "monthly goal".
+  const ordersChangePercent = useMemo(() => {
+    if (dateFilter === "all") return null;
+    const range = getDateRange(dateFilter, customRange);
+    const durationMs = range.to.getTime() - range.from.getTime();
+    const prevFrom = new Date(range.from.getTime() - durationMs - 1);
+    const prevTo = new Date(range.from.getTime() - 1);
+    const prevOrders = transactions.filter((t) => {
+      const d = new Date(t.created_at);
+      const isCompleted = t.status === "completed" || t.status === "success" || t.status === "successful";
+      return isCompleted && d >= prevFrom && d <= prevTo;
+    }).length;
+    if (prevOrders === 0) return totalOrders > 0 ? 100 : 0;
+    return ((totalOrders - prevOrders) / prevOrders) * 100;
+  }, [transactions, dateFilter, customRange, totalOrders]);
+
   const getChartData = () => {
     const range = getDateRange(dateFilter, customRange);
     const from = range.from;
@@ -544,7 +562,10 @@ export default function Dashboard() {
             onWithdrawalCreated={fetchData}
           />
         );
-      default:
+      default: {
+        const chartData = getChartData();
+        const revenueKey = { MZN: "revenueMZN", ZAR: "revenueZAR", USD: "revenueUSD", EUR: "revenueEUR", NGN: "revenueNGN" }[currencyView] as keyof typeof chartData[number];
+        const sparklineData = chartData.slice(-7).map((d) => Number(d[revenueKey] || 0));
         return (
           <div className="space-y-6 md:space-y-8">
             {/* Mobile date filter */}
@@ -567,12 +588,14 @@ export default function Dashboard() {
               conversionRate={conversionRate}
               currencyView={currencyView}
               onCurrencyViewChange={setCurrencyView}
+              sparklineData={sparklineData}
+              ordersChangePercent={ordersChangePercent}
             />
             {/* Chart + Activity Panel */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="lg:col-span-2">
                 <RevenueChart
-                  data={getChartData()}
+                  data={chartData}
                   currencyView={currencyView}
                 />
               </div>
@@ -582,6 +605,7 @@ export default function Dashboard() {
             </div>
           </div>
         );
+      }
     }
   };
 
