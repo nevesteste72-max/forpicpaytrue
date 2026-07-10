@@ -73,13 +73,10 @@ export function RefundsView() {
         if (refund) {
           await supabase.functions.invoke("send-refund-email", {
             body: {
-              email: refund.customer_email,
-              name: refund.customer_name,
-              product: refund.product_name,
-              amount: refund.amount,
-              currency: refund.currency,
+              refund_request_id: id,
             },
           });
+
         }
       }
 
