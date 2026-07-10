@@ -784,7 +784,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_owner_facebook_token: { Args: { _link_id: string }; Returns: string }
       get_transaction_for_refund: {
         Args: { p_email: string; p_transaction_id: string }
         Returns: {
