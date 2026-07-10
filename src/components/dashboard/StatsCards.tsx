@@ -1,12 +1,14 @@
 import { DollarSign, ShoppingCart, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type CurrencyView = "MZN" | "ZAR" | "USD";
+type CurrencyView = "MZN" | "ZAR" | "USD" | "EUR" | "NGN";
 
 interface StatsCardsProps {
   revenueMZN: number;
   revenueZAR: number;
   revenueUSD: number;
+  revenueEUR: number;
+  revenueNGN: number;
   totalOrders: number;
   pendingOrders: number;
   conversionRate: number;
@@ -18,6 +20,8 @@ export function StatsCards({
   revenueMZN,
   revenueZAR,
   revenueUSD,
+  revenueEUR,
+  revenueNGN,
   totalOrders,
   pendingOrders,
   conversionRate,
@@ -29,7 +33,11 @@ export function StatsCards({
       ? `${revenueMZN.toLocaleString("pt-MZ")} MZN`
       : currencyView === "ZAR"
         ? `R ${revenueZAR.toLocaleString("en-ZA")}`
-        : `$ ${revenueUSD.toLocaleString("en-US")}`;
+        : currencyView === "USD"
+          ? `$ ${revenueUSD.toLocaleString("en-US")}`
+          : currencyView === "NGN"
+            ? `₦ ${revenueNGN.toLocaleString("en-NG")}`
+            : `€ ${revenueEUR.toLocaleString("de-DE")}`;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
@@ -47,7 +55,7 @@ export function StatsCards({
           </div>
           {/* Currency Switcher */}
           <div className="flex items-center gap-0.5 bg-muted/60 p-0.5 rounded-lg border border-border">
-            {(["MZN", "ZAR", "USD"] as CurrencyView[]).map((c) => (
+            {(["EUR", "MZN", "ZAR", "USD", "NGN"] as CurrencyView[]).map((c) => (
               <button
                 key={c}
                 onClick={() => onCurrencyViewChange(c)}

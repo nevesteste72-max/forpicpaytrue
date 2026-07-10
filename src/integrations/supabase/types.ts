@@ -172,6 +172,7 @@ export type Database = {
           order_bump_price: number | null
           product_description: string | null
           product_name: string
+          product_type: string
           recovery_cta_text: string | null
           recovery_discount_percent: number | null
           recovery_enabled: boolean
@@ -223,6 +224,7 @@ export type Database = {
           order_bump_price?: number | null
           product_description?: string | null
           product_name: string
+          product_type?: string
           recovery_cta_text?: string | null
           recovery_discount_percent?: number | null
           recovery_enabled?: boolean
@@ -274,6 +276,7 @@ export type Database = {
           order_bump_price?: number | null
           product_description?: string | null
           product_name?: string
+          product_type?: string
           recovery_cta_text?: string | null
           recovery_discount_percent?: number | null
           recovery_enabled?: boolean

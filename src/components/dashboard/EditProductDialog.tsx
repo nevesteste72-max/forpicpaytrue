@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap } from "lucide-react";
+import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap, Truck, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +38,7 @@ interface Product {
   recovery_message?: string | null;
   recovery_cta_text?: string | null;
   recovery_redirect_url?: string | null;
+  product_type?: string;
 }
 
 const STRIPE_METHODS = [
@@ -85,6 +86,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [recoveryCtaText, setRecoveryCtaText] = useState("");
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
+  const [productType, setProductType] = useState("digital");
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -118,6 +120,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setRecoveryCtaText(product.recovery_cta_text || "");
       setRecoveryRedirectUrl(product.recovery_redirect_url || "");
       setShowTrustBadges((product as any).show_trust_badges !== false);
+      setProductType(product.product_type || "digital");
       setImagePreview(product.logo_url || null);
       setBannerPreview(product.checkout_banner_url || null);
       setImageFile(null);
@@ -190,6 +193,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         recovery_cta_text: recoveryCtaText || null,
         recovery_redirect_url: recoveryRedirectUrl || null,
         show_trust_badges: showTrustBadges,
+        product_type: productType,
       };
 
       // Logo: upload novo, ou setar null se removido
@@ -265,6 +269,32 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
 
             {/* ABA: PRODUTO — identidade, preço, idioma, pagamento */}
             <TabsContent value="produto" className="space-y-4 mt-4">
+              {/* Product Type */}
+              <div className="space-y-2">
+                <Label>Tipo de Produto</Label>
+                <p className="text-xs text-muted-foreground">
+                  Define o e-mail enviado ao cliente após o pagamento
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProductType("digital")}
+                    className={cn("p-3 rounded-xl border-2 flex flex-col items-center gap-1 text-center transition-all text-sm font-semibold", productType === "digital" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}
+                  >
+                    <Download className="w-4 h-4" />
+                    Digital
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProductType("physical")}
+                    className={cn("p-3 rounded-xl border-2 flex flex-col items-center gap-1 text-center transition-all text-sm font-semibold", productType === "physical" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}
+                  >
+                    <Truck className="w-4 h-4" />
+                    Físico
+                  </button>
+                </div>
+              </div>
+
               {/* Image */}
               <div className="space-y-2">
                 <Label>Imagem</Label>

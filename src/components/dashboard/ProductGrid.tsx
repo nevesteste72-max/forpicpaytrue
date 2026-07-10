@@ -29,6 +29,7 @@ interface Product {
   currency: string;
   checkout_language: string;
   stripe_payment_methods: string[];
+  product_type?: string;
 }
 
 interface ProductGridProps {
@@ -106,6 +107,13 @@ export function ProductGrid({ products, allProducts, onDelete, onCreateClick, on
                   {product.currency === "ZAR" ? "Stripe" : "M-Pesa"}
                 </span>
               </div>
+              <span className={`inline-block mb-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                product.product_type === "physical"
+                  ? "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                  : "bg-violet-50 text-violet-600 border-violet-100 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20"
+              }`}>
+                {product.product_type === "physical" ? "Físico" : "Digital"}
+              </span>
               <span className="text-xl font-semibold text-foreground tracking-tight">
                 {Number(product.amount).toLocaleString(product.currency === "ZAR" ? "en-ZA" : "pt-MZ")}{" "}
                 <span className="text-xs font-normal text-muted-foreground">{product.currency || "MZN"}</span>

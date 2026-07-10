@@ -61,6 +61,7 @@ interface Product {
   thank_you_title: string | null;
   thank_you_message: string | null;
   thank_you_video_url: string | null;
+  product_type: string;
 }
 
 interface Transaction {
@@ -115,7 +116,7 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [dateFilter, setDateFilter] = useState<DateFilterOption>("all");
-  const [currencyView, setCurrencyView] = useState<"MZN" | "ZAR" | "USD">("MZN");
+  const [currencyView, setCurrencyView] = useState<"MZN" | "ZAR" | "USD" | "EUR" | "NGN">("EUR");
   const [customRange, setCustomRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
@@ -182,6 +183,8 @@ export default function Dashboard() {
   const completedMZN = completedTx.filter((t) => (t.currency || "MZN") === "MZN");
   const completedZAR = completedTx.filter((t) => t.currency === "ZAR");
   const completedUSD = completedTx.filter((t) => t.currency === "USD");
+  const completedEUR = completedTx.filter((t) => t.currency === "EUR");
+  const completedNGN = completedTx.filter((t) => t.currency === "NGN");
 
   const calcRevenue = (txs: Transaction[]) =>
     txs.reduce((sum, t) => sum + Number(t.amount) + (t.order_bump_accepted ? Number(t.order_bump_amount || 0) : 0), 0);
@@ -189,6 +192,8 @@ export default function Dashboard() {
   const revenueMZN = calcRevenue(completedMZN);
   const revenueZAR = calcRevenue(completedZAR);
   const revenueUSD = calcRevenue(completedUSD);
+  const revenueEUR = calcRevenue(completedEUR);
+  const revenueNGN = calcRevenue(completedNGN);
   const totalOrders = completedTx.length;
   const pendingOrders = filteredTransactions.filter((t) => t.status === "pending").length;
   const conversionRate =
@@ -203,14 +208,16 @@ export default function Dashboard() {
 
     // For "all" or large ranges, group by month
     if (days > 90) {
-      const monthMap = new Map<string, { revenueMZN: number; revenueZAR: number; revenueUSD: number; orders: number }>();
+      const monthMap = new Map<string, { revenueMZN: number; revenueZAR: number; revenueUSD: number; revenueEUR: number; revenueNGN: number; orders: number }>();
       for (const t of completedTx) {
         const d = new Date(t.created_at);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        const entry = monthMap.get(key) || { revenueMZN: 0, revenueZAR: 0, revenueUSD: 0, orders: 0 };
+        const entry = monthMap.get(key) || { revenueMZN: 0, revenueZAR: 0, revenueUSD: 0, revenueEUR: 0, revenueNGN: 0, orders: 0 };
         const amt = Number(t.amount) + (t.order_bump_accepted ? Number(t.order_bump_amount || 0) : 0);
         if (t.currency === "ZAR") entry.revenueZAR += amt;
         else if (t.currency === "USD") entry.revenueUSD += amt;
+        else if (t.currency === "EUR") entry.revenueEUR += amt;
+        else if (t.currency === "NGN") entry.revenueNGN += amt;
         else entry.revenueMZN += amt;
         entry.orders += 1;
         monthMap.set(key, entry);
@@ -239,6 +246,8 @@ export default function Dashboard() {
       const revenueMZNDay = calcRevenue(dayTx.filter((t) => (t.currency || "MZN") === "MZN"));
       const revenueZARDay = calcRevenue(dayTx.filter((t) => t.currency === "ZAR"));
       const revenueUSDDay = calcRevenue(dayTx.filter((t) => t.currency === "USD"));
+      const revenueEURDay = calcRevenue(dayTx.filter((t) => t.currency === "EUR"));
+      const revenueNGNDay = calcRevenue(dayTx.filter((t) => t.currency === "NGN"));
 
       data.push({
         date:
@@ -248,6 +257,8 @@ export default function Dashboard() {
         revenueMZN: revenueMZNDay,
         revenueZAR: revenueZARDay,
         revenueUSD: revenueUSDDay,
+        revenueEUR: revenueEURDay,
+        revenueNGN: revenueNGNDay,
         orders: dayTx.length,
       });
     }
@@ -307,6 +318,7 @@ export default function Dashboard() {
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
+    productType: string;
   }) => {
     if (!user) return;
     setCreating(true);
@@ -340,6 +352,7 @@ export default function Dashboard() {
         recovery_cta_text: data.recoveryCtaText || null,
         recovery_redirect_url: data.recoveryRedirectUrl || null,
         show_trust_badges: data.showTrustBadges,
+        product_type: data.productType,
       };
 
       const { data: newProduct, error } = await supabase
@@ -547,6 +560,8 @@ export default function Dashboard() {
               revenueMZN={revenueMZN}
               revenueZAR={revenueZAR}
               revenueUSD={revenueUSD}
+              revenueEUR={revenueEUR}
+              revenueNGN={revenueNGN}
               totalOrders={totalOrders}
               pendingOrders={pendingOrders}
               conversionRate={conversionRate}

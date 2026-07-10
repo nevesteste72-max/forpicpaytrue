@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap } from "lucide-react";
+import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap, Truck, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Product {
@@ -59,6 +59,7 @@ interface CreateProductDialogProps {
     recoveryCtaText: string;
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
+    productType: string;
   }) => Promise<void>;
   creating: boolean;
 }
@@ -102,6 +103,7 @@ export function CreateProductDialog({
   const [recoveryCtaText, setRecoveryCtaText] = useState("");
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
+  const [productType, setProductType] = useState("digital");
 
   const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "EUR";
 
@@ -162,6 +164,7 @@ export function CreateProductDialog({
     setRecoveryCtaText("");
     setRecoveryRedirectUrl("");
     setShowTrustBadges(true);
+    setProductType("digital");
     clearImage();
     clearBanner();
   };
@@ -203,6 +206,7 @@ export function CreateProductDialog({
       recoveryCtaText: recoveryCtaText.trim(),
       recoveryRedirectUrl: recoveryRedirectUrl.trim(),
       showTrustBadges,
+      productType,
     });
     resetForm();
   };
@@ -320,6 +324,42 @@ export function CreateProductDialog({
                     )}
                   >
                     🇪🇺 EUR
+                  </button>
+                </div>
+              </div>
+
+              {/* Product Type */}
+              <div className="space-y-2">
+                <Label>Tipo de Produto</Label>
+                <p className="text-xs text-muted-foreground">
+                  Define o e-mail enviado ao cliente após o pagamento
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProductType("digital")}
+                    className={cn(
+                      "p-3 rounded-xl border-2 flex flex-col items-center gap-1 text-center transition-all text-sm font-semibold",
+                      productType === "digital"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    <Download className="w-4 h-4" />
+                    Digital
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProductType("physical")}
+                    className={cn(
+                      "p-3 rounded-xl border-2 flex flex-col items-center gap-1 text-center transition-all text-sm font-semibold",
+                      productType === "physical"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    <Truck className="w-4 h-4" />
+                    Físico
                   </button>
                 </div>
               </div>

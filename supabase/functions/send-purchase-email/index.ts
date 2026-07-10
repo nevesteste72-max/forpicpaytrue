@@ -18,6 +18,7 @@ interface PurchaseEmailRequest {
   order_bump_accepted?: boolean;
   order_bump_name?: string | null;
   order_bump_amount?: number;
+  product_type?: string | null;
 }
 
 serve(async (req) => {
@@ -43,6 +44,7 @@ serve(async (req) => {
       order_bump_accepted,
       order_bump_name,
       order_bump_amount,
+      product_type,
     } = body;
 
     if (!customer_email || !product_name) {
@@ -52,6 +54,7 @@ serve(async (req) => {
       );
     }
 
+    const isPhysical = product_type === "physical";
     const displayName = customer_name || customer_email.split("@")[0];
     const formattedAmount = `${currency} ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`;
     const purchaseDate = new Date().toLocaleString("en-ZA", {
@@ -71,9 +74,15 @@ serve(async (req) => {
       `;
     }
 
-    // Build access button if redirect_url exists
+    // Digital products get an access button; physical products get a shipping notice instead
     let accessButton = "";
-    if (redirect_url) {
+    if (isPhysical) {
+      accessButton = `
+        <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px 20px; margin: 24px 0 16px; text-align: center;">
+          <p style="margin: 0; font-size: 14px; color: #1e40af;">📦 Your order is confirmed and is now being prepared for shipping. We'll keep you updated on its progress.</p>
+        </div>
+      `;
+    } else if (redirect_url) {
       accessButton = `
         <div style="text-align: center; margin: 32px 0 16px;">
           <a href="${redirect_url}"
@@ -124,7 +133,9 @@ serve(async (req) => {
               <span style="font-size: 32px;">✅</span>
             </div>
             <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Payment Confirmed!</h1>
-            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">Thank you, ${displayName} — your payment was successfully received and your order is confirmed.</p>
+            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">${isPhysical
+              ? `Thank you, ${displayName} — your payment was successfully received and your order will be shipped soon.`
+              : `Thank you, ${displayName} — your payment was successfully received and your order is confirmed.`}</p>
           </div>
 
           <!-- Amount Paid -->
@@ -179,7 +190,9 @@ serve(async (req) => {
       `Payment Confirmed!`,
       ``,
       `Hi ${displayName},`,
-      `Your payment was successfully received and your order is confirmed.`,
+      isPhysical
+        ? `Your payment was successfully received and your order will be shipped soon.`
+        : `Your payment was successfully received and your order is confirmed.`,
       ``,
       `Amount Paid: ${formattedAmount}`,
       `Confirmed on: ${purchaseDate}`,
@@ -188,7 +201,7 @@ serve(async (req) => {
       `${product_name}: ${formattedAmount}`,
       order_bump_accepted && order_bump_name && order_bump_amount ? `+ ${order_bump_name}: ${currency} ${order_bump_amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "",
       ``,
-      redirect_url ? `Access your product: ${redirect_url}` : "",
+      isPhysical ? `Your order is being prepared for shipping. We'll keep you updated.` : (redirect_url ? `Access your product: ${redirect_url}` : ""),
       `Track your order: ${trackingUrl}`,
       ``,
       `Transaction ID: ${transaction_id}`,
@@ -200,7 +213,9 @@ serve(async (req) => {
       from: "PicPay <noreply@tecnhogar.store>",
       reply_to: "noreply@tecnhogar.store",
       to: [customer_email],
-      subject: `Payment confirmed: ${product_name} - ${formattedAmount}`,
+      subject: isPhysical
+        ? `Order confirmed: ${product_name} - ${formattedAmount}`
+        : `Payment confirmed: ${product_name} - ${formattedAmount}`,
       html,
       text: textContent,
       headers: {
