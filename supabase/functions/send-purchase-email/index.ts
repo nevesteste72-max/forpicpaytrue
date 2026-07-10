@@ -110,14 +110,18 @@ serve(async (req) => {
     // the deliverable link through to the tracking page.
     if (!isPhysical && redirect_url) trackingParams.set("access", redirect_url);
     const trackingUrl = `${origin}/rastreio/${transaction_id}?${trackingParams.toString()}`;
-    const trackButton = `
+    // Digital purchases have nothing to physically track — only physical
+    // orders get the order-tracking button.
+    const trackButton = isPhysical
+      ? `
       <div style="text-align: center; margin-bottom: 8px;">
         <a href="${trackingUrl}"
            style="display: inline-block; background-color: #ffffff; color: #2563eb; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid #2563eb;">
           Track Your Order
         </a>
       </div>
-    `;
+    `
+      : "";
 
     const html = `
     <!DOCTYPE html>
@@ -205,7 +209,7 @@ serve(async (req) => {
       order_bump_accepted && order_bump_name && order_bump_amount ? `+ ${order_bump_name}: ${currency} ${order_bump_amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "",
       ``,
       isPhysical ? `Your order is being prepared for shipping. We'll keep you updated.` : (redirect_url ? `Access your product: ${redirect_url}` : ""),
-      `Track your order: ${trackingUrl}`,
+      isPhysical ? `Track your order: ${trackingUrl}` : "",
       ``,
       `Transaction ID: ${transaction_id}`,
       ``,
