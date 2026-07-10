@@ -269,11 +269,15 @@ async function notifyFacebook(
 
     // Update transaction in DB if we have a transaction_id and status changed
     if (transaction_id && internalStatus !== "pending") {
+      // Bind the update to the exact debito_reference we just verified so a caller
+      // can't apply a real reference's status to an unrelated transaction_id.
       const { error: updateErr } = await supabaseAdmin
         .from("transactions")
         .update({ status: internalStatus })
         .eq("id", transaction_id)
-        .eq("status", "pending"); // Only update if still pending
+        .eq("debito_reference", debito_reference)
+        .eq("status", "pending");
+
 
       if (updateErr) {
         console.error("Failed to update transaction:", updateErr);

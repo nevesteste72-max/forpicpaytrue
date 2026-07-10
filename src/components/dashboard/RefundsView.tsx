@@ -69,19 +69,13 @@ export function RefundsView() {
 
       // If approved, send confirmation email
       if (status === "approved") {
-        const refund = refunds.find((r) => r.id === id);
-        if (refund) {
-          await supabase.functions.invoke("send-refund-email", {
-            body: {
-              email: refund.customer_email,
-              name: refund.customer_name,
-              product: refund.product_name,
-              amount: refund.amount,
-              currency: refund.currency,
-            },
-          });
-        }
+        await supabase.functions.invoke("send-refund-email", {
+          body: {
+            refund_request_id: id,
+          },
+        });
       }
+
 
       loadRefunds();
       setDetailsOpen(false);
