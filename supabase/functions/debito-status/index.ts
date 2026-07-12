@@ -68,6 +68,7 @@ async function sendPurchaseEmail(
     order_bump_name?: string | null;
     order_bump_amount?: number;
     product_type?: string | null;
+    lang?: string | null;
   }
 ) {
   try {
