@@ -360,7 +360,7 @@ serve(async (req) => {
     // Fetch full transaction + product data for UTMify & Facebook
     const { data: txRow } = await supabaseAdmin
       .from("transactions")
-      .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, product_type)")
+      .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, product_type, checkout_language)")
       .eq("id", transaction_id)
       .single();
 
