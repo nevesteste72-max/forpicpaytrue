@@ -354,6 +354,7 @@ async function notifyFacebook(
               order_bump_name: txRow.payment_links?.order_bump_name || null,
               order_bump_amount: Number(txRow.order_bump_amount || 0),
               product_type: txRow.payment_links?.product_type || "digital",
+              lang: txRow.payment_links?.checkout_language || "pt",
             });
 
             // Auto WhatsApp for approved payment
