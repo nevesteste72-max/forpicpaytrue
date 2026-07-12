@@ -19,7 +19,91 @@ interface PurchaseEmailRequest {
   order_bump_name?: string | null;
   order_bump_amount?: number;
   product_type?: string | null;
+  lang?: string | null;
 }
+
+type Lang = "pt" | "en" | "es";
+
+const i18n = {
+  pt: {
+    subjectDigital: (p: string, a: string) => `Pagamento confirmado: ${p} - ${a}`,
+    subjectPhysical: (p: string, a: string) => `Pedido confirmado: ${p} - ${a}`,
+    heading: "Pagamento Confirmado!",
+    thanksDigital: (n: string) => `Obrigado, ${n} — o seu pagamento foi recebido com sucesso e o seu pedido está confirmado.`,
+    thanksPhysical: (n: string) => `Obrigado, ${n} — o seu pagamento foi recebido com sucesso e o seu pedido será enviado em breve.`,
+    amountPaid: "Valor Pago",
+    confirmedOn: (d: string) => `Confirmado em ${d}`,
+    orderSummary: "Resumo do Pedido",
+    totalPaid: "Total Pago",
+    physicalNotice: "📦 O seu pedido está confirmado e a ser preparado para envio. Vamos mantê-lo informado sobre o progresso.",
+    accessProduct: "Aceder ao Produto",
+    trackOrder: "Rastrear Pedido",
+    txId: (id: string) => `ID da Transação: ${id}`,
+    footer: "Powered by PicPay",
+    textConfirmed: "Pagamento Confirmado!",
+    textHi: (n: string) => `Olá ${n},`,
+    textAmount: "Valor Pago",
+    textConfirmedOn: "Confirmado em",
+    textSummary: "Resumo do Pedido:",
+    textShipping: "O seu pedido está a ser preparado para envio. Vamos mantê-lo informado.",
+    textAccess: (u: string) => `Aceda ao seu produto: ${u}`,
+    textTrack: (u: string) => `Rastreie o seu pedido: ${u}`,
+    textTx: "ID da Transação",
+    locale: "pt-PT",
+  },
+  en: {
+    subjectDigital: (p: string, a: string) => `Payment confirmed: ${p} - ${a}`,
+    subjectPhysical: (p: string, a: string) => `Order confirmed: ${p} - ${a}`,
+    heading: "Payment Confirmed!",
+    thanksDigital: (n: string) => `Thank you, ${n} — your payment was successfully received and your order is confirmed.`,
+    thanksPhysical: (n: string) => `Thank you, ${n} — your payment was successfully received and your order will be shipped soon.`,
+    amountPaid: "Amount Paid",
+    confirmedOn: (d: string) => `Confirmed on ${d}`,
+    orderSummary: "Order Summary",
+    totalPaid: "Total Paid",
+    physicalNotice: "📦 Your order is confirmed and is now being prepared for shipping. We'll keep you updated on its progress.",
+    accessProduct: "Access Your Product",
+    trackOrder: "Track Your Order",
+    txId: (id: string) => `Transaction ID: ${id}`,
+    footer: "Powered by PicPay",
+    textConfirmed: "Payment Confirmed!",
+    textHi: (n: string) => `Hi ${n},`,
+    textAmount: "Amount Paid",
+    textConfirmedOn: "Confirmed on",
+    textSummary: "Order Summary:",
+    textShipping: "Your order is being prepared for shipping. We'll keep you updated.",
+    textAccess: (u: string) => `Access your product: ${u}`,
+    textTrack: (u: string) => `Track your order: ${u}`,
+    textTx: "Transaction ID",
+    locale: "en-US",
+  },
+  es: {
+    subjectDigital: (p: string, a: string) => `Pago confirmado: ${p} - ${a}`,
+    subjectPhysical: (p: string, a: string) => `Pedido confirmado: ${p} - ${a}`,
+    heading: "¡Pago Confirmado!",
+    thanksDigital: (n: string) => `Gracias, ${n} — su pago fue recibido con éxito y su pedido está confirmado.`,
+    thanksPhysical: (n: string) => `Gracias, ${n} — su pago fue recibido con éxito y su pedido será enviado pronto.`,
+    amountPaid: "Monto Pagado",
+    confirmedOn: (d: string) => `Confirmado el ${d}`,
+    orderSummary: "Resumen del Pedido",
+    totalPaid: "Total Pagado",
+    physicalNotice: "📦 Su pedido está confirmado y se está preparando para el envío. Le mantendremos informado del progreso.",
+    accessProduct: "Acceder al Producto",
+    trackOrder: "Rastrear Pedido",
+    txId: (id: string) => `ID de Transacción: ${id}`,
+    footer: "Powered by PicPay",
+    textConfirmed: "¡Pago Confirmado!",
+    textHi: (n: string) => `Hola ${n},`,
+    textAmount: "Monto Pagado",
+    textConfirmedOn: "Confirmado el",
+    textSummary: "Resumen del Pedido:",
+    textShipping: "Su pedido se está preparando para el envío. Le mantendremos informado.",
+    textAccess: (u: string) => `Acceda a su producto: ${u}`,
+    textTrack: (u: string) => `Rastree su pedido: ${u}`,
+    textTx: "ID de Transacción",
+    locale: "es-ES",
+  },
+} as const;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -45,6 +129,7 @@ serve(async (req) => {
       order_bump_name,
       order_bump_amount,
       product_type,
+      lang: langInput,
     } = body;
 
     if (!customer_email || !product_name) {
@@ -54,32 +139,33 @@ serve(async (req) => {
       );
     }
 
+    const lang: Lang = langInput && (langInput === "en" || langInput === "es" || langInput === "pt") ? langInput : "pt";
+    const t = i18n[lang];
+
     const isPhysical = product_type === "physical";
     const displayName = customer_name || customer_email.split("@")[0];
-    const formattedAmount = `${currency} ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`;
-    const purchaseDate = new Date().toLocaleString("en-ZA", {
+    const formattedAmount = `${currency} ${amount.toLocaleString(t.locale, { minimumFractionDigits: 2 })}`;
+    const purchaseDate = new Date().toLocaleString(t.locale, {
       dateStyle: "medium",
       timeStyle: "short",
       timeZone: "Africa/Maputo",
     });
 
-    // Build order bump row if applicable
     let orderBumpRow = "";
     if (order_bump_accepted && order_bump_name && order_bump_amount && order_bump_amount > 0) {
       orderBumpRow = `
         <tr>
           <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">+ ${order_bump_name}</td>
-          <td style="padding: 8px 0; text-align: right; color: #374151; font-size: 14px;">${currency} ${order_bump_amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
+          <td style="padding: 8px 0; text-align: right; color: #374151; font-size: 14px;">${currency} ${order_bump_amount.toLocaleString(t.locale, { minimumFractionDigits: 2 })}</td>
         </tr>
       `;
     }
 
-    // Digital products get an access button; physical products get a shipping notice instead
     let accessButton = "";
     if (isPhysical) {
       accessButton = `
         <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px 20px; margin: 24px 0 16px; text-align: center;">
-          <p style="margin: 0; font-size: 14px; color: #1e40af;">📦 Your order is confirmed and is now being prepared for shipping. We'll keep you updated on its progress.</p>
+          <p style="margin: 0; font-size: 14px; color: #1e40af;">${t.physicalNotice}</p>
         </div>
       `;
     } else if (redirect_url) {
@@ -87,37 +173,29 @@ serve(async (req) => {
         <div style="text-align: center; margin: 32px 0 16px;">
           <a href="${redirect_url}"
              style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-            Access Your Product
+            ${t.accessProduct}
           </a>
         </div>
       `;
     }
 
-    const whatsappButton = "";
-
     const origin = req.headers.get("origin") || "https://forpicpaytrue.lovable.app";
-    // The tracking page is fully static (no backend lookup) — every detail it
-    // shows is passed straight through as query params so the link keeps
-    // working even without a dedicated status-fetching endpoint.
     const trackingParams = new URLSearchParams({
       product: product_name,
-      amount: amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 }),
+      amount: amount.toLocaleString(t.locale, { minimumFractionDigits: 2 }),
       currency,
       date: purchaseDate,
       product_type: isPhysical ? "physical" : "digital",
+      lang,
     });
-    // Physical products have nothing to "access" — only digital products carry
-    // the deliverable link through to the tracking page.
     if (!isPhysical && redirect_url) trackingParams.set("access", redirect_url);
     const trackingUrl = `${origin}/rastreio/${transaction_id}?${trackingParams.toString()}`;
-    // Digital purchases have nothing to physically track — only physical
-    // orders get the order-tracking button.
     const trackButton = isPhysical
       ? `
       <div style="text-align: center; margin-bottom: 8px;">
         <a href="${trackingUrl}"
            style="display: inline-block; background-color: #ffffff; color: #2563eb; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid #2563eb;">
-          Track Your Order
+          ${t.trackOrder}
         </a>
       </div>
     `
@@ -125,7 +203,7 @@ serve(async (req) => {
 
     const html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="${lang}">
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,27 +212,22 @@ serve(async (req) => {
       <div style="max-width: 560px; margin: 0 auto; padding: 40px 20px;">
         <div style="background-color: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
 
-          <!-- Header -->
           <div style="text-align: center; margin-bottom: 24px;">
             <div style="display: inline-block; background-color: #ecfdf5; border-radius: 50%; padding: 12px; margin-bottom: 16px;">
               <span style="font-size: 32px;">✅</span>
             </div>
-            <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Payment Confirmed!</h1>
-            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">${isPhysical
-              ? `Thank you, ${displayName} — your payment was successfully received and your order will be shipped soon.`
-              : `Thank you, ${displayName} — your payment was successfully received and your order is confirmed.`}</p>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">${t.heading}</h1>
+            <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">${isPhysical ? t.thanksPhysical(displayName) : t.thanksDigital(displayName)}</p>
           </div>
 
-          <!-- Amount Paid -->
           <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
-            <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #047857; text-transform: uppercase; letter-spacing: 0.05em;">Amount Paid</p>
+            <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #047857; text-transform: uppercase; letter-spacing: 0.05em;">${t.amountPaid}</p>
             <p style="margin: 0; font-size: 28px; font-weight: 800; color: #047857;">${formattedAmount}</p>
-            <p style="margin: 8px 0 0; font-size: 12px; color: #059669;">Confirmed on ${purchaseDate}</p>
+            <p style="margin: 8px 0 0; font-size: 12px; color: #059669;">${t.confirmedOn(purchaseDate)}</p>
           </div>
 
-          <!-- Order Summary -->
           <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-            <h2 style="margin: 0 0 16px; font-size: 14px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.05em;">Order Summary</h2>
+            <h2 style="margin: 0 0 16px; font-size: 14px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.05em;">${t.orderSummary}</h2>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 0; color: #374151; font-size: 14px; font-weight: 500;">${product_name}</td>
@@ -162,67 +235,58 @@ serve(async (req) => {
               </tr>
               ${orderBumpRow}
               <tr style="border-top: 1px solid #e5e7eb;">
-                <td style="padding: 12px 0 0; color: #111827; font-size: 16px; font-weight: 700;">Total Paid</td>
+                <td style="padding: 12px 0 0; color: #111827; font-size: 16px; font-weight: 700;">${t.totalPaid}</td>
                 <td style="padding: 12px 0 0; text-align: right; color: #111827; font-size: 16px; font-weight: 700;">${formattedAmount}</td>
               </tr>
             </table>
           </div>
 
-          <!-- Access Button -->
           ${accessButton}
-
-          <!-- Track Order Button -->
           ${trackButton}
 
-          <!-- WhatsApp Button -->
-          ${whatsappButton}
-
-          <!-- Transaction ID -->
           <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-            <p style="margin: 0; color: #9ca3af; font-size: 12px;">Transaction ID: ${transaction_id}</p>
+            <p style="margin: 0; color: #9ca3af; font-size: 12px;">${t.txId(transaction_id)}</p>
           </div>
         </div>
 
-        <!-- Footer -->
         <div style="text-align: center; margin-top: 24px;">
-          <p style="margin: 0; color: #9ca3af; font-size: 12px;">Powered by PicPay</p>
+          <p style="margin: 0; color: #9ca3af; font-size: 12px;">${t.footer}</p>
         </div>
       </div>
     </body>
     </html>
     `;
 
-    // Plain text version to improve deliverability and reduce spam score
     const textContent = [
-      `Payment Confirmed!`,
+      t.textConfirmed,
       ``,
-      `Hi ${displayName},`,
-      isPhysical
-        ? `Your payment was successfully received and your order will be shipped soon.`
-        : `Your payment was successfully received and your order is confirmed.`,
+      t.textHi(displayName),
+      isPhysical ? t.thanksPhysical(displayName) : t.thanksDigital(displayName),
       ``,
-      `Amount Paid: ${formattedAmount}`,
-      `Confirmed on: ${purchaseDate}`,
+      `${t.textAmount}: ${formattedAmount}`,
+      `${t.textConfirmedOn}: ${purchaseDate}`,
       ``,
-      `Order Summary:`,
+      t.textSummary,
       `${product_name}: ${formattedAmount}`,
-      order_bump_accepted && order_bump_name && order_bump_amount ? `+ ${order_bump_name}: ${currency} ${order_bump_amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "",
+      order_bump_accepted && order_bump_name && order_bump_amount ? `+ ${order_bump_name}: ${currency} ${order_bump_amount.toLocaleString(t.locale, { minimumFractionDigits: 2 })}` : "",
       ``,
-      isPhysical ? `Your order is being prepared for shipping. We'll keep you updated.` : (redirect_url ? `Access your product: ${redirect_url}` : ""),
-      isPhysical ? `Track your order: ${trackingUrl}` : "",
+      isPhysical ? t.textShipping : (redirect_url ? t.textAccess(redirect_url) : ""),
+      isPhysical ? t.textTrack(trackingUrl) : "",
       ``,
-      `Transaction ID: ${transaction_id}`,
+      `${t.textTx}: ${transaction_id}`,
       ``,
       `— PicPay`,
     ].filter(Boolean).join("\n");
+
+    const subject = isPhysical
+      ? t.subjectPhysical(product_name, formattedAmount)
+      : t.subjectDigital(product_name, formattedAmount);
 
     const emailResponse = await resend.emails.send({
       from: "PicPay <noreply@tecnhogar.store>",
       reply_to: "noreply@tecnhogar.store",
       to: [customer_email],
-      subject: isPhysical
-        ? `Order confirmed: ${product_name} - ${formattedAmount}`
-        : `Payment confirmed: ${product_name} - ${formattedAmount}`,
+      subject,
       html,
       text: textContent,
       headers: {
@@ -230,9 +294,6 @@ serve(async (req) => {
       },
     });
 
-    // The Resend SDK returns { data, error } instead of throwing on API-level
-    // failures (e.g. unverified sending domain, invalid key) — check it explicitly
-    // so those failures are visible in logs instead of being reported as success.
     if (emailResponse.error) {
       console.error("Resend API returned an error:", JSON.stringify(emailResponse.error), "for:", customer_email);
       return new Response(
@@ -241,7 +302,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Purchase email sent to:", customer_email, "id:", emailResponse.data?.id);
+    console.log("Purchase email sent to:", customer_email, "id:", emailResponse.data?.id, "lang:", lang);
 
     return new Response(
       JSON.stringify({ success: true, data: emailResponse.data }),

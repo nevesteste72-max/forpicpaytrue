@@ -66,6 +66,7 @@ async function sendPurchaseEmail(
     order_bump_name?: string | null;
     order_bump_amount?: number;
     product_type?: string | null;
+    lang?: string | null;
   }
 ) {
   try {
@@ -359,7 +360,7 @@ serve(async (req) => {
     // Fetch full transaction + product data for UTMify & Facebook
     const { data: txRow } = await supabaseAdmin
       .from("transactions")
-      .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, product_type)")
+      .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, product_type, checkout_language)")
       .eq("id", transaction_id)
       .single();
 
@@ -427,6 +428,7 @@ serve(async (req) => {
           order_bump_name: txRow.payment_links?.order_bump_name || null,
           order_bump_amount: Number(txRow.order_bump_amount || 0),
           product_type: txRow.payment_links?.product_type || "digital",
+          lang: txRow.payment_links?.checkout_language || "pt",
         });
       }
 
