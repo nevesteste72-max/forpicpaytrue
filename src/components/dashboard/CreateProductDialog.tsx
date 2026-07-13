@@ -105,6 +105,7 @@ export function CreateProductDialog({
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
   const [productType, setProductType] = useState("digital");
+  const { toast } = useToast();
 
   const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "EUR";
 
