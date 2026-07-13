@@ -12,6 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap, Truck, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface Product {
   id: string;
