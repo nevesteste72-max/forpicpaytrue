@@ -296,10 +296,11 @@ export default function Dashboard() {
 
     const { error } = await supabase.storage
       .from("payment-images")
-      .upload(filePath, imageFile, { upsert: true });
+      .upload(filePath, imageFile, { upsert: true, contentType: imageFile.type });
 
     if (error) {
       console.error("Upload error:", error);
+      toast({ title: "Erro ao enviar imagem", description: error.message, variant: "destructive" });
       return null;
     }
 
