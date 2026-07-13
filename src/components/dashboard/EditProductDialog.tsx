@@ -155,8 +155,12 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const uploadImage = async (path: string, file: File): Promise<string | null> => {
     const { error } = await supabase.storage
       .from("payment-images")
-      .upload(path, file, { upsert: true });
-    if (error) return null;
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (error) {
+      console.error("Upload error:", error);
+      toast({ title: "Erro ao enviar imagem", description: error.message, variant: "destructive" });
+      return null;
+    }
     const { data } = supabase.storage.from("payment-images").getPublicUrl(path);
     return data.publicUrl;
   };
