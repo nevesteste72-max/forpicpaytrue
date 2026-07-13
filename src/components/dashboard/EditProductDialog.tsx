@@ -132,7 +132,15 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.size <= 2 * 1024 * 1024) {
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Imagem muito grande",
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          variant: "destructive",
+        });
+        return;
+      }
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
@@ -140,7 +148,15 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
 
   const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.size <= 2 * 1024 * 1024) {
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Imagem muito grande",
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          variant: "destructive",
+        });
+        return;
+      }
       setBannerFile(file);
       setBannerPreview(URL.createObjectURL(file));
     }

@@ -12,6 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap, Truck, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface Product {
   id: string;
@@ -104,13 +105,21 @@ export function CreateProductDialog({
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
   const [productType, setProductType] = useState("digital");
+  const { toast } = useToast();
 
   const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "EUR";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) return;
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Imagem muito grande",
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          variant: "destructive",
+        });
+        return;
+      }
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
@@ -119,7 +128,14 @@ export function CreateProductDialog({
   const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) return;
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Imagem muito grande",
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          variant: "destructive",
+        });
+        return;
+      }
       setCheckoutBannerFile(file);
       setBannerPreview(URL.createObjectURL(file));
     }
