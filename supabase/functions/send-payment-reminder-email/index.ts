@@ -33,7 +33,7 @@ const i18n = {
     payNow: "Pagar Agora",
     timeLeft: (h: number) => `Você tem ${h} horas para concluir o pagamento antes que o pedido seja cancelado.`,
     hopeToHear: "Esperamos ouvir de você em breve.",
-    regards: "Equipa PicPay",
+    regards: "Equipa OrderConfirm",
     itemInOrder: "Item deste pedido",
     needHelp: "Precisa de ajuda? Responda a este e-mail.",
     footerNote: "Pagamento seguro e encriptado.",
@@ -49,7 +49,7 @@ const i18n = {
     payNow: "Pay Now",
     timeLeft: (h: number) => `You have ${h} hours left to complete payment before your order is cancelled.`,
     hopeToHear: "We hope to hear from you soon.",
-    regards: "The PicPay Team",
+    regards: "The OrderConfirm Team",
     itemInOrder: "Item in this order",
     needHelp: "Need help? Reply to this email.",
     footerNote: "Your payment is secure and encrypted.",
@@ -65,7 +65,7 @@ const i18n = {
     payNow: "Pagar Ahora",
     timeLeft: (h: number) => `Tiene ${h} horas para completar el pago antes de que se cancele el pedido.`,
     hopeToHear: "Esperamos saber de usted pronto.",
-    regards: "Equipo PicPay",
+    regards: "Equipo OrderConfirm",
     itemInOrder: "Artículo de este pedido",
     needHelp: "¿Necesita ayuda? Responda a este correo.",
     footerNote: "Su pago es seguro y encriptado.",
@@ -135,7 +135,7 @@ serve(async (req) => {
         <div style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
 
           <div style="background-color: #0f1729; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 20px; font-weight: 800; color: #ffffff;">PicPay</span>
+            <span style="font-size: 20px; font-weight: 800; color: #ffffff;">OrderConfirm</span>
             <span style="font-size: 13px; font-weight: 600; color: #cbd5e1;">${t.banner}</span>
           </div>
 
@@ -209,7 +209,7 @@ serve(async (req) => {
     ].join("\n");
 
     const emailResponse = await resend.emails.send({
-      from: "PicPay <noreply@tecnhogar.store>",
+      from: "OrderConfirm <noreply@tecnhogar.store>",
       reply_to: "noreply@tecnhogar.store",
       to: [customer_email],
       subject: t.subject(product_name),

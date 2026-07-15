@@ -39,7 +39,7 @@ const i18n = {
     accessProduct: "Aceder ao Produto",
     trackOrder: "Rastrear Pedido",
     txId: (id: string) => `ID da Transação: ${id}`,
-    footer: "Powered by PicPay",
+    footer: "Powered by OrderConfirm",
     textConfirmed: "Pagamento Confirmado!",
     textHi: (n: string) => `Olá ${n},`,
     textAmount: "Valor Pago",
@@ -65,7 +65,7 @@ const i18n = {
     accessProduct: "Access Your Product",
     trackOrder: "Track Your Order",
     txId: (id: string) => `Transaction ID: ${id}`,
-    footer: "Powered by PicPay",
+    footer: "Powered by OrderConfirm",
     textConfirmed: "Payment Confirmed!",
     textHi: (n: string) => `Hi ${n},`,
     textAmount: "Amount Paid",
@@ -91,7 +91,7 @@ const i18n = {
     accessProduct: "Acceder al Producto",
     trackOrder: "Rastrear Pedido",
     txId: (id: string) => `ID de Transacción: ${id}`,
-    footer: "Powered by PicPay",
+    footer: "Powered by OrderConfirm",
     textConfirmed: "¡Pago Confirmado!",
     textHi: (n: string) => `Hola ${n},`,
     textAmount: "Monto Pagado",
@@ -275,7 +275,7 @@ serve(async (req) => {
       ``,
       `${t.textTx}: ${transaction_id}`,
       ``,
-      `— PicPay`,
+      `— OrderConfirm`,
     ].filter(Boolean).join("\n");
 
     const subject = isPhysical
@@ -283,7 +283,7 @@ serve(async (req) => {
       : t.subjectDigital(product_name, formattedAmount);
 
     const emailResponse = await resend.emails.send({
-      from: "PicPay <noreply@tecnhogar.store>",
+      from: "OrderConfirm <noreply@tecnhogar.store>",
       reply_to: "noreply@tecnhogar.store",
       to: [customer_email],
       subject,
