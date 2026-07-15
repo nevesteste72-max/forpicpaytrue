@@ -1,6 +1,8 @@
 {
   "rewrites": [
+    { "source": "/oferta1", "destination": "/oferta1/index.html" },
+    { "source": "/oferta1/dados", "destination": "/oferta1/dados.html" },
+    { "source": "/takealot.com", "destination": "/takealot.com/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
-    {"source": "/takealot.com", "destination": "/takealot.com/index.html"}
   ]
 }
