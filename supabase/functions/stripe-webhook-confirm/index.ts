@@ -85,6 +85,39 @@ async function sendPurchaseEmail(
 }
 
 /**
+ * Fires payment reminder email (failed/pending) via Resend (non-blocking).
+ */
+async function sendPaymentReminderEmail(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  data: {
+    customer_email: string;
+    customer_name: string;
+    product_name: string;
+    product_image_url?: string | null;
+    amount: number;
+    currency: string;
+    transaction_id: string;
+    payment_link_id: string;
+    lang?: string | null;
+  }
+) {
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/send-payment-reminder-email`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    console.log("Payment reminder email sent for tx:", data.transaction_id);
+  } catch (err) {
+    console.error("Failed to send payment reminder email:", err);
+  }
+}
+
+/**
  * Fires Facebook Conversions API in the background (non-blocking).
  */
 async function notifyFacebook(
@@ -360,7 +393,7 @@ serve(async (req) => {
     // Fetch full transaction + product data for UTMify & Facebook
     const { data: txRow } = await supabaseAdmin
       .from("transactions")
-      .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, product_type, checkout_language)")
+      .select("*, payment_links(product_name, id, logo_url, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, product_type, checkout_language)")
       .eq("id", transaction_id)
       .single();
 
@@ -444,6 +477,20 @@ serve(async (req) => {
         currency: txRow.currency || "ZAR",
         product_name: txRow.payment_links?.product_name || "Product",
       }, whatsappEvent);
+
+      if (resolvedStatus === "failed" && txRow.customer_email) {
+        await sendPaymentReminderEmail(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+          customer_email: txRow.customer_email,
+          customer_name: txRow.customer_name || customer_name || "",
+          product_name: txRow.payment_links?.product_name || "Product",
+          product_image_url: txRow.payment_links?.logo_url || null,
+          amount: Number(txRow.amount),
+          currency: txRow.currency || "ZAR",
+          transaction_id: txRow.id,
+          payment_link_id: txRow.payment_link_id,
+          lang: txRow.payment_links?.checkout_language || "pt",
+        });
+      }
     }
 
     return new Response(

@@ -87,6 +87,39 @@ async function sendPurchaseEmail(
 }
 
 /**
+ * Fires payment reminder email (failed/pending) via Resend (non-blocking).
+ */
+async function sendPaymentReminderEmail(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  data: {
+    customer_email: string;
+    customer_name: string;
+    product_name: string;
+    product_image_url?: string | null;
+    amount: number;
+    currency: string;
+    transaction_id: string;
+    payment_link_id: string;
+    lang?: string | null;
+  }
+) {
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/send-payment-reminder-email`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    console.log("Payment reminder email sent for tx:", data.transaction_id);
+  } catch (err) {
+    console.error("Failed to send payment reminder email:", err);
+  }
+}
+
+/**
  * Fires Facebook Conversions API in the background (non-blocking).
  */
 async function notifyFacebook(
@@ -368,11 +401,11 @@ async function notifyFacebook(
           }
         }
 
-        // If payment failed, send auto WhatsApp for failed
+        // If payment failed, send auto WhatsApp + reminder email
         if (internalStatus === "failed" && transaction_id) {
           const { data: failedTx } = await supabaseAdmin
             .from("transactions")
-            .select("*, payment_links(product_name)")
+            .select("*, payment_links(product_name, logo_url, checkout_language)")
             .eq("id", transaction_id)
             .single();
 
@@ -384,6 +417,20 @@ async function notifyFacebook(
               currency: failedTx.currency || "MZN",
               product_name: failedTx.payment_links?.product_name || "Product",
             }, "failed");
+
+            if (failedTx.customer_email) {
+              await sendPaymentReminderEmail(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+                customer_email: failedTx.customer_email,
+                customer_name: failedTx.customer_name || "",
+                product_name: failedTx.payment_links?.product_name || "Product",
+                product_image_url: failedTx.payment_links?.logo_url || null,
+                amount: Number(failedTx.amount),
+                currency: failedTx.currency || "MZN",
+                transaction_id: failedTx.id,
+                payment_link_id: failedTx.payment_link_id,
+                lang: failedTx.payment_links?.checkout_language || "pt",
+              });
+            }
           }
         }
       }
