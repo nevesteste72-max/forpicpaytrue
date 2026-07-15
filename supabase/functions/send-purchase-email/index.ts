@@ -179,7 +179,7 @@ serve(async (req) => {
       `;
     }
 
-    const origin = req.headers.get("origin") || "https://forpicpaytrue.lovable.app";
+    const origin = req.headers.get("origin") || "https://forpicpaytrue.vercel.app";
     const trackingParams = new URLSearchParams({
       product: product_name,
       amount: amount.toLocaleString(t.locale, { minimumFractionDigits: 2 }),

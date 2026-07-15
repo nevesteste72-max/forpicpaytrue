@@ -57,7 +57,7 @@ serve(async (req) => {
       event_name,
       event_time: Math.floor(Date.now() / 1000),
       action_source: "website",
-      event_source_url: event_source_url || "https://cashpaysa.lovable.app",
+      event_source_url: event_source_url || "https://forpicpaytrue.vercel.app",
       user_data: userData,
       custom_data: {
         value: Number(value),
