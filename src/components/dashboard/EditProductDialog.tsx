@@ -14,6 +14,7 @@ import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { UploadPaymentImageError, uploadPaymentImage } from "@/lib/paymentImageUpload";
 
 interface Product {
   id: string;
@@ -47,33 +48,6 @@ const STRIPE_METHODS = [
   { value: "google_pay", label: "Google Pay" },
   { value: "link", label: "Link (Stripe)" },
 ];
-
-const MIME_EXT_FALLBACK: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/heic": "heic",
-  "image/heif": "heif",
-  "image/avif": "avif",
-};
-
-function getSafeExtension(file: File): string {
-  const rawExt = file.name.includes(".") ? file.name.split(".").pop() : "";
-  const cleaned = (rawExt || "").trim().toLowerCase();
-  const isValid = cleaned.length > 0 && cleaned.length <= 5 && /^[a-z0-9]+$/.test(cleaned);
-  return isValid ? cleaned : MIME_EXT_FALLBACK[file.type] || "png";
-}
-
-// contentType passado para .upload() é ignorado pelo SDK quando o corpo é um File/Blob
-// (ele usa FormData internamente); o Content-Type real vem de file.type. Reenvelopamos
-// o File quando o navegador não detectou o tipo, para não mandar um multipart sem tipo.
-function getUploadableFile(file: File): File {
-  if (file.type) return file;
-  const ext = getSafeExtension(file);
-  const fallbackType = Object.entries(MIME_EXT_FALLBACK).find(([, e]) => e === ext)?.[0] || "application/octet-stream";
-  return new File([file], file.name, { type: fallbackType });
-}
 
 interface EditProductDialogProps {
   open: boolean;
@@ -195,25 +169,6 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
     );
   };
 
-  const uploadImage = async (path: string, file: File): Promise<string | null> => {
-    const { error } = await supabase.storage
-      .from("payment-images")
-      .upload(path, file, { upsert: true, contentType: file.type || "application/octet-stream" });
-    if (error) {
-      const status = (error as { status?: number }).status;
-      const statusCode = (error as { statusCode?: string }).statusCode;
-      console.error("Upload error:", { name: error.name, message: error.message, status, statusCode, raw: error });
-      toast({
-        title: "Erro ao enviar imagem",
-        description: `${error.message}${statusCode ? ` — código: ${statusCode}` : ""}${status ? ` (HTTP ${status})` : ""}`,
-        variant: "destructive",
-      });
-      return null;
-    }
-    const { data } = supabase.storage.from("payment-images").getPublicUrl(path);
-    return data.publicUrl;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
@@ -251,28 +206,16 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
 
       // Logo: upload novo, ou setar null se removido
       if (imageFile) {
-        const { data: userData } = await supabase.auth.getUser();
-        const uid = userData.user?.id;
-        if (uid) {
-          const safeImageFile = getUploadableFile(imageFile);
-          const ext = getSafeExtension(safeImageFile);
-          const url = await uploadImage(`${uid}/${product.id}.${ext}`, safeImageFile);
-          if (url) updateData.logo_url = url;
-        }
+        const url = await uploadPaymentImage({ file: imageFile, baseName: product.id, toast });
+        if (url) updateData.logo_url = url;
       } else if (!imagePreview && product.logo_url) {
         updateData.logo_url = null;
       }
 
       // Banner: upload novo, ou setar null se removido
       if (bannerFile) {
-        const { data: userData } = await supabase.auth.getUser();
-        const uid = userData.user?.id;
-        if (uid) {
-          const safeBannerFile = getUploadableFile(bannerFile);
-          const ext = getSafeExtension(safeBannerFile);
-          const url = await uploadImage(`${uid}/${product.id}-banner.${ext}`, safeBannerFile);
-          if (url) updateData.checkout_banner_url = url;
-        }
+        const url = await uploadPaymentImage({ file: bannerFile, baseName: `${product.id}-banner`, toast });
+        if (url) updateData.checkout_banner_url = url;
       } else if (!bannerPreview && product.checkout_banner_url) {
         updateData.checkout_banner_url = null;
       }
@@ -289,7 +232,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       onSaved();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Erro ao atualizar";
-      toast({ title: "Erro", description: message, variant: "destructive" });
+      toast({ title: err instanceof UploadPaymentImageError ? "Erro ao enviar imagem" : "Erro", description: message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
