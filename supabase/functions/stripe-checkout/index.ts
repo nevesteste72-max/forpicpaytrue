@@ -59,7 +59,7 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    const origin = req.headers.get("origin") || "https://forpicpaytrue.vercel.app";
+    const origin = req.headers.get("origin") || "https://www.tecnhogar.store";
     const finalSuccessUrl = success_url || `${origin}/pay/${payment_link_id}?payment=success`;
     const finalCancelUrl = cancel_url || `${origin}/pay/${payment_link_id}?payment=cancelled`;
 

@@ -166,7 +166,7 @@ serve(async (req) => {
 
       case "card": {
         endpoint = `${DEBITO_API_URL}/wallets/${DEBITO_WALLET_ID}/card-payment`;
-        const origin = req.headers.get("origin") || "https://forpicpaytrue.vercel.app";
+        const origin = req.headers.get("origin") || "https://www.tecnhogar.store";
         const finalCallbackUrl = callback_url || `${origin}/?payment=complete`;
         requestBody = {
           amount,
