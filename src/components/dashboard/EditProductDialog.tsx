@@ -14,7 +14,7 @@ import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { uploadPaymentImage } from "@/lib/paymentImageUpload";
+import { UploadPaymentImageError, uploadPaymentImage } from "@/lib/paymentImageUpload";
 
 interface Product {
   id: string;
@@ -207,7 +207,6 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       // Logo: upload novo, ou setar null se removido
       if (imageFile) {
         const url = await uploadPaymentImage({ file: imageFile, baseName: product.id, toast });
-        if (!url) throw new Error("Não foi possível guardar a imagem do produto.");
         if (url) updateData.logo_url = url;
       } else if (!imagePreview && product.logo_url) {
         updateData.logo_url = null;
@@ -216,7 +215,6 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       // Banner: upload novo, ou setar null se removido
       if (bannerFile) {
         const url = await uploadPaymentImage({ file: bannerFile, baseName: `${product.id}-banner`, toast });
-        if (!url) throw new Error("Não foi possível guardar o banner do checkout.");
         if (url) updateData.checkout_banner_url = url;
       } else if (!bannerPreview && product.checkout_banner_url) {
         updateData.checkout_banner_url = null;
@@ -234,7 +232,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       onSaved();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Erro ao atualizar";
-      toast({ title: "Erro", description: message, variant: "destructive" });
+      toast({ title: err instanceof UploadPaymentImageError ? "Erro ao enviar imagem" : "Erro", description: message, variant: "destructive" });
     } finally {
       setSaving(false);
     }

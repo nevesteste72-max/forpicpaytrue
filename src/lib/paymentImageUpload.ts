@@ -33,8 +33,15 @@ type ToastFn = (props: {
 type UploadPaymentImageOptions = {
   file: File;
   baseName: string;
-  toast: ToastFn;
+  toast?: ToastFn;
 };
+
+export class UploadPaymentImageError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UploadPaymentImageError";
+  }
+}
 
 function getSafeExtension(file: File): string {
   const rawExt = file.name.includes(".") ? file.name.split(".").pop() : "";
@@ -104,14 +111,11 @@ async function getFreshUploadSession() {
   return session;
 }
 
-export async function uploadPaymentImage({ file, baseName, toast }: UploadPaymentImageOptions): Promise<string | null> {
+export async function uploadPaymentImage({ file, baseName }: UploadPaymentImageOptions): Promise<string> {
   if (file.size > MAX_IMAGE_SIZE_BYTES) {
-    toast({
-      title: "Imagem muito grande",
-      description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
-      variant: "destructive",
-    });
-    return null;
+    throw new UploadPaymentImageError(
+      `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`
+    );
   }
 
   let session;
@@ -119,12 +123,7 @@ export async function uploadPaymentImage({ file, baseName, toast }: UploadPaymen
     session = await getFreshUploadSession();
   } catch (error) {
     console.error("[payment-images] Upload blocked by missing/expired session", getErrorDetails(error));
-    toast({
-      title: "Sessão expirada",
-      description: "Entra novamente e tenta subir a imagem outra vez.",
-      variant: "destructive",
-    });
-    return null;
+    throw new UploadPaymentImageError("Sessão expirada. Entra novamente e tenta subir a imagem outra vez.");
   }
 
   const uploadableFile = getUploadableFile(file);
@@ -158,12 +157,7 @@ export async function uploadPaymentImage({ file, baseName, toast }: UploadPaymen
       },
       error: getErrorDetails(error),
     });
-    toast({
-      title: "Erro ao enviar imagem",
-      description: buildUploadErrorMessage(error),
-      variant: "destructive",
-    });
-    return null;
+    throw new UploadPaymentImageError(buildUploadErrorMessage(error));
   }
 
   const { data } = supabase.storage.from(PAYMENT_IMAGES_BUCKET).getPublicUrl(path);

@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import cashpayIcon from "@/assets/picpay-logo.jpeg";
-import { uploadPaymentImage } from "@/lib/paymentImageUpload";
+import { UploadPaymentImageError, uploadPaymentImage } from "@/lib/paymentImageUpload";
 
 type DashboardTab = "overview" | "products" | "flows" | "transactions" | "clients" | "withdrawals" | "whatsapp" | "refunds" | "settings";
 
@@ -368,25 +368,19 @@ export default function Dashboard() {
         // Upload product image
         if (data.imageFile) {
           const imageUrl = await uploadPaymentImage({ file: data.imageFile, baseName: newProduct.id, toast });
-          if (!imageUrl) throw new Error("Não foi possível guardar a imagem do produto.");
-          if (imageUrl) {
-            await supabase
-              .from("payment_links")
-              .update({ logo_url: imageUrl })
-              .eq("id", newProduct.id);
-          }
+          await supabase
+            .from("payment_links")
+            .update({ logo_url: imageUrl })
+            .eq("id", newProduct.id);
         }
 
         // Upload checkout banner
         if (data.checkoutBannerFile) {
           const bannerUrl = await uploadPaymentImage({ file: data.checkoutBannerFile, baseName: `${newProduct.id}-banner`, toast });
-          if (!bannerUrl) throw new Error("Não foi possível guardar o banner do checkout.");
-          if (bannerUrl) {
-            await supabase
-              .from("payment_links")
-              .update({ checkout_banner_url: bannerUrl })
-              .eq("id", newProduct.id);
-          }
+          await supabase
+            .from("payment_links")
+            .update({ checkout_banner_url: bannerUrl })
+            .eq("id", newProduct.id);
         }
       }
 
@@ -395,7 +389,7 @@ export default function Dashboard() {
       fetchData();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Erro ao criar produto";
-      toast({ title: "Erro", description: message, variant: "destructive" });
+      toast({ title: error instanceof UploadPaymentImageError ? "Erro ao enviar imagem" : "Erro", description: message, variant: "destructive" });
     } finally {
       setCreating(false);
     }
