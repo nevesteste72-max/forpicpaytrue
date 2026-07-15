@@ -368,6 +368,7 @@ export default function Dashboard() {
         // Upload product image
         if (data.imageFile) {
           const imageUrl = await uploadPaymentImage({ file: data.imageFile, baseName: newProduct.id, toast });
+          if (!imageUrl) throw new Error("Não foi possível guardar a imagem do produto.");
           if (imageUrl) {
             await supabase
               .from("payment_links")
@@ -379,6 +380,7 @@ export default function Dashboard() {
         // Upload checkout banner
         if (data.checkoutBannerFile) {
           const bannerUrl = await uploadPaymentImage({ file: data.checkoutBannerFile, baseName: `${newProduct.id}-banner`, toast });
+          if (!bannerUrl) throw new Error("Não foi possível guardar o banner do checkout.");
           if (bannerUrl) {
             await supabase
               .from("payment_links")
