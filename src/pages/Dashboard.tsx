@@ -102,6 +102,33 @@ const financeLinks: { icon: typeof Wallet; label: string; tab: DashboardTab }[] 
   { icon: Settings, label: "Definições", tab: "settings" },
 ];
 
+const MIME_EXT_FALLBACK: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "image/heic": "heic",
+  "image/heif": "heif",
+  "image/avif": "avif",
+};
+
+function getSafeExtension(file: File): string {
+  const rawExt = file.name.includes(".") ? file.name.split(".").pop() : "";
+  const cleaned = (rawExt || "").trim().toLowerCase();
+  const isValid = cleaned.length > 0 && cleaned.length <= 5 && /^[a-z0-9]+$/.test(cleaned);
+  return isValid ? cleaned : MIME_EXT_FALLBACK[file.type] || "png";
+}
+
+// contentType passado para .upload() é ignorado pelo SDK quando o corpo é um File/Blob
+// (ele usa FormData internamente); o Content-Type real vem de file.type. Reenvelopamos
+// o File quando o navegador não detectou o tipo, para não mandar um multipart sem tipo.
+function getUploadableFile(file: File): File {
+  if (file.type) return file;
+  const ext = getSafeExtension(file);
+  const fallbackType = Object.entries(MIME_EXT_FALLBACK).find(([, e]) => e === ext)?.[0] || "application/octet-stream";
+  return new File([file], file.name, { type: fallbackType });
+}
+
 export default function Dashboard() {
   const { user, loading: authLoading, signOut, isAdmin } = useAuth();
   const { toast } = useToast();
@@ -291,16 +318,23 @@ export default function Dashboard() {
 
   const uploadImage = async (linkId: string, imageFile: File): Promise<string | null> => {
     if (!user) return null;
-    const fileExt = imageFile.name.split(".").pop();
+    const safeFile = getUploadableFile(imageFile);
+    const fileExt = getSafeExtension(safeFile);
     const filePath = `${user.id}/${linkId}.${fileExt}`;
 
     const { error } = await supabase.storage
       .from("payment-images")
-      .upload(filePath, imageFile, { upsert: true, contentType: imageFile.type });
+      .upload(filePath, safeFile, { upsert: true, contentType: safeFile.type || "application/octet-stream" });
 
     if (error) {
-      console.error("Upload error:", error);
-      toast({ title: "Erro ao enviar imagem", description: error.message, variant: "destructive" });
+      const status = (error as { status?: number }).status;
+      const statusCode = (error as { statusCode?: string }).statusCode;
+      console.error("Upload error:", { name: error.name, message: error.message, status, statusCode, raw: error });
+      toast({
+        title: "Erro ao enviar imagem",
+        description: `${error.message}${statusCode ? ` — código: ${statusCode}` : ""}${status ? ` (HTTP ${status})` : ""}`,
+        variant: "destructive",
+      });
       return null;
     }
 
