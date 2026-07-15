@@ -183,6 +183,11 @@ export function StripeCheckoutForm({
       });
 
       if (error) {
+        // Stripe still returns the PaymentIntent (usually in "requires_payment_method")
+        // even on a declined card — without its id, the backend has nothing to look up
+        // and rejects the confirm call, so the transaction never gets marked as failed
+        // and no reminder email/WhatsApp goes out.
+        const failedPaymentIntentId = error.payment_intent?.id;
         try {
           await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-webhook-confirm`,
@@ -195,7 +200,11 @@ export function StripeCheckoutForm({
               },
               body: JSON.stringify({
                 transaction_id: transactionId,
+                payment_intent_id: failedPaymentIntentId || null,
                 payment_status: "failed",
+                customer_email: customerEmail,
+                customer_name: customerName,
+                tracking_params: trackingParams,
               }),
             }
           );

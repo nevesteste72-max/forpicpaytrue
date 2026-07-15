@@ -329,47 +329,59 @@ serve(async (req) => {
     }
 
     // Determine the transaction status by ALWAYS retrieving the PaymentIntent from Stripe.
-    // Never trust the client-supplied `payment_status` value.
+    // Never trust a client-supplied "successful"/"pending" status. The one exception is an
+    // explicit client-reported failure with no PaymentIntent at all (e.g. a Stripe.js
+    // validation error before any charge attempt) -- there is nothing to verify in that
+    // case, and refusing to record it just means the customer never gets a failure email.
     let resolvedStatus: "successful" | "failed" | "pending" = "pending";
     const updateData: Record<string, unknown> = {
       stripe_payment_intent_id: payment_intent_id || null,
     };
     if (customer_email) updateData.customer_email = customer_email;
 
-    if (!payment_intent_id || !STRIPE_SECRET_KEY) {
+    if (!payment_intent_id) {
+      if (payment_status === "failed") {
+        resolvedStatus = "failed";
+      } else {
+        return new Response(
+          JSON.stringify({ success: false, error: "Missing payment_intent_id" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else if (!STRIPE_SECRET_KEY) {
       return new Response(
-        JSON.stringify({ success: false, error: "Missing payment_intent_id or Stripe not configured" }),
+        JSON.stringify({ success: false, error: "Stripe not configured" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-    }
+    } else {
+      try {
+        const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+        const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
+        const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
 
-    try {
-      const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-      const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
-      const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
+        // Derive status ONLY from Stripe's authoritative PaymentIntent state.
+        if (pi.status === "succeeded") resolvedStatus = "successful";
+        else if (pi.status === "canceled" || pi.status === "requires_payment_method") resolvedStatus = "failed";
+        else resolvedStatus = "pending";
 
-      // Derive status ONLY from Stripe's authoritative PaymentIntent state.
-      if (pi.status === "succeeded") resolvedStatus = "successful";
-      else if (pi.status === "canceled" || pi.status === "requires_payment_method") resolvedStatus = "failed";
-      else resolvedStatus = "pending";
-
-      if (pi.payment_method) {
-        updateData.stripe_payment_method_id = typeof pi.payment_method === "string"
-          ? pi.payment_method
-          : pi.payment_method.id;
+        if (pi.payment_method) {
+          updateData.stripe_payment_method_id = typeof pi.payment_method === "string"
+            ? pi.payment_method
+            : pi.payment_method.id;
+        }
+        if (pi.customer) {
+          updateData.stripe_customer_id = typeof pi.customer === "string"
+            ? pi.customer
+            : pi.customer.id;
+        }
+        console.log("Stripe PI status:", pi.status, "-> resolved:", resolvedStatus);
+      } catch (stripeErr) {
+        console.error("Failed to retrieve PaymentIntent from Stripe:", stripeErr);
+        return new Response(
+          JSON.stringify({ success: false, error: "Failed to verify payment with Stripe" }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
-      if (pi.customer) {
-        updateData.stripe_customer_id = typeof pi.customer === "string"
-          ? pi.customer
-          : pi.customer.id;
-      }
-      console.log("Stripe PI status:", pi.status, "-> resolved:", resolvedStatus);
-    } catch (stripeErr) {
-      console.error("Failed to retrieve PaymentIntent from Stripe:", stripeErr);
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to verify payment with Stripe" }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
     }
 
     updateData.status = resolvedStatus;
