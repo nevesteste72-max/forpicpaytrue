@@ -268,6 +268,11 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // When an external funnel page already fired InitiateCheckout before redirecting
+  // here (e.g. a "Complete the Purchase" button), it appends ?ic=0 so this page
+  // doesn't fire it a second time for the same person.
+  const icAlreadyFiredExternally = searchParams.get("ic") === "0";
+
   const [link, setLink] = useState<PaymentLink | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -665,7 +670,7 @@ export default function Checkout() {
       }
     }
 
-    trackInitiateCheckout(totalAmount, link.currency || "MZN");
+    if (!icAlreadyFiredExternally) trackInitiateCheckout(totalAmount, link.currency || "MZN");
     setPaymentState("processing");
 
     try {
@@ -1006,7 +1011,7 @@ export default function Checkout() {
                     onCustomerPhoneChange={setPhone}
                     hideCustomerFields={false}
                     trackingParams={trackingParams}
-                    onInitiateCheckout={() => trackInitiateCheckout(totalAmount, currencySymbol)}
+                    onInitiateCheckout={() => { if (!icAlreadyFiredExternally) trackInitiateCheckout(totalAmount, currencySymbol); }}
                     onSuccess={async () => {
                       trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);
                       const hasFlow = await checkAndRedirectToFlow(stripeTransactionId || "");
