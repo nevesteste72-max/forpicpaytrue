@@ -62,6 +62,7 @@ interface StripeCheckoutFormProps {
   onCustomerPhoneChange?: (phone: string) => void;
   onSuccess: () => void;
   onError: (msg: string) => void;
+  onInitiateCheckout?: () => void;
   orderBumpSlot?: React.ReactNode;
   trackingParams?: TrackingParams;
   hideCustomerFields?: boolean;
@@ -83,6 +84,7 @@ export function StripeCheckoutForm({
   onCustomerPhoneChange,
   onSuccess,
   onError,
+  onInitiateCheckout,
   orderBumpSlot,
   trackingParams,
   hideCustomerFields,
@@ -140,6 +142,7 @@ export function StripeCheckoutForm({
       return;
     }
 
+    onInitiateCheckout?.();
     setProcessing(true);
 
     try {

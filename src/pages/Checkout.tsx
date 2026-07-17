@@ -387,7 +387,7 @@ export default function Checkout() {
   }, [link?.currency, link?.id]);
 
   // Facebook Pixel
-  const { trackPurchase, trackInitiateCheckout } = useFacebookPixel(link?.facebook_pixel_id);
+  const { trackPurchase, trackInitiateCheckout, trackViewContent } = useFacebookPixel(link?.facebook_pixel_id);
 
   // UTMify tracking script — injected on every checkout
   useUtmifyScript();
@@ -428,12 +428,14 @@ export default function Checkout() {
     if (linkId) fetchLink();
   }, [linkId]);
 
-  // Fire InitiateCheckout as soon as checkout page loads and pixel is ready
-  const icFired = useRef(false);
+  // Fire ViewContent as soon as the checkout/product page loads and pixel is ready.
+  // InitiateCheckout only fires when the customer actually submits a payment attempt
+  // (see handleMobileSubmit and the Stripe form's onInitiateCheckout), not on page load.
+  const vcFired = useRef(false);
   useEffect(() => {
-    if (link && !icFired.current && link.facebook_pixel_id) {
-      icFired.current = true;
-      trackInitiateCheckout(
+    if (link && !vcFired.current && link.facebook_pixel_id) {
+      vcFired.current = true;
+      trackViewContent(
         Number(link.amount),
         link.currency || "MZN"
       );
@@ -663,6 +665,7 @@ export default function Checkout() {
       }
     }
 
+    trackInitiateCheckout(totalAmount, link.currency || "MZN");
     setPaymentState("processing");
 
     try {
@@ -1003,6 +1006,7 @@ export default function Checkout() {
                     onCustomerPhoneChange={setPhone}
                     hideCustomerFields={false}
                     trackingParams={trackingParams}
+                    onInitiateCheckout={() => trackInitiateCheckout(totalAmount, currencySymbol)}
                     onSuccess={async () => {
                       trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);
                       const hasFlow = await checkAndRedirectToFlow(stripeTransactionId || "");

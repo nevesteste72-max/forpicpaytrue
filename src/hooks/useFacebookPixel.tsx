@@ -65,5 +65,14 @@ export function useFacebookPixel(pixelId: string | null | undefined) {
     });
   };
 
-  return { trackPurchase, trackInitiateCheckout };
+  const trackViewContent = (value: number, currency: string) => {
+    if (!pixelId || !window.fbq) return;
+    window.fbq("track", "ViewContent", {
+      value,
+      currency,
+      content_type: "product",
+    });
+  };
+
+  return { trackPurchase, trackInitiateCheckout, trackViewContent };
 }
