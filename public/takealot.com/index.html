@@ -1,31 +1,34 @@
-<!DOCTYPE html><html lang="pt"><head>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e);
+    s.parentNode.insertBefore(t,s)
+    }(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
 
- <script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e);
-  s.parentNode.insertBefore(t,s)
-  }(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
+    /* O teu ID do Pixel foi inserido aqui e os eventos de rastreamento atualizados */
+    fbq('init', '1961917827762675');
+    fbq('track', 'PageView');
+    fbq('track', 'ViewContent', { value: 299.00, currency: 'ZAR', content_type: 'product' });
+  </script>
 
-  fbq('init', '1238580704010895');
-  fbq('track', 'PageView');
-  fbq('track', 'ViewContent'); // Evento importante para PV
-</script>
+  <script src="js/latest.js" data-utmify-prevent-xcod-sck="" data-utmify-prevent-subids="" async="" defer=""></script>
 
-<script src="js/latest.js" data-utmify-prevent-xcod-sck="" data-utmify-prevent-subids="" async="" defer=""></script>
-
-<script>
-  window.pixelId = "67918adf0b80f52dd2589822";
-  var a = document.createElement("script");
-  a.setAttribute("async", "");
-  a.setAttribute("defer", "");
-  a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
-  document.head.appendChild(a);
-</script><script async="" defer="" src="js/pixel.js"></script>
+  <script>
+    window.pixelId = "67918adf0b80f52dd2589822";
+    var a = document.createElement("script");
+    a.setAttribute("async", "");
+    a.setAttribute("defer", "");
+    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+    document.head.appendChild(a);
+  </script>
+  <script async="" defer="" src="js/pixel.js"></script>
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,14 +47,13 @@
       --danger: #ff5a5f;        /* contorno do botão esquerdo */
     }
 
-.add-btn,
-.add-btn:hover,
-.add-btn:focus,
-.add-btn:active{
-  text-decoration: none;
-  color: #fff; /* garante que o texto fique branco */
-}
-
+    .add-btn,
+    .add-btn:hover,
+    .add-btn:focus,
+    .add-btn:active{
+      text-decoration: none;
+      color: #fff; /* garante que o texto fique branco */
+    }
 
     *{ box-sizing: border-box; }
     html, body { height: 100%; }
@@ -392,1224 +394,1223 @@
     }
 
     /* ===== BLOCO DE OFERTAS (Best Price / Fastest Delivery) ===== */
-.offers{
-  padding: 12px 12px 0;
-}
-
-.offer-card{
-  border: 1px solid #dcdcdc;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 1px 0 rgba(0,0,0,.04);
-  padding: 14px 12px;
-  display: flex;
-  gap: 12px;
-  position: relative;
-  margin-bottom: 12px;
-}
-
-.offer-card.is-selected{
-  border-color: #0b6ecb;
-  box-shadow: 0 0 0 1px #0b6ecb;
-}
-
-.offer-radio{
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 2px solid #c9c9c9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 24px;
-  flex: 0 0 auto;
-  background: #fff;
-}
-
-.offer-card.is-selected .offer-radio{
-  border-color: #0b6ecb;
-}
-.offer-card.is-selected .offer-radio::after{
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: #0b6ecb;
-  display: block;
-}
-
-.offer-body{
-  flex: 1;
-  min-width: 0;
-}
-
-.offer-top{
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 6px;
-}
-
-.price, .currency{
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -0.4px;
-  line-height: 1;
-}
-
-.currency{ margin-right: 6px; }
-
-.old-price{
-  color: #9a9a9a;
-  text-decoration: line-through;
-  font-size: 14px;
-  margin-top: 6px;
-  white-space: nowrap;
-}
-
-.info-ico{
-  width: 16px;
-  height: 16px;
-  color: #9a9a9a;
-  margin-top: 6px;
-  flex: 0 0 auto;
-}
-
-.offer-line{
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-  color: #333;
-  font-size: 14px;
-}
-
-.offer-line .muted{
-  color: #8a8a8a;
-  font-weight: 500;
-}
-
-.delivery-range{
-  font-size: 16px;
-  font-weight: 800;
-  margin-top: 4px;
-}
-
-.tcs{
-  display: inline-block;
-  margin-top: 6px;
-  color: #0b6ecb;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.tag{
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  border-radius: 10px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.tag.best{ background: #0b6ecb; }
-.tag.fast{ background: #6d6d6d; }
-
-.tag-ico{
-  width: 16px;
-  height: 16px;
-  color: #fff;
-}
-
-.pill{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #f2f2f2;
-  border: 1px solid #e1e1e1;
-  color: #333;
-  font-size: 12px;
-  font-weight: 700;
-  border-radius: 6px;
-  padding: 2px 6px;
-  line-height: 1.2;
-  margin-left: 6px;
-}
-
-/* ===== FREE DELIVERY WITH TAKEALOTMORE ===== */
-.takealotmore{
-  padding: 12px;
-}
-
-.takealotmore-box{
-  border: 1px dashed #dcdcdc;
-  border-radius: 12px;
-  background: #fff;
-  padding: 14px 12px;
-  text-align: center;
-}
-
-.takealotmore-text{
-  font-size: 14px;
-  font-weight: 700;
-  color: #6a6a6a;
-  letter-spacing: .2px;
-}
-
-.takealotmore-text strong{
-  color: #0b6ecb; /* azul Takealot */
-  font-weight: 800;
-}
-
-/* ===== SHIPS IN 4-6 WORK DAYS (Takealot-like) ===== */
-.ship-strip{
-  padding: 10px 12px 0;
-  border-top: 1px solid #f0f0f0;
-  background: #fff;
-}
-
-.ship-head{
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.ship-title{
-  font-size: 20px;
-  font-weight: 900;
-  color: #111;
-  letter-spacing: -0.2px;
-}
-
-.ship-title strong{
-  font-weight: 900;
-}
-
-.ship-link{
-  font-size: 14px;
-  font-weight: 700;
-  color: #0b6ecb;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.ship-sub{
-  margin-top: 4px;
-}
-
-.ship-q{
-  display: inline-block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #0b6ecb;
-  text-decoration: none;
-}
-
-.ship-row{
-  display: grid;
-  grid-template-columns: 26px 1fr 22px;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 0;
-  border-top: 1px solid #e9e9e9;
-}
-
-.ship-row--last{
-  border-bottom: 1px solid #e9e9e9;
-}
-
-.ship-ico{
-  width: 26px;
-  height: 26px;
-  color: #6f6f6f;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ship-ico svg{
-  width: 22px;
-  height: 22px;
-  display: block;
-}
-
-.ship-text{
-  font-size: 14px;
-  color: #333;
-  line-height: 1.35;
-}
-
-.ship-info{
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  background: #178a3b; /* verde “info” */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 900;
-  font-size: 12px;
-}
-.ship-info span{
-  transform: translateY(-.5px);
-}
-
-/* ===== DESCRIPTION (Takealot-like) ===== */
-.desc-section{
-  padding: 6px 12px 0;
-  border-top: 1px solid #f0f0f0;
-}
-
-.desc-title{
-  margin: 16px 0 10px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111;
-}
-
-.desc-box{
-  position: relative;
-}
-
-.desc-content{
-  font-size: 14px;
-  line-height: 1.5;
-  color: #333;
-}
-
-/* estado recolhido */
-.desc-box.is-collapsed .desc-content{
-  max-height: 210px;   /* altura semelhante ao print antes de expandir */
-  overflow: hidden;
-}
-
-.desc-subhead{
-  margin: 12px 0 6px;
-  font-weight: 600;
-  color: #111;
-}
-
-.desc-list{
-  margin: 0 0 8px;
-  padding-left: 18px;
-}
-
-.desc-fade{
-  display: none;
-}
-
-.desc-box.is-collapsed .desc-fade{
-  display: block;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 70px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
-}
-
-/* botão Show More */
-.show-more{
-  width: 100%;
-  margin: 12px 0 16px;
-  height: 46px;
-  border-radius: 999px;
-  border: 1px solid #d7d7d7;
-  background: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  color: #222;
-  cursor: pointer;
-}
-.show-more:active{
-  transform: scale(.99);
-}
-
-/* ===== SELLER + CREDIT + REWARDS ===== */
-.seller-block{
-  padding: 12px;
-  border-top: 1px solid #f0f0f0;
-  background: #fff;
-}
-
-.soldby{
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 10px;
-}
-.soldby-label{ color:#333; }
-.soldby-link{
-  color: #0b6ecb;
-  font-weight: 700;
-  text-decoration: none;
-  margin-left: 6px;
-}
-
-.seller-score{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #e3e3e3;
-  border-radius: 8px;
-  padding: 10px 12px;
-  background: #fff;
-  margin-bottom: 14px;
-}
-
-.seller-score-left{
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.seller-score-title{
-  font-size: 15px;
-  font-weight: 700;
-  color: #111;
-}
-
-.mini-info{
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #1a7f37;
-  color: #fff;
-  font-weight: 900;
-  font-size: 12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  line-height: 1;
-}
-
-.seller-score-right{
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #333;
-}
-.mini-star{
-  color: #0b6ecb;
-  font-size: 16px;
-  transform: translateY(-1px);
-}
-.seller-rating{
-  font-weight: 800;
-}
-.dot-sep{
-  color: #9a9a9a;
-}
-.seller-reviews{
-  color: #333;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-/* cards */
-.card{
-  border: 1px solid #eeeeee;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 1px 0 rgba(0,0,0,.04);
-  padding: 14px 12px;
-  margin-bottom: 12px;
-}
-
-/* takealot.credit */
-.credit-brand{
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  margin-bottom: 8px;
-}
-.credit-takealot{ color:#333; }
-.credit-dot{ color:#0b6ecb; }
-.credit-credit{ color:#333; font-weight: 700; }
-
-.credit-text{
-  margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: #333;
-}
-
-.credit-more{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.credit-more-inner{
-  background: #f4f4f4;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
-}
-
-.credit-more-logo{
-  font-weight: 900;
-  margin-left: 6px;
-  color: #0b6ecb;
-}
-.credit-more-logo span{
-  color: #ff3b30; /* "more" em vermelho */
-  font-weight: 900;
-  margin-left: 2px;
-}
-
-.credit-options{
-  align-self: flex-end;
-  font-size: 14px;
-  font-weight: 700;
-  color: #0b6ecb;
-  text-decoration: none;
-}
-
-/* rewards */
-.reward-row{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.reward-left{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.reward-badge{
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight: 900;
-  color: #fff;
-  flex: 0 0 auto;
-}
-
-.reward-badge.eb{
-  background: #ff7a00; /* laranja */
-}
-
-.reward-name{
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
-  white-space: nowrap;
-}
-.reward-name-accent{
-  color: #ff7a00;
-  font-weight: 900;
-}
-
-.reward-value{
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
-  white-space: nowrap;
-}
-
-/* discovery miles */
-.reward-d{
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 2px solid #a98b4a;
-  color: #a98b4a;
-  font-weight: 900;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex: 0 0 auto;
-}
-
-.reward-name.miles{
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-.miles-top{
-  font-size: 11px;
-  color: #4a6aa6;
-  font-weight: 700;
-}
-.miles-bottom{
-  font-size: 14px;
-  color: #1f3e7a;
-  font-weight: 900;
-  letter-spacing: .5px;
-}
-
-/* ===== PRODUCT INFORMATION ===== */
-.pi-section{
-  padding: 6px 12px 0;
-  border-top: 1px solid #f0f0f0;
-  background: #fff;
-}
-
-.pi-title{
-  margin: 16px 0 10px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111;
-}
-
-.pi-table{
-  border: 1px solid #e0e0e0;
-  border-radius: 0; /* no print parece bem “reta” */
-  overflow: hidden;
-  background: #fff;
-}
-
-.pi-row{
-  display: grid;
-  grid-template-columns: 42% 58%;
-  border-top: 1px solid #e0e0e0;
-  min-height: 44px;
-}
-
-.pi-row:first-child{ border-top: 0; }
-
-.pi-key{
-  background: #f3f3f3;
-  padding: 12px 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-}
-
-.pi-val{
-  padding: 12px 12px;
-  font-size: 14px;
-  color: #333;
-}
-
-.pi-links a{
-  color: #0b6ecb;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.pi-showmore{
-  width: 100%;
-  margin: 12px 0 16px;
-  height: 46px;
-  border-radius: 999px;
-  border: 1px solid #d7d7d7;
-  background: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  color: #222;
-  cursor: pointer;
-}
-.pi-showmore:active{ transform: scale(.99); }
-
-/* ===== MODAL (sheet) ===== */
-.pi-modal{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.45);
-  display: none;
-  z-index: 2200;
-}
-
-.pi-modal.is-open{ display: block; }
-
-.pi-sheet{
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background: #fff;
-  overflow: hidden;
-}
-
-.pi-sheet-head{
-  height: 56px;
-  display: grid;
-  grid-template-columns: 56px 1fr 56px;
-  align-items: center;
-  border-bottom: 1px solid #e8e8e8;
-  padding: 0 6px;
-}
-
-.pi-close{
-  width: 44px;
-  height: 44px;
-  margin-left: 6px;
-  border-radius: 999px;
-  border: 0;
-  background: transparent;
-  font-size: 22px;
-  cursor: pointer;
-}
-.pi-close:active{ background: rgba(0,0,0,.06); }
-
-.pi-sheet-title{
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111;
-}
-
-.pi-head-spacer{ width: 56px; height: 1px; }
-
-.pi-sheet-body{
-  height: calc(100% - 56px);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 0 18px;
-}
-
-.pi-table--full{
-  border-left: 0;
-  border-right: 0;
-}
-
-/* ===== REVIEWS PREVIEW ===== */
-.rv-preview{
-  padding: 12px;
-  border-top: 1px solid #f0f0f0;
-  background: #fff;
-}
-
-.rv-preview-head{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.rv-preview-title{
-  font-size: 18px;
-  font-weight: 600;
-  color: #111;
-}
-
-.rv-preview-meta{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  color:#333;
-  font-size: 14px;
-  white-space: nowrap;
-}
-.rv-star{ color:#f4b400; }
-.rv-score{ font-weight: 600; }
-.rv-count{ color:#6b6b6b; font-weight: 600; }
-
-.rv-card{
-  border: 1px solid #dcdcdc;
-  border-radius: 4px;
-  background: #f7f7f7;
-  padding: 12px;
-}
-
-.rv-card-top{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.rv-name-date{
-  font-size: 14px;
-  color:#333;
-  font-weight: 600;
-}
-
-.rv-mini-right{
-  display:flex;
-  align-items:center;
-  gap: 6px;
-  color:#333;
-  font-size: 13px;
-  white-space: nowrap;
-}
-.rv-mini-star{ color:#f4b400; }
-.rv-mini-score{ font-weight: 600; }
-.rv-mini-like{ font-size: 12px; opacity: .8; }
-.rv-mini-likecount{ color:#666; font-weight: 600; }
-
-.rv-snippet{
-  font-size: 14px;
-  color:#444;
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-
-.rv-readmore{
-  color:#0b6ecb;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.rv-viewall-row{
-  display:flex;
-  justify-content:flex-end;
-  padding-top: 8px;
-}
-.rv-viewall{
-  color:#0b6ecb;
-  text-decoration:none;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-/* ===== REVIEWS PAGE (overlay) ===== */
-.rv-page{
-  position: fixed;
-  inset: 0;
-  background: #fff;
-  display: none;
-  z-index: 2300;
-}
-
-.rv-page.is-open{ display:block; }
-
-.rv-topbar{
-  height: 56px;
-  display:grid;
-  grid-template-columns: 56px 1fr 56px;
-  align-items:center;
-  border-bottom: 1px solid #e8e8e8;
-  padding: 0 6px;
-}
-
-.rv-back{
-  width: 44px;
-  height: 44px;
-  margin-left: 6px;
-  border-radius: 999px;
-  border: 0;
-  background: transparent;
-  font-size: 22px;
-  cursor: pointer;
-}
-.rv-back:active{ background: rgba(0,0,0,.06); }
-
-.rv-top-title{
-  text-align:center;
-  font-size: 18px;
-  font-weight: 600;
-  color:#111;
-}
-.rv-top-spacer{ width:56px; height:1px; }
-
-.rv-summary{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 14px 12px 6px;
-}
-
-.rv-big{
-  font-size: 64px;
-  font-weight: 600;
-  color:#4a4a4a;
-  letter-spacing: -1px;
-  line-height: 1;
-}
-
-.rv-stars{
-  font-size: 20px;
-  color:#f4b400;
-  letter-spacing: 2px;
-  white-space: nowrap;
-}
-.rv-star-dim{ color:#d9d9d9; }
-
-.rv-total{
-  font-size: 16px;
-  font-weight: 600;
-  color:#555;
-  white-space: nowrap;
-}
-
-.rv-bars{
-  padding: 0 12px 10px;
-}
-
-.rv-bar-row{
-  display:grid;
-  grid-template-columns: 34px 1fr 52px;
-  align-items:center;
-  gap: 10px;
-  padding: 6px 0;
-}
-
-.rv-bar-left{
-  font-size: 14px;
-  font-weight: 600;
-  color:#333;
-}
-.rv-bar-star{ color:#f4b400; }
-
-.rv-bar-track{
-  height: 10px;
-  background: #e9e9e9;
-  border-radius: 999px;
-  overflow:hidden;
-}
-
-.rv-bar-fill{
-  height: 100%;
-  border-radius: 999px;
-}
-
-/* cores das barras (igual ao visual do print) */
-.rv5{ width: 78%; background: #0a9a2a; }
-.rv4{ width: 15%; background: #7ac400; }
-.rv3{ width: 5%;  background: #f4b400; }
-.rv2{ width: 3%;  background: #f39c12; }
-.rv1{ width: 6%;  background: #e74c3c; }
-
-.rv-bar-num{
-  text-align:right;
-  font-size: 14px;
-  font-weight: 600;
-  color:#444;
-}
-
-.rv-write{
-  display:block;
-  text-align:right;
-  margin-top: 10px;
-  color:#0b6ecb;
-  text-decoration:none;
-  font-weight: 600;
-}
-
-.rv-controls{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 10px 12px;
-  border-top: 1px solid #efefef;
-  border-bottom: 1px solid #efefef;
-  background: #fff;
-}
-
-.rv-ctrl{
-  height: 44px;
-  border: 0;
-  background: #ececec;
-  border-radius: 2px;
-  font-size: 16px;
-  font-weight: 600;
-  color:#555;
-  cursor:pointer;
-}
-
-.rv-list{
-  height: calc(100% - 56px - 120px - 80px);
-  overflow:auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 12px;
-}
-
-.rv-item{
-  padding: 14px 0;
-  border-bottom: 1px solid #efefef;
-}
-
-.rv-item-stars{
-  color:#f4b400;
-  font-size: 18px;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
-
-.rv-item-head{
-  font-size: 16px;
-  color:#222;
-  margin-bottom: 4px;
-}
-
-.rv-item-sub{
-  font-size: 14px;
-  color:#888;
-  font-style: italic;
-  margin-bottom: 10px;
-}
-
-.rv-item-text{
-  font-size: 15px;
-  color:#333;
-  line-height: 1.45;
-}
-
-/* ===== SINGLE PRICE (1 preço, sem variação) ===== */
-.single-price{
-  padding: 12px 12px 0;
-  background: #fff;
-}
-
-.price-row{
-  border-bottom: 1px solid #efefef;
-  padding-bottom: 12px;
-}
-
-.main-price{
-  display:flex;
-  align-items:baseline;
-  gap: 6px;
-}
-
-.main-price .currency{
-  font-size: 22px;
-  font-weight: 600;
-  color:#111;
-}
-
-.main-price .price{
-  font-size: 38px;
-  font-weight: 600;
-  letter-spacing: -0.5px;
-  color:#111;
-  line-height: 1;
-}
-
-.was-price{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.was-price .was{
-  color:#9a9a9a;
-  text-decoration: line-through;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.est-delivery{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.muted{
-  color:#8a8a8a;
-  font-weight: 600;
-}
-
-/* pills CPT/JHB (reusa a tua pill se já existir) */
-.single-price .pill{
-  margin-left: 0;
-}
-
-#singleDeliveryRange{
-  margin-top: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  color:#111;
-}
-
-/* ===== FIX: remove buraco entre rating e preço ===== */
-.wrap{ padding-bottom: 0 !important; }
-
-.info{ 
-  padding-bottom: 6px !important; 
-  margin-bottom: 0 !important; 
-  min-height: auto !important; 
-}
-
-.subtitle{
-  margin: 4px 0 6px !important;
-}
-
-.rating{ 
-  margin: 0 !important; 
-  padding: 0 !important;
-}
-
-.wrap section{
-  margin-bottom: 0 !important;
-}
-
-.hero__imgbox{ touch-action: pan-y; }
-.hero__img{ user-select: none; -webkit-user-drag: none; }
-
- /* Takealot-like stock block */
-  .ta-stock{
-    background:#fff;
-    padding: 12px;
-    border-top: 1px solid #f0f0f0;
-  }
-
-  .ta-stock__head{
-    display:flex;
-    align-items: baseline;
-    gap:10px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
-
-  .ta-stock__title{
-    font-size: 20px;
-    font-weight: 700;
-    color:#111;
-    letter-spacing: -0.2px;
-  }
-
-  .ta-stock__pills{
-    display:flex;
-    gap:6px;
-    align-items:center;
-  }
-
-  .ta-pill{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    height: 18px;
-    padding: 0 6px;
-    border-radius: 4px;
-    background: #f4f4f4;
-    border: 1px solid #e1e1e1;
-    color:#333;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .2px;
-    line-height: 18px;
-  }
-
-  .ta-stock__link{
-    margin-left:auto;
-    font-size: 14px;
-    font-weight: 800;
-    color:#0b6ecb;
-    text-decoration:none;
-    white-space: nowrap;
-  }
-
-  .ta-stock__list{
-    list-style:none;
-    margin:0;
-    padding:0;
-  }
-
-  .ta-stock__row{
-    display:grid;
-    grid-template-columns: 26px 1fr 22px;
-    align-items:center;
-    gap: 10px;
-    padding: 12px 0;
-    border-top: 1px solid #e9e9e9;
-  }
-  .ta-stock__row:first-child{ border-top: 0; }
-  .ta-stock__row--last{ border-bottom: 1px solid #e9e9e9; }
-
-  .ta-ico{
-    width: 26px;
-    height: 26px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#6f6f6f;
-  }
-
-  .ta-ico svg{
-    width: 22px;
-    height: 22px;
-    display:block;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  /* star filled like screenshot */
-  .ta-stock__row:first-child .ta-ico svg{
-    fill: currentColor;
-    stroke: none;
-  }
-
-  .ta-stock__text{
-    font-size: 14px;
-    color:#333;
-    line-height: 1.35;
-  }
-
-  .ta-info{
-    width: 20px;
-    height: 20px;
-    border-radius: 999px;
-    background: #178a3b;
-    border: 0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    padding:0;
-  }
-  .ta-info span{
-    color:#fff;
-    font-weight: 900;
-    font-size: 12px;
-    transform: translateY(-.5px);
-    line-height: 1;
-  }
-  .ta-info:active{ transform: scale(.98); }
-
-  /* ===== FREE GIFT BANNER ===== */
-  .gift-section{
-    padding: 12px;
-  }
-
-  .gift-banner{
-    border: 1px dashed #178a3b;
-    background: #f2faf4;
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 14px;
-    color: #1a5c2c;
-    line-height: 1.4;
-    text-align: center;
-  }
-  .gift-banner strong{ color: #0e7a2c; }
-
-  .footer-banner{
-  width: 100%;
-  background: #fff;
-  padding: 8px 0;
-  border-top: 1px solid #e8e8e8;
-}
-
-.footer-banner img{
-  display: block;
-  width: 100%;
-  max-width: 420px;   /* igual ao mobile do Takealot */
-  margin: 0 auto;
-  height: auto;
-}
-
+    .offers{
+      padding: 12px 12px 0;
+    }
+
+    .offer-card{
+      border: 1px solid #dcdcdc;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 1px 0 rgba(0,0,0,.04);
+      padding: 14px 12px;
+      display: flex;
+      gap: 12px;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .offer-card.is-selected{
+      border-color: #0b6ecb;
+      box-shadow: 0 0 0 1px #0b6ecb;
+    }
+
+    .offer-radio{
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 2px solid #c9c9c9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 24px;
+      flex: 0 0 auto;
+      background: #fff;
+    }
+
+    .offer-card.is-selected .offer-radio{
+      border-color: #0b6ecb;
+    }
+    .offer-card.is-selected .offer-radio::after{
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #0b6ecb;
+      display: block;
+    }
+
+    .offer-body{
+      flex: 1;
+      min-width: 0;
+    }
+
+    .offer-top{
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .price, .currency{
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      line-height: 1;
+    }
+
+    .currency{ margin-right: 6px; }
+
+    .old-price{
+      color: #9a9a9a;
+      text-decoration: line-through;
+      font-size: 14px;
+      margin-top: 6px;
+      white-space: nowrap;
+    }
+
+    .info-ico{
+      width: 16px;
+      height: 16px;
+      color: #9a9a9a;
+      margin-top: 6px;
+      flex: 0 0 auto;
+    }
+
+    .offer-line{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .offer-line .muted{
+      color: #8a8a8a;
+      font-weight: 500;
+    }
+
+    .delivery-range{
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .tcs{
+      display: inline-block;
+      margin-top: 6px;
+      color: #0b6ecb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .tag{
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .tag.best{ background: #0b6ecb; }
+    .tag.fast{ background: #6d6d6d; }
+
+    .tag-ico{
+      width: 16px;
+      height: 16px;
+      color: #fff;
+    }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #f2f2f2;
+      border: 1px solid #e1e1e1;
+      color: #333;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 2px 6px;
+      line-height: 1.2;
+      margin-left: 6px;
+    }
+
+    /* ===== FREE DELIVERY WITH TAKEALOTMORE ===== */
+    .takealotmore{
+      padding: 12px;
+    }
+
+    .takealotmore-box{
+      border: 1px dashed #dcdcdc;
+      border-radius: 12px;
+      background: #fff;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .takealotmore-text{
+      font-size: 14px;
+      font-weight: 700;
+      color: #6a6a6a;
+      letter-spacing: .2px;
+    }
+
+    .takealotmore-text strong{
+      color: #0b6ecb; /* azul Takealot */
+      font-weight: 800;
+    }
+
+    /* ===== SHIPS IN 4-6 WORK DAYS (Takealot-like) ===== */
+    .ship-strip{
+      padding: 10px 12px 0;
+      border-top: 1px solid #f0f0f0;
+      background: #fff;
+    }
+
+    .ship-head{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .ship-title{
+      font-size: 20px;
+      font-weight: 900;
+      color: #111;
+      letter-spacing: -0.2px;
+    }
+
+    .ship-title strong{
+      font-weight: 900;
+    }
+
+    .ship-link{
+      font-size: 14px;
+      font-weight: 700;
+      color: #0b6ecb;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .ship-sub{
+      margin-top: 4px;
+    }
+
+    .ship-q{
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #0b6ecb;
+      text-decoration: none;
+    }
+
+    .ship-row{
+      display: grid;
+      grid-template-columns: 26px 1fr 22px;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid #e9e9e9;
+    }
+
+    .ship-row--last{
+      border-bottom: 1px solid #e9e9e9;
+    }
+
+    .ship-ico{
+      width: 26px;
+      height: 26px;
+      color: #6f6f6f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ship-ico svg{
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+
+    .ship-text{
+      font-size: 14px;
+      color: #333;
+      line-height: 1.35;
+    }
+
+    .ship-info{
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #178a3b; /* verde “info” */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 12px;
+    }
+    .ship-info span{
+      transform: translateY(-.5px);
+    }
+
+    /* ===== DESCRIPTION (Takealot-like) ===== */
+    .desc-section{
+      padding: 6px 12px 0;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .desc-title{
+      margin: 16px 0 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .desc-box{
+      position: relative;
+    }
+
+    .desc-content{
+      font-size: 14px;
+      line-height: 1.5;
+      color: #333;
+    }
+
+    /* estado recolhido */
+    .desc-box.is-collapsed .desc-content{
+      max-height: 210px;   /* altura semelhante ao print antes de expandir */
+      overflow: hidden;
+    }
+
+    .desc-subhead{
+      margin: 12px 0 6px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .desc-list{
+      margin: 0 0 8px;
+      padding-left: 18px;
+    }
+
+    .desc-fade{
+      display: none;
+    }
+
+    .desc-box.is-collapsed .desc-fade{
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 70px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+    }
+
+    /* botão Show More */
+    .show-more{
+      width: 100%;
+      margin: 12px 0 16px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid #d7d7d7;
+      background: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      color: #222;
+      cursor: pointer;
+    }
+    .show-more:active{
+      transform: scale(.99);
+    }
+
+    /* ===== SELLER + CREDIT + REWARDS ===== */
+    .seller-block{
+      padding: 12px;
+      border-top: 1px solid #f0f0f0;
+      background: #fff;
+    }
+
+    .soldby{
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .soldby-label{ color:#333; }
+    .soldby-link{
+      color: #0b6ecb;
+      font-weight: 700;
+      text-decoration: none;
+      margin-left: 6px;
+    }
+
+    .seller-score{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #e3e3e3;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+      margin-bottom: 14px;
+    }
+
+    .seller-score-left{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .seller-score-title{
+      font-size: 15px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .mini-info{
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #1a7f37;
+      color: #fff;
+      font-weight: 900;
+      font-size: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height: 1;
+    }
+
+    .seller-score-right{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #333;
+    }
+    .mini-star{
+      color: #0b6ecb;
+      font-size: 16px;
+      transform: translateY(-1px);
+    }
+    .seller-rating{
+      font-weight: 800;
+    }
+    .dot-sep{
+      color: #9a9a9a;
+    }
+    .seller-reviews{
+      color: #333;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* cards */
+    .card{
+      border: 1px solid #eeeeee;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 1px 0 rgba(0,0,0,.04);
+      padding: 14px 12px;
+      margin-bottom: 12px;
+    }
+
+    /* takealot.credit */
+    .credit-brand{
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      margin-bottom: 8px;
+    }
+    .credit-takealot{ color:#333; }
+    .credit-dot{ color:#0b6ecb; }
+    .credit-credit{ color:#333; font-weight: 700; }
+
+    .credit-text{
+      margin: 0 0 12px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: #333;
+    }
+
+    .credit-more{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .credit-more-inner{
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .credit-more-logo{
+      font-weight: 900;
+      margin-left: 6px;
+      color: #0b6ecb;
+    }
+    .credit-more-logo span{
+      color: #ff3b30; /* "more" em vermelho */
+      font-weight: 900;
+      margin-left: 2px;
+    }
+
+    .credit-options{
+      align-self: flex-end;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0b6ecb;
+      text-decoration: none;
+    }
+
+    /* rewards */
+    .reward-row{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .reward-left{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .reward-badge{
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      color: #fff;
+      flex: 0 0 auto;
+    }
+
+    .reward-badge.eb{
+      background: #ff7a00; /* laranja */
+    }
+
+    .reward-name{
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      white-space: nowrap;
+    }
+    .reward-name-accent{
+      color: #ff7a00;
+      font-weight: 900;
+    }
+
+    .reward-value{
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    /* discovery miles */
+    .reward-d{
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 2px solid #a98b4a;
+      color: #a98b4a;
+      font-weight: 900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+    }
+
+    .reward-name.miles{
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+    .miles-top{
+      font-size: 11px;
+      color: #4a6aa6;
+      font-weight: 700;
+    }
+    .miles-bottom{
+      font-size: 14px;
+      color: #1f3e7a;
+      font-weight: 900;
+      letter-spacing: .5px;
+    }
+
+    /* ===== PRODUCT INFORMATION ===== */
+    .pi-section{
+      padding: 6px 12px 0;
+      border-top: 1px solid #f0f0f0;
+      background: #fff;
+    }
+
+    .pi-title{
+      margin: 16px 0 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .pi-table{
+      border: 1px solid #e0e0e0;
+      border-radius: 0; /* no print parece bem “reta” */
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .pi-row{
+      display: grid;
+      grid-template-columns: 42% 58%;
+      border-top: 1px solid #e0e0e0;
+      min-height: 44px;
+    }
+
+    .pi-row:first-child{ border-top: 0; }
+
+    .pi-key{
+      background: #f3f3f3;
+      padding: 12px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .pi-val{
+      padding: 12px 12px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .pi-links a{
+      color: #0b6ecb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .pi-showmore{
+      width: 100%;
+      margin: 12px 0 16px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid #d7d7d7;
+      background: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      color: #222;
+      cursor: pointer;
+    }
+    .pi-showmore:active{ transform: scale(.99); }
+
+    /* ===== MODAL (sheet) ===== */
+    .pi-modal{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: none;
+      z-index: 2200;
+    }
+
+    .pi-modal.is-open{ display: block; }
+
+    .pi-sheet{
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .pi-sheet-head{
+      height: 56px;
+      display: grid;
+      grid-template-columns: 56px 1fr 56px;
+      align-items: center;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 6px;
+    }
+
+    .pi-close{
+      width: 44px;
+      height: 44px;
+      margin-left: 6px;
+      border-radius: 999px;
+      border: 0;
+      background: transparent;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .pi-close:active{ background: rgba(0,0,0,.06); }
+
+    .pi-sheet-title{
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .pi-head-spacer{ width: 56px; height: 1px; }
+
+    .pi-sheet-body{
+      height: calc(100% - 56px);
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 0 18px;
+    }
+
+    .pi-table--full{
+      border-left: 0;
+      border-right: 0;
+    }
+
+    /* ===== REVIEWS PREVIEW ===== */
+    .rv-preview{
+      padding: 12px;
+      border-top: 1px solid #f0f0f0;
+      background: #fff;
+    }
+
+    .rv-preview-head{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .rv-preview-title{
+      font-size: 18px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .rv-preview-meta{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      color:#333;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .rv-star{ color:#f4b400; }
+    .rv-score{ font-weight: 600; }
+    .rv-count{ color:#6b6b6b; font-weight: 600; }
+
+    .rv-card{
+      border: 1px solid #dcdcdc;
+      border-radius: 4px;
+      background: #f7f7f7;
+      padding: 12px;
+    }
+
+    .rv-card-top{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .rv-name-date{
+      font-size: 14px;
+      color:#333;
+      font-weight: 600;
+    }
+
+    .rv-mini-right{
+      display:flex;
+      align-items:center;
+      gap: 6px;
+      color:#333;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .rv-mini-star{ color:#f4b400; }
+    .rv-mini-score{ font-weight: 600; }
+    .rv-mini-like{ font-size: 12px; opacity: .8; }
+    .rv-mini-likecount{ color:#666; font-weight: 600; }
+
+    .rv-snippet{
+      font-size: 14px;
+      color:#444;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .rv-readmore{
+      color:#0b6ecb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .rv-viewall-row{
+      display:flex;
+      justify-content:flex-end;
+      padding-top: 8px;
+    }
+    .rv-viewall{
+      color:#0b6ecb;
+      text-decoration:none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* ===== REVIEWS PAGE (overlay) ===== */
+    .rv-page{
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      display: none;
+      z-index: 2300;
+    }
+
+    .rv-page.is-open{ display:block; }
+
+    .rv-topbar{
+      height: 56px;
+      display:grid;
+      grid-template-columns: 56px 1fr 56px;
+      align-items:center;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 6px;
+    }
+
+    .rv-back{
+      width: 44px;
+      height: 44px;
+      margin-left: 6px;
+      border-radius: 999px;
+      border: 0;
+      background: transparent;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .rv-back:active{ background: rgba(0,0,0,.06); }
+
+    .rv-top-title{
+      text-align:center;
+      font-size: 18px;
+      font-weight: 600;
+      color:#111;
+    }
+    .rv-top-spacer{ width:56px; height:1px; }
+
+    .rv-summary{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 12px 6px;
+    }
+
+    .rv-big{
+      font-size: 64px;
+      font-weight: 600;
+      color:#4a4a4a;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .rv-stars{
+      font-size: 20px;
+      color:#f4b400;
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+    .rv-star-dim{ color:#d9d9d9; }
+
+    .rv-total{
+      font-size: 16px;
+      font-weight: 600;
+      color:#555;
+      white-space: nowrap;
+    }
+
+    .rv-bars{
+      padding: 0 12px 10px;
+    }
+
+    .rv-bar-row{
+      display:grid;
+      grid-template-columns: 34px 1fr 52px;
+      align-items:center;
+      gap: 10px;
+      padding: 6px 0;
+    }
+
+    .rv-bar-left{
+      font-size: 14px;
+      font-weight: 600;
+      color:#333;
+    }
+    .rv-bar-star{ color:#f4b400; }
+
+    .rv-bar-track{
+      height: 10px;
+      background: #e9e9e9;
+      border-radius: 999px;
+      overflow:hidden;
+    }
+
+    .rv-bar-fill{
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    /* cores das barras (igual ao visual do print) */
+    .rv5{ width: 78%; background: #0a9a2a; }
+    .rv4{ width: 15%; background: #7ac400; }
+    .rv3{ width: 5%;  background: #f4b400; }
+    .rv2{ width: 3%;  background: #f39c12; }
+    .rv1{ width: 6%;  background: #e74c3c; }
+
+    .rv-bar-num{
+      text-align:right;
+      font-size: 14px;
+      font-weight: 600;
+      color:#444;
+    }
+
+    .rv-write{
+      display:block;
+      text-align:right;
+      margin-top: 10px;
+      color:#0b6ecb;
+      text-decoration:none;
+      font-weight: 600;
+    }
+
+    .rv-controls{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 10px 12px;
+      border-top: 1px solid #efefef;
+      border-bottom: 1px solid #efefef;
+      background: #fff;
+    }
+
+    .rv-ctrl{
+      height: 44px;
+      border: 0;
+      background: #ececec;
+      border-radius: 2px;
+      font-size: 16px;
+      font-weight: 600;
+      color:#555;
+      cursor:pointer;
+    }
+
+    .rv-list{
+      height: calc(100% - 56px - 120px - 80px);
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
+    }
+
+    .rv-item{
+      padding: 14px 0;
+      border-bottom: 1px solid #efefef;
+    }
+
+    .rv-item-stars{
+      color:#f4b400;
+      font-size: 18px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .rv-item-head{
+      font-size: 16px;
+      color:#222;
+      margin-bottom: 4px;
+    }
+
+    .rv-item-sub{
+      font-size: 14px;
+      color:#888;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .rv-item-text{
+      font-size: 15px;
+      color:#333;
+      line-height: 1.45;
+    }
+
+    /* ===== SINGLE PRICE (1 preço, sem variação) ===== */
+    .single-price{
+      padding: 12px 12px 0;
+      background: #fff;
+    }
+
+    .price-row{
+      border-bottom: 1px solid #efefef;
+      padding-bottom: 12px;
+    }
+
+    .main-price{
+      display:flex;
+      align-items:baseline;
+      gap: 6px;
+    }
+
+    .main-price .currency{
+      font-size: 22px;
+      font-weight: 600;
+      color:#111;
+    }
+
+    .main-price .price{
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color:#111;
+      line-height: 1;
+    }
+
+    .was-price{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .was-price .was{
+      color:#9a9a9a;
+      text-decoration: line-through;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .est-delivery{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .muted{
+      color:#8a8a8a;
+      font-weight: 600;
+    }
+
+    /* pills CPT/JHB (reusa a tua pill se já existir) */
+    .single-price .pill{
+      margin-left: 0;
+    }
+
+    #singleDeliveryRange{
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      color:#111;
+    }
+
+    /* ===== FIX: remove buraco entre rating e preço ===== */
+    .wrap{ padding-bottom: 0 !important; }
+
+    .info{ 
+      padding-bottom: 6px !important; 
+      margin-bottom: 0 !important; 
+      min-height: auto !important; 
+    }
+
+    .subtitle{
+      margin: 4px 0 6px !important;
+    }
+
+    .rating{ 
+      margin: 0 !important; 
+      padding: 0 !important;
+    }
+
+    .wrap section{
+      margin-bottom: 0 !important;
+    }
+
+    .hero__imgbox{ touch-action: pan-y; }
+    .hero__img{ user-select: none; -webkit-user-drag: none; }
+
+    /* Takealot-like stock block */
+    .ta-stock{
+      background:#fff;
+      padding: 12px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .ta-stock__head{
+      display:flex;
+      align-items: baseline;
+      gap:10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .ta-stock__title{
+      font-size: 20px;
+      font-weight: 700;
+      color:#111;
+      letter-spacing: -0.2px;
+    }
+
+    .ta-stock__pills{
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+
+    .ta-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height: 18px;
+      padding: 0 6px;
+      border-radius: 4px;
+      background: #f4f4f4;
+      border: 1px solid #e1e1e1;
+      color:#333;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      line-height: 18px;
+    }
+
+    .ta-stock__link{
+      margin-left:auto;
+      font-size: 14px;
+      font-weight: 800;
+      color:#0b6ecb;
+      text-decoration:none;
+      white-space: nowrap;
+    }
+
+    .ta-stock__list{
+      list-style:none;
+      margin:0;
+      padding:0;
+    }
+
+    .ta-stock__row{
+      display:grid;
+      grid-template-columns: 26px 1fr 22px;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid #e9e9e9;
+    }
+    .ta-stock__row:first-child{ border-top: 0; }
+    .ta-stock__row--last{ border-bottom: 1px solid #e9e9e9; }
+
+    .ta-ico{
+      width: 26px;
+      height: 26px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#6f6f6f;
+    }
+
+    .ta-ico svg{
+      width: 22px;
+      height: 22px;
+      display:block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* star filled like screenshot */
+    .ta-stock__row:first-child .ta-ico svg{
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .ta-stock__text{
+      font-size: 14px;
+      color:#333;
+      line-height: 1.35;
+    }
+
+    .ta-info{
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #178a3b;
+      border: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      padding:0;
+    }
+    .ta-info span{
+      color:#fff;
+      font-weight: 900;
+      font-size: 12px;
+      transform: translateY(-.5px);
+      line-height: 1;
+    }
+    .ta-info:active{ transform: scale(.98); }
+
+    /* ===== FREE GIFT BANNER ===== */
+    .gift-section{
+      padding: 12px;
+    }
+
+    .gift-banner{
+      border: 1px dashed #178a3b;
+      background: #f2faf4;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #1a5c2c;
+      line-height: 1.4;
+      text-align: center;
+    }
+    .gift-banner strong{ color: #0e7a2c; }
+
+    .footer-banner{
+      width: 100%;
+      background: #fff;
+      padding: 8px 0;
+      border-top: 1px solid #e8e8e8;
+    }
+
+    .footer-banner img{
+      display: block;
+      width: 100%;
+      max-width: 420px;   /* igual ao mobile do Takealot */
+      margin: 0 auto;
+      height: auto;
+    }
 
   </style>
 </head>
@@ -1704,7 +1705,7 @@
         <strong>4.5</strong>
         <a class="reviews-link" href="#" aria-label="Reviews link" id="rvOpenFromStars">3278 Reviews</a>
       </div>
-  </section></div>
+  </div>
 
  <!-- PRICE (apenas 1 preço) -->
 <section class="single-price" aria-label="Price and delivery">
@@ -1733,13 +1734,13 @@
 
       <!-- aqui entra data dinâmica ou "Get It Tomorrow!" -->
       <div class="delivery-inline">
-  <span class="delivery-range" id="singleDeliveryRange">Get It Tomorrow!</span>
-  <a class="tcs" href="#">T&Cs Apply</a>
-</div>
+        <span class="delivery-range" id="singleDeliveryRange">Get It Tomorrow!</span>
+        <a class="tcs" href="#">T&Cs Apply</a>
+      </div>
 
+    </div>
   </div>
-</div></section>
-
+</section>
 
   <!-- FREE DELIVERY WITH TAKEALOTMORE -->
 <section class="takealotmore">
@@ -2044,7 +2045,6 @@
   </div>
 </div>
 
-
 <!-- =========================
      REVIEWS (Preview + Page)
 ========================= -->
@@ -2207,9 +2207,6 @@
   </div>
 </div>
 
-
-
-
   <!-- Barra fixa inferior -->
   <footer class="bottom-bar" aria-label="Bottom action bar">
     <div class="bottom-actions">
@@ -2220,15 +2217,16 @@
         </svg>
       </button>
 
-     <a href="/takealot.com/checkout" class="add-btn" id="mainAddBtn" aria-label="Add to Cart">
-  <svg class="cart-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M6 6h15l-2 9H7L6 6Z"></path>
-    <path d="M6 6l-2-2H2"></path>
-    <circle cx="9" cy="20" r="1"></circle>
-    <circle cx="18" cy="20" r="1"></circle>
-  </svg>
-  Add to Cart
-</a>
+      <!-- BOTÃO ATUALIZADO COM O PIXEL -->
+      <a href="checkout.html" onclick="fbq('track', 'AddToCart', { value: 299.00, currency: 'ZAR' });" class="add-btn" id="mainAddBtn" aria-label="Add to Cart">
+        <svg class="cart-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 6h15l-2 9H7L6 6Z"></path>
+          <path d="M6 6l-2-2H2"></path>
+          <circle cx="9" cy="20" r="1"></circle>
+          <circle cx="18" cy="20" r="1"></circle>
+        </svg>
+        Add to Cart
+      </a>
 
   </div></footer>
 
@@ -2239,71 +2237,67 @@
   </div>
 
   <!-- TAKEALOT CREDIT IMAGE BANNER -->
-<div class="footer-banner">
-  <img src="/takealot.com/images/takealot-credit.png" alt="takealot.credit shop now pay later" loading="lazy">
-</div>
-
+  <div class="footer-banner">
+    <img src="/takealot.com/images/takealot-credit.png" alt="takealot.credit shop now pay later" loading="lazy">
+  </div>
 
   <script>
-
-
     // ===== Carousel (dots + swipe) =====
-const images = ["/takealot.com/images/p1.png","/takealot.com/images/p1-original-backup.png","/takealot.com/images/p2.png","/takealot.com/images/p3.png","/takealot.com/images/p4.png","/takealot.com/images/p5.png","/takealot.com/images/p6.png"];
+    const images = ["/takealot.com/images/p1.png","/takealot.com/images/p1-original-backup.png","/takealot.com/images/p2.png","/takealot.com/images/p3.png","/takealot.com/images/p4.png","/takealot.com/images/p5.png","/takealot.com/images/p6.png"];
 
-const productImage = document.getElementById("productImage");
-const dots = Array.from(document.querySelectorAll(".dots .dot"));
+    const productImage = document.getElementById("productImage");
+    const dots = Array.from(document.querySelectorAll(".dots .dot"));
 
-let currentIndex = 0;
+    let currentIndex = 0;
 
-function setActive(index){
-  if(!productImage) return;
+    function setActive(index){
+      if(!productImage) return;
 
-  // normaliza o index
-  currentIndex = (index + images.length) % images.length;
+      // normaliza o index
+      currentIndex = (index + images.length) % images.length;
+      productImage.src = images[currentIndex];
 
-  productImage.src = images[currentIndex];
+      // dots
+      dots.forEach((d, i) => d.classList.toggle("is-active", i === currentIndex));
 
-  // dots
-  dots.forEach((d, i) => d.classList.toggle("is-active", i === currentIndex));
-
-  // mantém modal em sync se estiver aberto
-  const modal = document.getElementById("modal");
-  const modalImg = document.getElementById("modalImg");
-  if(modal && modalImg && modal.classList.contains("is-open")){
-    modalImg.src = images[currentIndex];
-  }
-}
-
-// click nos dots
-dots.forEach(dot => {
-  dot.addEventListener("click", () => {
-    const i = Number(dot.getAttribute("data-index"));
-    if(!Number.isNaN(i)) setActive(i);
-  });
-});
-
-// swipe no mobile (arrastar na imagem)
-const box = document.querySelector(".hero__imgbox");
-if(box){
-  let startX = 0;
-
-  box.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-  }, { passive: true });
-
-  box.addEventListener("touchend", (e) => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = endX - startX;
-
-    if(Math.abs(diff) > 45){
-      if(diff < 0) setActive(currentIndex + 1); // esquerda = próxima
-      else setActive(currentIndex - 1);         // direita = anterior
+      // mantém modal em sync se estiver aberto
+      const modal = document.getElementById("modal");
+      const modalImg = document.getElementById("modalImg");
+      if(modal && modalImg && modal.classList.contains("is-open")){
+        modalImg.src = images[currentIndex];
+      }
     }
-  }, { passive: true });
-}
 
-// inicializa
-setActive(0);
+    // click nos dots
+    dots.forEach(dot => {
+      dot.addEventListener("click", () => {
+        const i = Number(dot.getAttribute("data-index"));
+        if(!Number.isNaN(i)) setActive(i);
+      });
+    });
+
+    // swipe no mobile (arrastar na imagem)
+    const box = document.querySelector(".hero__imgbox");
+    if(box){
+      let startX = 0;
+
+      box.addEventListener("touchstart", (e) => {
+        startX = e.touches[0].clientX;
+      }, { passive: true });
+
+      box.addEventListener("touchend", (e) => {
+        const endX = e.changedTouches[0].clientX;
+        const diff = endX - startX;
+
+        if(Math.abs(diff) > 45){
+          if(diff < 0) setActive(currentIndex + 1); // esquerda = próxima
+          else setActive(currentIndex - 1);         // direita = anterior
+        }
+      }, { passive: true });
+    }
+
+    // inicializa
+    setActive(0);
 
     // === Expand modal ===
     const expandBtn = document.getElementById("expandBtn");
@@ -2312,207 +2306,190 @@ setActive(0);
     const modalClose = document.getElementById("modalClose");
 
     if(expandBtn && modal && modalImg){
-  expandBtn.addEventListener("click", () => {
-    modalImg.src = productImage ? productImage.src : images[0];
-    modal.classList.add("is-open");
-  });
-}
+      expandBtn.addEventListener("click", () => {
+        modalImg.src = productImage ? productImage.src : images[0];
+        modal.classList.add("is-open");
+      });
+    }
 
-if(modalClose && modal){
-  modalClose.addEventListener("click", () => modal.classList.remove("is-open"));
-  modal.addEventListener("click", (e) => {
-    if(e.target === modal) modal.classList.remove("is-open");
-  });
-}
+    if(modalClose && modal){
+      modalClose.addEventListener("click", () => modal.classList.remove("is-open"));
+      modal.addEventListener("click", (e) => {
+        if(e.target === modal) modal.classList.remove("is-open");
+      });
+    }
 
-
-  // === Seleção de ofertas (só se existir no HTML) ===
-const offerCards = Array.from(document.querySelectorAll(".offer-card"));
-if(offerCards.length){
-  function selectOffer(idx){
-    offerCards.forEach((c, i) => c.classList.toggle("is-selected", i === idx));
-  }
-  offerCards.forEach((card, idx) => {
-    card.addEventListener("click", () => selectOffer(idx));
-    card.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" || e.key === " "){
-        e.preventDefault();
-        selectOffer(idx);
+    // === Seleção de ofertas (só se existir no HTML) ===
+    const offerCards = Array.from(document.querySelectorAll(".offer-card"));
+    if(offerCards.length){
+      function selectOffer(idx){
+        offerCards.forEach((c, i) => c.classList.toggle("is-selected", i === idx));
       }
+      offerCards.forEach((card, idx) => {
+        card.addEventListener("click", () => selectOffer(idx));
+        card.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            selectOffer(idx);
+          }
+        });
+      });
+      // default selecionado
+      selectOffer(0);
+    }
+
+    // === Description: Show More / Show Less ===
+    const descBox = document.getElementById("descBox");
+    const showMoreBtn = document.getElementById("showMoreBtn");
+
+    if(descBox && showMoreBtn){
+      // começa recolhido
+      descBox.classList.add("is-collapsed");
+
+      showMoreBtn.addEventListener("click", () => {
+        const isCollapsed = descBox.classList.toggle("is-collapsed");
+        showMoreBtn.textContent = isCollapsed ? "Show More" : "Show Less";
+      });
+    }
+
+    // === Product Information modal ===
+    const piOpen = document.getElementById("piOpen");
+    const piModal = document.getElementById("piModal");
+    const piClose = document.getElementById("piClose");
+
+    if(piOpen && piModal && piClose){
+      piOpen.addEventListener("click", () => {
+        piModal.classList.add("is-open");
+        piModal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      });
+
+      function closePi(){
+        piModal.classList.remove("is-open");
+        piModal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
+      piClose.addEventListener("click", closePi);
+
+      // clicar fora (overlay) fecha
+      piModal.addEventListener("click", (e) => {
+        if(e.target === piModal) closePi();
+      });
+
+      // ESC fecha
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape" && piModal.classList.contains("is-open")) closePi();
+      });
+    }
+
+    // === Reviews overlay open/close ===
+    const rvPage = document.getElementById("rvPage");
+    const rvClose = document.getElementById("rvClose");
+    const rvOpenFromViewAll = document.getElementById("rvOpenFromViewAll");
+    const rvOpenFromReadMore = document.getElementById("rvOpenFromReadMore");
+    const rvOpenFromStars = document.getElementById("rvOpenFromStars");
+
+    function openReviews(){
+      rvPage.classList.add("is-open");
+      rvPage.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+    function closeReviews(){
+      rvPage.classList.remove("is-open");
+      rvPage.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    if(rvOpenFromViewAll) rvOpenFromViewAll.addEventListener("click", (e)=>{ e.preventDefault(); openReviews(); });
+    if(rvOpenFromReadMore) rvOpenFromReadMore.addEventListener("click", (e)=>{ e.preventDefault(); openReviews(); });
+    if(rvOpenFromStars) rvOpenFromStars.addEventListener("click", (e)=>{ e.preventDefault(); openReviews(); });
+    if(rvClose) rvClose.addEventListener("click", closeReviews);
+
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape" && rvPage && rvPage.classList.contains("is-open")) closeReviews();
     });
-  });
-}
 
-// === Description: Show More / Show Less ===
-const descBox = document.getElementById("descBox");
-const showMoreBtn = document.getElementById("showMoreBtn");
-
-if(descBox && showMoreBtn){
-  // começa recolhido (como no Takealot)
-  descBox.classList.add("is-collapsed");
-
-  showMoreBtn.addEventListener("click", () => {
-    const isCollapsed = descBox.classList.toggle("is-collapsed");
-    showMoreBtn.textContent = isCollapsed ? "Show More" : "Show Less";
-  });
-}
-
-// === Product Information modal ===
-const piOpen = document.getElementById("piOpen");
-const piModal = document.getElementById("piModal");
-const piClose = document.getElementById("piClose");
-
-if(piOpen && piModal && piClose){
-  piOpen.addEventListener("click", () => {
-    piModal.classList.add("is-open");
-    piModal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  });
-
-  function closePi(){
-    piModal.classList.remove("is-open");
-    piModal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  piClose.addEventListener("click", closePi);
-
-  // clicar fora (overlay) fecha
-  piModal.addEventListener("click", (e) => {
-    if(e.target === piModal) closePi();
-  });
-
-  // ESC fecha
-  document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape" && piModal.classList.contains("is-open")) closePi();
-  });
-}
-
-// === Reviews overlay open/close ===
-const rvPage = document.getElementById("rvPage");
-const rvClose = document.getElementById("rvClose");
-const rvOpenFromViewAll = document.getElementById("rvOpenFromViewAll");
-const rvOpenFromReadMore = document.getElementById("rvOpenFromReadMore");
-const rvOpenFromStars = document.getElementById("rvOpenFromStars");
-
-function openReviews(){
-  rvPage.classList.add("is-open");
-  rvPage.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-}
-function closeReviews(){
-  rvPage.classList.remove("is-open");
-  rvPage.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-}
-
-if(rvOpenFromViewAll) rvOpenFromViewAll.addEventListener("click", (e)=>{ e.preventDefault(); openReviews(); });
-if(rvOpenFromReadMore) rvOpenFromReadMore.addEventListener("click", (e)=>{ e.preventDefault(); openReviews(); });
-if(rvOpenFromStars) rvOpenFromStars.addEventListener("click", (e)=>{ e.preventDefault(); openReviews(); });
-if(rvClose) rvClose.addEventListener("click", closeReviews);
-
-document.addEventListener("keydown", (e) => {
-  if(e.key === "Escape" && rvPage && rvPage.classList.contains("is-open")) closeReviews();
-});
-
-
-// default selecionado (igual ao print)
-selectOffer(0);
-
-    // Inicial
-    setActive(0);
 
     // ===== Delivery dates (dinâmicas + Get It Tomorrow) =====
-(function setDynamicDeliveryDates(){
-  const bestEl = document.getElementById("bestDeliveryRange");
-  const fastEl = document.getElementById("fastDeliveryRange");
-  if(!bestEl || !fastEl) return;
+    (function setDynamicDeliveryDates(){
+      const bestEl = document.getElementById("bestDeliveryRange");
+      const fastEl = document.getElementById("fastDeliveryRange");
+      if(!bestEl || !fastEl) return;
 
-  function addDays(date, days){
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
-  }
+      function addDays(date, days){
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+      }
 
-  function formatDayMonth(date){
-    const months = [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December"
-    ];
-    return `${date.getDate()} ${months[date.getMonth()]}`;
-  }
+      function formatDayMonth(date){
+        const months = [
+          "January","February","March","April","May","June",
+          "July","August","September","October","November","December"
+        ];
+        return `${date.getDate()} ${months[date.getMonth()]}`;
+      }
 
-  function formatRange(start, end){
-    return `${formatDayMonth(start)} - ${formatDayMonth(end)}`;
-  }
+      function formatRange(start, end){
+        return `${formatDayMonth(start)} - ${formatDayMonth(end)}`;
+      }
 
-  const today = new Date();
-  const tomorrow = addDays(today, 1);
+      const today = new Date();
+      const tomorrow = addDays(today, 1);
 
-  // ===== CONFIGURAÇÃO (podes ajustar se o professor pedir) =====
-  // Best Price → mais lento
-  const bestStart = addDays(today, 7);
-  const bestEnd   = addDays(today, 14);
+      // Best Price → mais lento
+      const bestStart = addDays(today, 7);
+      const bestEnd   = addDays(today, 14);
 
-  // Fastest Delivery → rápido
-  const fastStart = addDays(today, 1);
-  const fastEnd   = addDays(today, 2);
+      // Fastest Delivery → rápido
+      const fastStart = addDays(today, 1);
+      const fastEnd   = addDays(today, 2);
 
-  // Best Price sempre com intervalo
-  bestEl.textContent = formatRange(bestStart, bestEnd);
+      bestEl.textContent = formatRange(bestStart, bestEnd);
 
-  // Fastest Delivery: "Get It Tomorrow!" se aplicável
-  const isTomorrow =
-    fastStart.getDate() === tomorrow.getDate() &&
-    fastStart.getMonth() === tomorrow.getMonth() &&
-    fastStart.getFullYear() === tomorrow.getFullYear();
+      const isTomorrow =
+        fastStart.getDate() === tomorrow.getDate() &&
+        fastStart.getMonth() === tomorrow.getMonth() &&
+        fastStart.getFullYear() === tomorrow.getFullYear();
 
-  if(isTomorrow){
-    fastEl.textContent = "Get It Tomorrow!";
-  } else {
-    fastEl.textContent = formatRange(fastStart, fastEnd);
-  }
-})();
+      if(isTomorrow){
+        fastEl.textContent = "Get It Tomorrow!";
+      } else {
+        fastEl.textContent = formatRange(fastStart, fastEnd);
+      }
+    })();
 
-// ===== Delivery date (preço único) + Get It Tomorrow =====
-(function singleDelivery(){
-  const el = document.getElementById("singleDeliveryRange");
-  if(!el) return;
+    // ===== Delivery date (preço único) + Get It Tomorrow =====
+    (function singleDelivery(){
+      const el = document.getElementById("singleDeliveryRange");
+      if(!el) return;
 
-  function addDays(date, days){
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
-  }
-  function formatDayMonth(date){
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    return `${date.getDate()} ${months[date.getMonth()]}`;
-  }
-  function formatRange(a,b){
-    return `${formatDayMonth(a)} - ${formatDayMonth(b)}`;
-  }
+      function addDays(date, days){
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+      }
+      function formatDayMonth(date){
+        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        return `${date.getDate()} ${months[date.getMonth()]}`;
+      }
+      function formatRange(a,b){
+        return `${formatDayMonth(a)} - ${formatDayMonth(b)}`;
+      }
 
-  const today = new Date();
-  const start = addDays(today, 1);  // amanhã
-  const end   = addDays(today, 2);  // depois de amanhã
+      const today = new Date();
+      const start = addDays(today, 1);  // amanhã
+      const end   = addDays(today, 2);  // depois de amanhã
 
-  // Se começa amanhã, mostra Get It Tomorrow!
-  const tomorrow = addDays(today, 1);
-  const isTomorrow =
-    start.getFullYear() === tomorrow.getFullYear() &&
-    start.getMonth() === tomorrow.getMonth() &&
-    start.getDate() === tomorrow.getDate();
+      const tomorrow = addDays(today, 1);
+      const isTomorrow =
+        start.getFullYear() === tomorrow.getFullYear() &&
+        start.getMonth() === tomorrow.getMonth() &&
+        start.getDate() === tomorrow.getDate();
 
-  el.textContent = isTomorrow ? "Get It Tomorrow!" : formatRange(start, end);
-})();
-
-
+      el.textContent = isTomorrow ? "Get It Tomorrow!" : formatRange(start, end);
+    })();
   </script>
-
-
-
-
-
-
-
-</body></html>
+</body>
+</html>
