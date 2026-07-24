@@ -140,12 +140,15 @@ interface PaymentLink {
   order_bump_name: string | null;
   order_bump_description: string | null;
   order_bump_price: number | null;
+  order_bump_image_url: string | null;
   order_bump_2_name: string | null;
   order_bump_2_description: string | null;
   order_bump_2_price: number | null;
+  order_bump_2_image_url: string | null;
   order_bump_3_name: string | null;
   order_bump_3_description: string | null;
   order_bump_3_price: number | null;
+  order_bump_3_image_url: string | null;
   redirect_url: string | null;
   currency: string;
   checkout_language: string;
@@ -645,7 +648,7 @@ export default function Checkout() {
     try {
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, checkout_accent_color")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, checkout_accent_color")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -663,9 +666,9 @@ export default function Checkout() {
   };
 
   const bumps = link ? [
-    { name: link.order_bump_name, desc: link.order_bump_description, price: link.order_bump_price },
-    { name: link.order_bump_2_name, desc: link.order_bump_2_description, price: link.order_bump_2_price },
-    { name: link.order_bump_3_name, desc: link.order_bump_3_description, price: link.order_bump_3_price },
+    { name: link.order_bump_name, desc: link.order_bump_description, price: link.order_bump_price, img: link.order_bump_image_url },
+    { name: link.order_bump_2_name, desc: link.order_bump_2_description, price: link.order_bump_2_price, img: link.order_bump_2_image_url },
+    { name: link.order_bump_3_name, desc: link.order_bump_3_description, price: link.order_bump_3_price, img: link.order_bump_3_image_url },
   ].filter(b => b.name && b.price && Number(b.price) > 0) : [];
   const hasBump = bumps.length > 0;
   const bumpAmount = bumps.reduce((sum, b, i) => sum + (bumpsAccepted[i] ? Number(b.price) : 0), 0);
@@ -963,7 +966,7 @@ export default function Checkout() {
             productName={bump.name!}
             productDescription={bump.desc || null}
             amount={Number(bump.price)}
-            logoUrl={null}
+            logoUrl={bump.img || null}
             accepted={bumpsAccepted[idx]}
             onToggle={(v) => {
               setBumpsAccepted(prev => {
@@ -1307,7 +1310,7 @@ export default function Checkout() {
                   productName={bump.name!}
                   productDescription={bump.desc || null}
                   amount={Number(bump.price)}
-                  logoUrl={null}
+                  logoUrl={bump.img || null}
                   accepted={bumpsAccepted[idx]}
                   onToggle={(v) => {
                     setBumpsAccepted(prev => {

@@ -47,6 +47,7 @@ interface CreateProductDialogProps {
     orderBump3Name: string;
     orderBump3Description: string;
     orderBump3Price: string;
+    bumpImageFiles: (File | null)[];
     redirectUrl: string;
     currency: string;
     checkoutLanguage: string;
@@ -91,6 +92,10 @@ export function CreateProductDialog({
   const [orderBump3Name, setOrderBump3Name] = useState("");
   const [orderBump3Description, setOrderBump3Description] = useState("");
   const [orderBump3Price, setOrderBump3Price] = useState("");
+  // Optional image per bump
+  const [bumpImageFiles, setBumpImageFiles] = useState<(File | null)[]>([null, null, null]);
+  const [bumpImagePreviews, setBumpImagePreviews] = useState<(string | null)[]>([null, null, null]);
+  const bumpImageRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [redirectUrl, setRedirectUrl] = useState("");
   const [currency, setCurrency] = useState("MZN");
   const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
@@ -157,6 +162,20 @@ export function CreateProductDialog({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleBumpImageSelect = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBumpImageFiles((prev) => prev.map((f, i) => (i === idx ? file : f)));
+    setBumpImagePreviews((prev) => prev.map((p, i) => (i === idx ? URL.createObjectURL(file) : p)));
+  };
+
+  const clearBumpImage = (idx: number) => {
+    setBumpImageFiles((prev) => prev.map((f, i) => (i === idx ? null : f)));
+    setBumpImagePreviews((prev) => prev.map((p, i) => (i === idx ? null : p)));
+    const ref = bumpImageRefs.current[idx];
+    if (ref) ref.value = "";
+  };
+
   const resetForm = () => {
     setProductName("");
     setProductDescription("");
@@ -186,6 +205,8 @@ export function CreateProductDialog({
     setShowTrustBadges(true);
     setProductType("digital");
     setCheckoutAccentColor("#16a34a");
+    setBumpImageFiles([null, null, null]);
+    setBumpImagePreviews([null, null, null]);
     clearImage();
     clearBanner();
   };
@@ -212,6 +233,7 @@ export function CreateProductDialog({
       orderBump3Name: orderBump3Name.trim(),
       orderBump3Description: orderBump3Description.trim(),
       orderBump3Price: orderBump3Price.trim(),
+      bumpImageFiles,
       redirectUrl,
       currency,
       checkoutLanguage,
@@ -606,7 +628,36 @@ export function CreateProductDialog({
                 ].map((bump, idx) => (
                   <div key={idx} className="space-y-2 pt-3 border-t border-border first:border-t-0 first:pt-0">
                     <Label className="text-xs font-semibold text-muted-foreground">{bump.label}</Label>
-                    <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-10 rounded-lg text-sm" />
+                    <div className="flex gap-2">
+                      {bumpImagePreviews[idx] ? (
+                        <div className="relative shrink-0">
+                          <img src={bumpImagePreviews[idx]!} alt="" className="w-12 h-12 rounded-lg object-cover border-2 border-border" />
+                          <button
+                            type="button"
+                            onClick={() => clearBumpImage(idx)}
+                            className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => bumpImageRefs.current[idx]?.click()}
+                          className="w-12 h-12 shrink-0 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                        >
+                          <ImagePlus className="w-4 h-4" />
+                        </button>
+                      )}
+                      <input
+                        ref={(el) => { bumpImageRefs.current[idx] = el; }}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleBumpImageSelect(idx, e)}
+                        className="hidden"
+                      />
+                      <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-12 rounded-lg text-sm flex-1" />
+                    </div>
                     <Input value={bump.desc} onChange={(e) => bump.setDesc(e.target.value)} placeholder="Descrição" className="h-10 rounded-lg text-sm" />
                     <Input type="number" min="0" step="0.01" value={bump.price} onChange={(e) => bump.setPrice(e.target.value)} placeholder={`Preço (${currency})`} className="h-10 rounded-lg text-sm" />
                   </div>

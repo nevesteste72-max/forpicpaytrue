@@ -28,6 +28,9 @@ interface Product {
   order_bump_name: string | null;
   order_bump_description: string | null;
   order_bump_price: number | null;
+  order_bump_image_url?: string | null;
+  order_bump_2_image_url?: string | null;
+  order_bump_3_image_url?: string | null;
   redirect_url?: string | null;
   facebook_pixel_id?: string | null;
   facebook_token?: string | null;
@@ -97,6 +100,24 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  // Optional image per bump (new files to upload) + previews (existing or new)
+  const [bumpImageFiles, setBumpImageFiles] = useState<(File | null)[]>([null, null, null]);
+  const [bumpImagePreviews, setBumpImagePreviews] = useState<(string | null)[]>([null, null, null]);
+  const bumpImageRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleBumpImageSelect = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBumpImageFiles((prev) => prev.map((f, i) => (i === idx ? file : f)));
+    setBumpImagePreviews((prev) => prev.map((p, i) => (i === idx ? URL.createObjectURL(file) : p)));
+  };
+
+  const clearBumpImage = (idx: number) => {
+    setBumpImageFiles((prev) => prev.map((f, i) => (i === idx ? null : f)));
+    setBumpImagePreviews((prev) => prev.map((p, i) => (i === idx ? null : p)));
+    const ref = bumpImageRefs.current[idx];
+    if (ref) ref.value = "";
+  };
 
   useEffect(() => {
     if (product && open) {
@@ -115,6 +136,12 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setOrderBump3Name((product as any).order_bump_3_name || "");
       setOrderBump3Description((product as any).order_bump_3_description || "");
       setOrderBump3Price((product as any).order_bump_3_price ? String((product as any).order_bump_3_price) : "");
+      setBumpImageFiles([null, null, null]);
+      setBumpImagePreviews([
+        product.order_bump_image_url || null,
+        product.order_bump_2_image_url || null,
+        product.order_bump_3_image_url || null,
+      ]);
       setRedirectUrl((product as any).redirect_url || "");
       setFacebookPixelId((product as any).facebook_pixel_id || "");
       setFacebookToken((product as any).facebook_token || "");
@@ -224,6 +251,18 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         if (url) updateData.checkout_banner_url = url;
       } else if (!bannerPreview && product.checkout_banner_url) {
         updateData.checkout_banner_url = null;
+      }
+
+      // Order bump images: upload novos, ou setar null se removidos
+      const bumpImageColumns = ["order_bump_image_url", "order_bump_2_image_url", "order_bump_3_image_url"] as const;
+      const existingBumpImages = [product.order_bump_image_url, product.order_bump_2_image_url, product.order_bump_3_image_url];
+      for (let i = 0; i < 3; i++) {
+        if (bumpImageFiles[i]) {
+          const url = await uploadPaymentImage({ file: bumpImageFiles[i]!, baseName: `${product.id}-bump${i + 1}`, toast });
+          if (url) updateData[bumpImageColumns[i]] = url;
+        } else if (!bumpImagePreviews[i] && existingBumpImages[i]) {
+          updateData[bumpImageColumns[i]] = null;
+        }
       }
 
       const { error } = await supabase
@@ -410,7 +449,36 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
                 ].map((bump, idx) => (
                   <div key={idx} className="space-y-2 pt-3 border-t border-border first:border-t-0 first:pt-0">
                     <Label className="text-xs font-semibold text-muted-foreground">{bump.label}</Label>
-                    <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-10 rounded-lg text-sm" />
+                    <div className="flex gap-2">
+                      {bumpImagePreviews[idx] ? (
+                        <div className="relative shrink-0">
+                          <img src={bumpImagePreviews[idx]!} alt="" className="w-12 h-12 rounded-lg object-cover border-2 border-border" />
+                          <button
+                            type="button"
+                            onClick={() => clearBumpImage(idx)}
+                            className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => bumpImageRefs.current[idx]?.click()}
+                          className="w-12 h-12 shrink-0 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                        >
+                          <ImagePlus className="w-4 h-4" />
+                        </button>
+                      )}
+                      <input
+                        ref={(el) => { bumpImageRefs.current[idx] = el; }}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleBumpImageSelect(idx, e)}
+                        className="hidden"
+                      />
+                      <Input value={bump.name} onChange={(e) => bump.setName(e.target.value)} placeholder="Nome" className="h-12 rounded-lg text-sm flex-1" />
+                    </div>
                     <Input value={bump.desc} onChange={(e) => bump.setDesc(e.target.value)} placeholder="Descrição" className="h-10 rounded-lg text-sm" />
                     <Input type="number" min="0" step="0.01" value={bump.price} onChange={(e) => bump.setPrice(e.target.value)} placeholder={`Preço (${product?.currency || "MZN"})`} className="h-10 rounded-lg text-sm" />
                   </div>

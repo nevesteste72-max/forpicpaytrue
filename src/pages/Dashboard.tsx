@@ -304,6 +304,7 @@ export default function Dashboard() {
     orderBump3Name: string;
     orderBump3Description: string;
     orderBump3Price: string;
+    bumpImageFiles: (File | null)[];
     redirectUrl: string;
     currency: string;
     checkoutLanguage: string;
@@ -383,6 +384,20 @@ export default function Dashboard() {
             .from("payment_links")
             .update({ checkout_banner_url: bannerUrl })
             .eq("id", newProduct.id);
+        }
+
+        // Upload order bump images (up to 3)
+        const bumpImageColumns = ["order_bump_image_url", "order_bump_2_image_url", "order_bump_3_image_url"] as const;
+        const bumpUpdates: Record<string, string> = {};
+        for (let i = 0; i < (data.bumpImageFiles?.length || 0); i++) {
+          const file = data.bumpImageFiles[i];
+          if (file) {
+            const url = await uploadPaymentImage({ file, baseName: `${newProduct.id}-bump${i + 1}`, toast });
+            bumpUpdates[bumpImageColumns[i]] = url;
+          }
+        }
+        if (Object.keys(bumpUpdates).length > 0) {
+          await supabase.from("payment_links").update(bumpUpdates).eq("id", newProduct.id);
         }
       }
 

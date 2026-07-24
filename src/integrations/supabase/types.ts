@@ -176,6 +176,9 @@ export type Database = {
           order_bump_3_price: number | null
           order_bump_description: string | null
           order_bump_id: string | null
+          order_bump_image_url: string | null
+          order_bump_2_image_url: string | null
+          order_bump_3_image_url: string | null
           order_bump_name: string | null
           order_bump_price: number | null
           product_description: string | null
@@ -229,6 +232,9 @@ export type Database = {
           order_bump_3_price?: number | null
           order_bump_description?: string | null
           order_bump_id?: string | null
+          order_bump_image_url?: string | null
+          order_bump_2_image_url?: string | null
+          order_bump_3_image_url?: string | null
           order_bump_name?: string | null
           order_bump_price?: number | null
           product_description?: string | null
@@ -282,6 +288,9 @@ export type Database = {
           order_bump_3_price?: number | null
           order_bump_description?: string | null
           order_bump_id?: string | null
+          order_bump_image_url?: string | null
+          order_bump_2_image_url?: string | null
+          order_bump_3_image_url?: string | null
           order_bump_name?: string | null
           order_bump_price?: number | null
           product_description?: string | null

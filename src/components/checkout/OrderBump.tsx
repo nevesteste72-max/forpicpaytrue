@@ -48,6 +48,13 @@ export function OrderBump({
         >
           {accepted && <Check className="w-3.5 h-3.5 text-white" />}
         </div>
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt={productName}
+            className="w-12 h-12 shrink-0 rounded-lg object-cover border border-border bg-card"
+          />
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center mb-1">
             <span className="font-bold text-foreground text-sm">{productName}</span>
