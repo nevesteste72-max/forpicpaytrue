@@ -1105,10 +1105,10 @@ export default function Checkout() {
             </div>
             )}
 
-            {/* Security badges — bottom of the checkout */}
+            {/* Security badges — bottom of the checkout, localized to the product language */}
             <div className="flex items-center justify-center gap-4 px-6 md:px-8 pb-6 md:pb-8 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> SSL Encrypted</span>
-              <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> Secure Payment</span>
+              <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> {lang === "en" ? "SSL Encrypted" : lang === "es" ? "Cifrado SSL" : "Encriptação SSL"}</span>
+              <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> {lang === "en" ? "Secure Payment" : lang === "es" ? "Pago Seguro" : "Pagamento Seguro"}</span>
             </div>
           </div>
 
