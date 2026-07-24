@@ -145,6 +145,7 @@ export type Database = {
       payment_links: {
         Row: {
           amount: number
+          checkout_accent_color: string | null
           checkout_banner_url: string | null
           checkout_language: string
           checkout_timer_minutes: number | null
@@ -197,6 +198,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          checkout_accent_color?: string | null
           checkout_banner_url?: string | null
           checkout_language?: string
           checkout_timer_minutes?: number | null
@@ -249,6 +251,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          checkout_accent_color?: string | null
           checkout_banner_url?: string | null
           checkout_language?: string
           checkout_timer_minutes?: number | null

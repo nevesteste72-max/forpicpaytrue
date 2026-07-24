@@ -40,6 +40,7 @@ interface Product {
   recovery_cta_text?: string | null;
   recovery_redirect_url?: string | null;
   product_type?: string;
+  checkout_accent_color?: string | null;
 }
 
 const STRIPE_METHODS = [
@@ -47,6 +48,8 @@ const STRIPE_METHODS = [
   { value: "apple_pay", label: "Apple Pay" },
   { value: "google_pay", label: "Google Pay" },
   { value: "link", label: "Link (Stripe)" },
+  { value: "mbway", label: "MB Way (Portugal, EUR)" },
+  { value: "multibanco", label: "Multibanco (Portugal, EUR)" },
 ];
 
 interface EditProductDialogProps {
@@ -88,6 +91,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
   const [productType, setProductType] = useState("digital");
+  const [checkoutAccentColor, setCheckoutAccentColor] = useState("#16a34a");
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -101,6 +105,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setAmount(String(product.amount));
       setCheckoutLanguage(product.checkout_language || "pt");
       setStripePaymentMethods(product.stripe_payment_methods?.length ? product.stripe_payment_methods : ["card"]);
+      setCheckoutAccentColor(product.checkout_accent_color || "#16a34a");
       setOrderBumpName(product.order_bump_name || "");
       setOrderBumpDescription((product as any).order_bump_description || "");
       setOrderBumpPrice(product.order_bump_price ? String(product.order_bump_price) : "");
@@ -194,6 +199,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         facebook_pixel_id: facebookPixelId || null,
         facebook_token: facebookToken || null,
         checkout_timer_minutes: checkoutTimerMinutes ? parseInt(checkoutTimerMinutes) : 0,
+        checkout_accent_color: checkoutAccentColor || null,
         recovery_enabled: recoveryEnabled,
         recovery_discount_percent: recoveryDiscountPercent ? parseInt(recoveryDiscountPercent) : 0,
         recovery_headline: recoveryHeadline || null,
@@ -358,6 +364,30 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
                   </div>
                 </div>
               )}
+
+              {/* Checkout accent color */}
+              <div className="space-y-2">
+                <Label>Cor do checkout (botões e destaques)</Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={checkoutAccentColor}
+                    onChange={(e) => setCheckoutAccentColor(e.target.value)}
+                    className="h-10 w-14 rounded-lg border border-border bg-transparent cursor-pointer p-1"
+                  />
+                  <Input
+                    value={checkoutAccentColor}
+                    onChange={(e) => setCheckoutAccentColor(e.target.value)}
+                    placeholder="#16a34a"
+                    className="max-w-[140px] font-mono h-12 rounded-xl"
+                  />
+                  <span
+                    className="h-10 flex-1 rounded-lg border border-border"
+                    style={{ background: checkoutAccentColor }}
+                    aria-hidden
+                  />
+                </div>
+              </div>
 
               {/* Redirect URL */}
               <div className="space-y-2">

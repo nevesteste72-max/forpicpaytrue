@@ -97,6 +97,41 @@ async function getStripePromise(): Promise<Stripe | null> {
   return stripePromise;
 }
 
+// Convert a hex color (#rrggbb) into the "H S% L%" component string that the
+// shadcn CSS variables expect, plus a lighter variant used by gradient-primary.
+function accentColorToCssVars(hex?: string | null): React.CSSProperties | undefined {
+  if (!hex) return undefined;
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+  if (!m) return undefined;
+  const r = parseInt(m[1], 16) / 255;
+  const g = parseInt(m[2], 16) / 255;
+  const b = parseInt(m[3], 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (d !== 0) {
+    switch (max) {
+      case r: h = ((g - b) / d) % 6; break;
+      case g: h = (b - r) / d + 2; break;
+      default: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  const H = Math.round(h);
+  const S = Math.round(s * 100);
+  const L = Math.round(l * 100);
+  const lightL = Math.min(L + 12, 95);
+  return {
+    ["--primary" as string]: `${H} ${S}% ${L}%`,
+    ["--primary-light" as string]: `${H} ${S}% ${lightL}%`,
+    ["--ring" as string]: `${H} ${S}% ${L}%`,
+  } as React.CSSProperties;
+}
+
 interface PaymentLink {
   id: string;
   product_name: string;
@@ -120,6 +155,7 @@ interface PaymentLink {
   facebook_token?: string | null;
   checkout_banner_url?: string | null;
   checkout_timer_minutes?: number | null;
+  checkout_accent_color?: string | null;
   recovery_enabled?: boolean;
   recovery_discount_percent?: number;
   recovery_headline?: string | null;
@@ -610,7 +646,7 @@ export default function Checkout() {
     try {
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_3_name, order_bump_3_description, order_bump_3_price, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, checkout_accent_color")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -945,7 +981,7 @@ export default function Checkout() {
     ) : null;
 
     return (
-      <div className="min-h-screen bg-muted flex flex-col md:items-center md:justify-center">
+      <div className="min-h-screen bg-muted flex flex-col md:items-center md:justify-center" style={accentColorToCssVars(link.checkout_accent_color)}>
         <div className="w-full md:max-w-lg md:p-4">
           <div className="bg-card md:rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden md:border border-border min-h-screen md:min-h-0">
             {/* Countdown Timer */}
@@ -962,16 +998,27 @@ export default function Checkout() {
               />
             )}
 
-            {/* Product Header */}
+            {/* Product Header — compact order summary (thumbnail left, name + price right) */}
             <div className="p-6 md:p-8 pb-0">
-              <div className="bg-muted/40 rounded-2xl p-6 border border-border text-center">
-                {link.logo_url && (
-                  <img src={link.logo_url} alt={link.product_name} className="w-full max-w-[260px] h-auto max-h-[200px] object-contain mx-auto mb-4 rounded-2xl shadow-md" />
-                )}
-                <h2 className="text-lg font-bold text-foreground">{link.product_name}</h2>
-                <p className="text-3xl font-bold text-foreground mt-2">
-                  {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
-                </p>
+              <h3 className="text-base font-bold text-foreground mb-3">
+                {lang === "en" ? "Order summary" : lang === "es" ? "Resumen del pedido" : "Resumo do pedido"}
+              </h3>
+              <div className="bg-muted/40 rounded-2xl p-4 border border-border">
+                <div className="flex items-center gap-4">
+                  {link.logo_url && (
+                    <img
+                      src={link.logo_url}
+                      alt={link.product_name}
+                      className="w-16 h-16 md:w-20 md:h-20 shrink-0 object-cover rounded-xl shadow-sm border border-border"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm md:text-base font-semibold text-foreground leading-snug">{link.product_name}</h2>
+                    <p className="text-xl md:text-2xl font-bold text-foreground mt-1">
+                      {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
                 {typeof buyerCount === "number" && buyerCount > 0 && (
                   <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
                     <span aria-hidden>🔥</span>
@@ -1095,7 +1142,7 @@ export default function Checkout() {
 
   // --- MAIN FORM (M-Pesa only) ---
   return (
-    <div className="min-h-screen bg-muted flex flex-col md:items-center md:justify-center">
+    <div className="min-h-screen bg-muted flex flex-col md:items-center md:justify-center" style={accentColorToCssVars(link.checkout_accent_color)}>
       <div className="w-full md:max-w-lg md:p-4">
         <div className="bg-card md:rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden md:border border-border min-h-screen md:min-h-0">
           {/* Countdown Timer */}
