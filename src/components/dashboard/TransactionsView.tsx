@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
-import { Clock, Search } from "lucide-react";
+import { Clock, Search, ShieldCheck, ShieldOff, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Transaction {
   id: string;
@@ -15,7 +17,10 @@ interface Transaction {
   order_bump_accepted: boolean;
   order_bump_amount: number | null;
   currency?: string;
+  access_revoked?: boolean;
 }
+
+const PAID_STATUSES = ["successful", "success", "completed"];
 
 interface TransactionsViewProps {
   transactions: Transaction[];
@@ -57,6 +62,31 @@ function getAvatarColor(email: string): string {
 export function TransactionsView({ transactions }: TransactionsViewProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { toast } = useToast();
+  const [revokedOverride, setRevokedOverride] = useState<Record<string, boolean>>({});
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const isRevoked = (tx: Transaction) => revokedOverride[tx.id] ?? tx.access_revoked ?? false;
+
+  const toggleAccess = async (tx: Transaction) => {
+    const next = !isRevoked(tx);
+    setBusyId(tx.id);
+    const { error } = await supabase
+      .from("transactions")
+      // Cast: access_revoked is newer than the generated Supabase types.
+      .update({ access_revoked: next } as never)
+      .eq("id", tx.id);
+    setBusyId(null);
+    if (error) {
+      toast({ title: "Erro", description: "Não foi possível atualizar o acesso.", variant: "destructive" });
+      return;
+    }
+    setRevokedOverride((prev) => ({ ...prev, [tx.id]: next }));
+    toast({
+      title: next ? "Acesso revogado" : "Acesso restaurado",
+      description: `${tx.customer_email} ${next ? "já não" : "volta a"} ter acesso à área de membros.`,
+    });
+  };
 
   const filtered = transactions.filter((tx) => {
     const matchesSearch =
@@ -136,6 +166,7 @@ export function TransactionsView({ transactions }: TransactionsViewProps) {
                   <th className="px-6 py-3 font-medium">Valor</th>
                   <th className="px-6 py-3 font-medium">Status</th>
                   <th className="px-6 py-3 font-medium">Data</th>
+                  <th className="px-6 py-3 font-medium">Acesso</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40 text-sm">
@@ -195,6 +226,32 @@ export function TransactionsView({ transactions }: TransactionsViewProps) {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
+                      </td>
+                      <td className="px-6 py-3.5">
+                        {PAID_STATUSES.includes(tx.status) ? (
+                          <button
+                            onClick={() => toggleAccess(tx)}
+                            disabled={busyId === tx.id}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors disabled:opacity-60",
+                              isRevoked(tx)
+                                ? "border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                                : "border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                            )}
+                            title={isRevoked(tx) ? "Restaurar o acesso à área de membros" : "Revogar o acesso à área de membros"}
+                          >
+                            {busyId === tx.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : isRevoked(tx) ? (
+                              <ShieldCheck className="w-3.5 h-3.5" />
+                            ) : (
+                              <ShieldOff className="w-3.5 h-3.5" />
+                            )}
+                            {isRevoked(tx) ? "Restaurar" : "Revogar"}
+                          </button>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        )}
                       </td>
                     </tr>
                   );
