@@ -246,7 +246,23 @@ serve(async (req) => {
       piParams.customer = stripeCustomerId;
     }
 
-    const paymentIntent = await stripe.paymentIntents.create(piParams as Stripe.PaymentIntentCreateParams);
+    // Create the PaymentIntent. If Stripe rejects the requested methods (e.g. mbway/
+    // multibanco not yet activated on the account, or currency not eligible), fall back
+    // to card-only so the checkout still loads instead of failing with a 500.
+    let paymentIntent: Stripe.PaymentIntent;
+    try {
+      paymentIntent = await stripe.paymentIntents.create(piParams as Stripe.PaymentIntentCreateParams);
+    } catch (piErr) {
+      console.error("PaymentIntent create failed for methods", allowedMethods, "-", piErr instanceof Error ? piErr.message : piErr);
+      const fallbackParams: Record<string, unknown> = {
+        ...piParams,
+        payment_method_types: ["card"],
+        setup_future_usage: "off_session",
+      };
+      delete fallbackParams.payment_method_options;
+      paymentIntent = await stripe.paymentIntents.create(fallbackParams as Stripe.PaymentIntentCreateParams);
+      console.log("PaymentIntent created with card-only fallback:", paymentIntent.id);
+    }
 
     // Update transaction with stripe payment intent ID
     await supabaseAdmin
