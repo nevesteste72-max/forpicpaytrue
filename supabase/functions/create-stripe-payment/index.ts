@@ -177,6 +177,7 @@ serve(async (req) => {
         payment_provider: "stripe",
         order_bump_accepted: order_bump_accepted || false,
         order_bump_amount: bumpAmount,
+        bumps_accepted: bumpsAccepted,
         status: "pending",
         stripe_customer_id: stripeCustomerId || null,
       })

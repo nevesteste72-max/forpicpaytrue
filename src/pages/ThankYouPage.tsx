@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle2, PartyPopper, ExternalLink } from "lucide-react";
+import { Loader2, CheckCircle2, PartyPopper, ExternalLink, PackageOpen } from "lucide-react";
 import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
 import { useUtmifyScript } from "@/hooks/useUtmifyScript";
 
@@ -155,11 +155,26 @@ export default function ThankYouPage() {
               </div>
             )}
 
-            {/* Access Content Button */}
+            {/* Members area — main way to access the downloadable materials */}
+            <a
+              href="/membros"
+              className="w-full h-12 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+            >
+              <PackageOpen className="w-4 h-4" />
+              {lang === "en" ? "Access My Members Area" : "Aceder à Área de Membros"}
+            </a>
+            <p className="text-xs text-muted-foreground text-center -mt-3">
+              {lang === "en"
+                ? "Enter the email you used on this purchase to download your materials."
+                : "Entra com o email desta compra para descarregares os teus materiais."}
+            </p>
+
+            {/* Optional external content link (if configured) */}
             {linkInfo?.redirect_url && (
               <Button
                 onClick={() => window.open(linkInfo.redirect_url!, "_blank")}
-                className="w-full h-12 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25"
+                variant="outline"
+                className="w-full h-11 rounded-xl font-semibold"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 {lang === "en" ? "Access Content" : "Acessar Conteúdo"}
