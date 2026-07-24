@@ -246,22 +246,45 @@ serve(async (req) => {
       piParams.customer = stripeCustomerId;
     }
 
-    // Create the PaymentIntent. If Stripe rejects the requested methods (e.g. mbway/
-    // multibanco not yet activated on the account, or currency not eligible), fall back
-    // to card-only so the checkout still loads instead of failing with a 500.
-    let paymentIntent: Stripe.PaymentIntent;
-    try {
-      paymentIntent = await stripe.paymentIntents.create(piParams as Stripe.PaymentIntentCreateParams);
-    } catch (piErr) {
-      console.error("PaymentIntent create failed for methods", allowedMethods, "-", piErr instanceof Error ? piErr.message : piErr);
-      const fallbackParams: Record<string, unknown> = {
-        ...piParams,
-        payment_method_types: ["card"],
-        setup_future_usage: "off_session",
-      };
-      delete fallbackParams.payment_method_options;
-      paymentIntent = await stripe.paymentIntents.create(fallbackParams as Stripe.PaymentIntentCreateParams);
-      console.log("PaymentIntent created with card-only fallback:", paymentIntent.id);
+    // Create the PaymentIntent. If Stripe rejects a method (e.g. a local method not yet
+    // activated on the account), we drop only that method and retry — so an active method
+    // like MB Way still shows even if Multibanco is still pending. Card always survives.
+    const buildParams = (methods: string[]): Record<string, unknown> => {
+      const p: Record<string, unknown> = { ...piParams, payment_method_types: methods };
+      delete p.setup_future_usage;
+      delete p.payment_method_options;
+      const hasNonReusable = methods.some((m) => !REUSABLE_METHODS.has(m));
+      if (!hasNonReusable) {
+        p.setup_future_usage = "off_session";
+      } else if (methods.includes("card")) {
+        p.payment_method_options = { card: { setup_future_usage: "off_session" } };
+      }
+      return p;
+    };
+
+    let methodsToTry = [...allowedMethods];
+    let paymentIntent: Stripe.PaymentIntent | null = null;
+    let lastErr: unknown = null;
+    while (methodsToTry.length > 0 && !paymentIntent) {
+      try {
+        paymentIntent = await stripe.paymentIntents.create(buildParams(methodsToTry) as Stripe.PaymentIntentCreateParams);
+      } catch (piErr) {
+        lastErr = piErr;
+        const msg = piErr instanceof Error ? piErr.message : String(piErr);
+        console.error("PaymentIntent create failed for methods", methodsToTry, "-", msg);
+        // Drop a non-card method and retry. Prefer the one named in the error message.
+        const named = methodsToTry.find((m) => m !== "card" && msg.toLowerCase().includes(m));
+        const dropIdx = named
+          ? methodsToTry.indexOf(named)
+          : methodsToTry.map((m) => m !== "card").lastIndexOf(true);
+        if (dropIdx === -1) break; // only card left and it failed -> real error
+        console.warn("Dropping payment method and retrying:", methodsToTry[dropIdx]);
+        methodsToTry = methodsToTry.filter((_, i) => i !== dropIdx);
+      }
+    }
+    if (!paymentIntent) throw lastErr ?? new Error("Failed to create PaymentIntent");
+    if (methodsToTry.length !== allowedMethods.length) {
+      console.log("PaymentIntent created with reduced methods:", methodsToTry.join(","), paymentIntent.id);
     }
 
     // Update transaction with stripe payment intent ID
