@@ -32,7 +32,6 @@ import { cn } from "@/lib/utils";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { CheckoutTimer } from "@/components/checkout/CheckoutTimer";
-import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
 import cashpayIcon from "@/assets/cashpay-icon.png";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import emolaLogo from "@/assets/emola-logo.png";
@@ -1111,9 +1110,6 @@ export default function Checkout() {
             )}
           </div>
 
-          <div className="text-center py-4 md:mt-6">
-            <img src={cashpayLogoFull} alt="Picpay" className="h-20 w-20 mx-auto rounded-full object-contain" />
-          </div>
         </div>
 
         {/* Recovery Popup */}
@@ -1401,9 +1397,6 @@ export default function Checkout() {
           )}
         </div>
 
-        <div className="text-center py-4 md:mt-6">
-          <img src={cashpayLogoFull} alt="Picpay" className="h-20 w-20 mx-auto rounded-full object-contain" />
-        </div>
 
         {/* Recovery Popup for M-Pesa */}
         {link?.recovery_enabled && (
