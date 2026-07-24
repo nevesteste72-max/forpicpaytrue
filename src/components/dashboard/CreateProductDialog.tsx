@@ -25,6 +25,8 @@ const STRIPE_METHODS = [
   { value: "apple_pay", label: "Apple Pay" },
   { value: "google_pay", label: "Google Pay" },
   { value: "link", label: "Link (Stripe)" },
+  { value: "mbway", label: "MB Way (Portugal, EUR)" },
+  { value: "multibanco", label: "Multibanco (Portugal, EUR)" },
 ];
 
 interface CreateProductDialogProps {
@@ -61,6 +63,7 @@ interface CreateProductDialogProps {
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
     productType: string;
+    checkoutAccentColor: string;
   }) => Promise<void>;
   creating: boolean;
 }
@@ -105,6 +108,7 @@ export function CreateProductDialog({
   const [recoveryRedirectUrl, setRecoveryRedirectUrl] = useState("");
   const [showTrustBadges, setShowTrustBadges] = useState(true);
   const [productType, setProductType] = useState("digital");
+  const [checkoutAccentColor, setCheckoutAccentColor] = useState("#16a34a");
   const { toast } = useToast();
 
   const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "EUR";
@@ -181,6 +185,7 @@ export function CreateProductDialog({
     setRecoveryRedirectUrl("");
     setShowTrustBadges(true);
     setProductType("digital");
+    setCheckoutAccentColor("#16a34a");
     clearImage();
     clearBanner();
   };
@@ -223,6 +228,7 @@ export function CreateProductDialog({
       recoveryRedirectUrl: recoveryRedirectUrl.trim(),
       showTrustBadges,
       productType,
+      checkoutAccentColor,
     });
     resetForm();
   };
@@ -535,6 +541,34 @@ export function CreateProductDialog({
                   )}
                 </div>
               )}
+
+              {/* Checkout accent color */}
+              <div className="space-y-2">
+                <Label htmlFor="accentColor">Cor do checkout (botões e destaques)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Define a cor dos botões, preço e selos na página de pagamento
+                </p>
+                <div className="flex items-center gap-3">
+                  <input
+                    id="accentColor"
+                    type="color"
+                    value={checkoutAccentColor}
+                    onChange={(e) => setCheckoutAccentColor(e.target.value)}
+                    className="h-10 w-14 rounded-lg border border-border bg-transparent cursor-pointer p-1"
+                  />
+                  <Input
+                    value={checkoutAccentColor}
+                    onChange={(e) => setCheckoutAccentColor(e.target.value)}
+                    placeholder="#16a34a"
+                    className="max-w-[140px] font-mono"
+                  />
+                  <span
+                    className="h-10 flex-1 rounded-lg border border-border"
+                    style={{ background: checkoutAccentColor }}
+                    aria-hidden
+                  />
+                </div>
+              </div>
 
               {/* Redirect URL */}
               <div className="space-y-2">

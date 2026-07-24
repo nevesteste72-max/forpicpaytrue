@@ -194,11 +194,16 @@ serve(async (req) => {
     console.log("Transaction created:", tx.id, "amount:", totalAmount, "customer:", stripeCustomerId);
 
     // Map UI payment method names to valid Stripe payment_method_types
-    const VALID_STRIPE_METHODS = new Set(["card", "link"]);
+    // mbway + multibanco enabled for Portugal (EUR). They require the method to be
+    // activated in the Stripe Dashboard and the PaymentIntent currency to be "eur".
+    const VALID_STRIPE_METHODS = new Set(["card", "link", "mbway", "multibanco"]);
+    // Methods that can be saved for the one-click upsell (setup_future_usage=off_session).
+    // MB Way / Multibanco are not reusable off_session, so they must be excluded from it.
+    const REUSABLE_METHODS = new Set(["card", "link"]);
     const rawMethods: string[] = Array.isArray(payment_methods) && payment_methods.length > 0
       ? payment_methods
       : ["card"];
-    
+
     const allowedMethods = [...new Set(
       rawMethods
         .map((m: string) => {
@@ -210,12 +215,13 @@ serve(async (req) => {
 
     if (allowedMethods.length === 0) allowedMethods.push("card");
 
-    // Create PaymentIntent with setup_future_usage for one-click upsell
+    // Create PaymentIntent. setup_future_usage powers the one-click upsell, but only
+    // card/link support it — applying it globally when mbway/multibanco are present
+    // makes Stripe reject the PaymentIntent, so we scope it per method type instead.
     const piParams: Record<string, unknown> = {
       amount: stripeAmount,
       currency: chargeCurrency,
       payment_method_types: allowedMethods,
-      setup_future_usage: "off_session",
       metadata: {
         transaction_id: tx.id,
         payment_link_id,
@@ -225,6 +231,16 @@ serve(async (req) => {
       // receipt_email removed to prevent Stripe from sending automatic receipts
       description: `Payment for ${payment_link_id}`,
     };
+
+    const hasNonReusableMethod = allowedMethods.some((m) => !REUSABLE_METHODS.has(m));
+    if (!hasNonReusableMethod) {
+      // Only reusable methods -> enable one-click upsell for the whole intent.
+      piParams.setup_future_usage = "off_session";
+    } else if (allowedMethods.includes("card")) {
+      // Mixed methods -> keep one-click upsell on card only; leave the async
+      // methods (mbway/multibanco) untouched so Stripe doesn't reject the intent.
+      piParams.payment_method_options = { card: { setup_future_usage: "off_session" } };
+    }
 
     if (stripeCustomerId) {
       piParams.customer = stripeCustomerId;

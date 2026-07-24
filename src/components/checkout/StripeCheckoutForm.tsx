@@ -92,7 +92,12 @@ export function StripeCheckoutForm({
 }: StripeCheckoutFormProps) {
   const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
   const walletOrNever = (method: string) => (enabledMethods.includes(method) ? "auto" : "never") as "auto" | "never";
-  const paymentMethodOrder = enabledMethods.includes("link") ? ["card", "link"] : ["card"];
+  const paymentMethodOrder = [
+    "card",
+    ...(enabledMethods.includes("mbway") ? ["mbway"] : []),
+    ...(enabledMethods.includes("multibanco") ? ["multibanco"] : []),
+    ...(enabledMethods.includes("link") ? ["link"] : []),
+  ];
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -371,7 +376,7 @@ export function StripeCheckoutForm({
       <Button
         type="submit"
         disabled={!stripe || processing}
-        className="w-full h-14 rounded-xl bg-[hsl(145,60%,40%)] hover:bg-[hsl(145,60%,35%)] text-white font-bold text-base shadow-lg shadow-[hsl(145,60%,40%)]/25 active:scale-[0.98] transition-all"
+        className="w-full h-14 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/25 active:scale-[0.98] transition-all"
       >
         {processing ? (
           <Loader2 className="w-5 h-5 animate-spin" />

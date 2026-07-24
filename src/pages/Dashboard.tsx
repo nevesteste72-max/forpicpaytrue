@@ -320,6 +320,7 @@ export default function Dashboard() {
     recoveryRedirectUrl: string;
     showTrustBadges: boolean;
     productType: string;
+    checkoutAccentColor: string;
   }) => {
     if (!user) return;
     setCreating(true);
@@ -354,6 +355,7 @@ export default function Dashboard() {
         recovery_redirect_url: data.recoveryRedirectUrl || null,
         show_trust_badges: data.showTrustBadges,
         product_type: data.productType,
+        checkout_accent_color: data.checkoutAccentColor || null,
       };
 
       const { data: newProduct, error } = await supabase
