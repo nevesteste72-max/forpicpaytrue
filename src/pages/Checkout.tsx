@@ -323,7 +323,9 @@ export default function Checkout() {
   const [errorMessage, setErrorMessage] = useState("");
   const [bumpsAccepted, setBumpsAccepted] = useState<boolean[]>([false, false, false]);
   const [selectedMethod, setSelectedMethod] = useState<SelectedMethod>("mpesa");
-  const [phonePrefix, setPhonePrefix] = useState("+27");
+  // Empty so the Stripe form derives the default prefix from the product currency
+  // (EUR -> +351, BRL -> +55, ...) instead of forcing South Africa's +27.
+  const [phonePrefix, setPhonePrefix] = useState("");
 
   // Stripe state
   const [checkoutStep, setCheckoutStep] = useState<1 | 2>(1); // kept for resetForm compat

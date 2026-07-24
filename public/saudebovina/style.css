@@ -1873,3 +1873,27 @@ button {
     object-fit: cover;
     display: block;
 }
+
+/* ===== Depoimentos (prova social) ===== */
+.testimonials-section {
+    padding: 2.25rem 0 2.75rem;
+    background-color: var(--color-bg-primary);
+    overflow: hidden;
+}
+.testimonials-section .carousel-container { margin-bottom: 1.25rem; }
+.testimonial-slide {
+    width: 230px;
+    flex-shrink: 0;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-md, 0 6px 20px -8px rgba(0,0,0,.25));
+    background: #fff;
+}
+.testimonial-slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+@media (max-width: 640px) {
+    .testimonial-slide { width: 190px; }
+}
