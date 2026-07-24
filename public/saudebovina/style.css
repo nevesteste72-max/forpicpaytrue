@@ -1883,6 +1883,7 @@ button {
 .testimonials-section .carousel-container { margin-bottom: 1.25rem; }
 .testimonial-slide {
     width: 230px;
+    height: 405px;
     flex-shrink: 0;
     border-radius: var(--border-radius-md);
     overflow: hidden;
@@ -1891,9 +1892,11 @@ button {
 }
 .testimonial-slide img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
     display: block;
 }
 @media (max-width: 640px) {
-    .testimonial-slide { width: 190px; }
+    .testimonial-slide { width: 190px; height: 335px; }
 }
