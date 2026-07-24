@@ -92,15 +92,11 @@ export function StripeCheckoutForm({
 }: StripeCheckoutFormProps) {
   const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
   const walletOrNever = (method: string) => (enabledMethods.includes(method) ? "auto" : "never") as "auto" | "never";
-  // Local methods first (Pix in BR, MB Way/Multibanco in PT, Bizum in ES), card after.
-  const paymentMethodOrder = [
-    ...(enabledMethods.includes("pix") ? ["pix"] : []),
-    ...(enabledMethods.includes("mbway") ? ["mbway"] : []),
-    ...(enabledMethods.includes("multibanco") ? ["multibanco"] : []),
-    ...(enabledMethods.includes("bizum") ? ["bizum"] : []),
-    "card",
-    ...(enabledMethods.includes("link") ? ["link"] : []),
-  ];
+  // Display methods in the exact order configured on the product (e.g. card, mbway,
+  // multibanco). Wallets (apple/google pay) are handled separately via `wallets`.
+  const paymentMethodOrder = enabledMethods.filter(
+    (m) => m !== "apple_pay" && m !== "google_pay"
+  );
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -346,7 +342,7 @@ export function StripeCheckoutForm({
       {/* Stripe PaymentElement */}
       <div className="pt-2">
         <Label className="block text-sm font-semibold text-foreground mb-3">
-          {t("Dados do Cartão", "Card Details", "Datos de la Tarjeta")}
+          {t("Forma de pagamento", "Payment method", "Método de pago")}
         </Label>
         <PaymentElement
           options={{
@@ -356,8 +352,10 @@ export function StripeCheckoutForm({
             },
             wallets: { applePay: walletOrNever("apple_pay"), googlePay: walletOrNever("google_pay"), link: walletOrNever("link") },
             paymentMethodOrder,
+            // We already collect name/email/phone above and pass them in confirmParams,
+            // so hide Stripe's duplicate billing fields to avoid a redundant email/name.
             fields: {
-              billingDetails: "auto",
+              billingDetails: "never",
             },
             terms: {
               card: "never",
