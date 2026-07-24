@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/", "has": [{ "type": "host", "value": "saudebovina.tecnhogar.store" }], "destination": "/saudebovina/index.html" },
     { "source": "/takealot.com", "destination": "/takealot.com/index.html" },
      { "source": "/takealot.com/checkout", "destination": "/takealot.com/checkout.html" },
     { "source": "/saudebovina", "destination": "/saudebovina/index.html" },
