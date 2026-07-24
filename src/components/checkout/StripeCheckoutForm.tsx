@@ -353,9 +353,15 @@ export function StripeCheckoutForm({
             wallets: { applePay: walletOrNever("apple_pay"), googlePay: walletOrNever("google_pay"), link: walletOrNever("link") },
             paymentMethodOrder,
             // We already collect name/email/phone above and pass them in confirmParams,
-            // so hide Stripe's duplicate billing fields to avoid a redundant email/name.
+            // so don't re-ask those. Address stays "auto" so methods that require it
+            // (Klarna, PayPal, SEPA) can still collect it when selected.
             fields: {
-              billingDetails: "never",
+              billingDetails: {
+                name: "never",
+                email: "never",
+                phone: "never",
+                address: "auto",
+              },
             },
             terms: {
               card: "never",

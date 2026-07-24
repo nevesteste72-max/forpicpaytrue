@@ -193,35 +193,17 @@ serve(async (req) => {
 
     console.log("Transaction created:", tx.id, "amount:", totalAmount, "customer:", stripeCustomerId);
 
-    // Map UI payment method names to valid Stripe payment_method_types
-    // mbway + multibanco enabled for Portugal (EUR). They require the method to be
-    // activated in the Stripe Dashboard and the PaymentIntent currency to be "eur".
-    const VALID_STRIPE_METHODS = new Set(["card", "link", "mbway", "multibanco", "pix", "bizum"]);
-    // Methods that can be saved for the one-click upsell (setup_future_usage=off_session).
-    // MB Way / Multibanco are not reusable off_session, so they must be excluded from it.
-    const REUSABLE_METHODS = new Set(["card", "link"]);
-    const rawMethods: string[] = Array.isArray(payment_methods) && payment_methods.length > 0
-      ? payment_methods
-      : ["card"];
-
-    const allowedMethods = [...new Set(
-      rawMethods
-        .map((m: string) => {
-          if (m === "apple_pay" || m === "google_pay") return "card";
-          return m;
-        })
-        .filter((m: string) => VALID_STRIPE_METHODS.has(m))
-    )];
-
-    if (allowedMethods.length === 0) allowedMethods.push("card");
-
-    // Create PaymentIntent. setup_future_usage powers the one-click upsell, but only
-    // card/link support it — applying it globally when mbway/multibanco are present
-    // makes Stripe reject the PaymentIntent, so we scope it per method type instead.
+    // Show every payment method enabled on the Stripe account that is eligible for this
+    // currency/amount (card, MB Way, Multibanco, Klarna, PayPal, SEPA, ...). Stripe renders
+    // each with its own info card and a "show more" section automatically. Enable/disable
+    // which methods appear from the Stripe Dashboard (Settings → Payment methods).
     const piParams: Record<string, unknown> = {
       amount: stripeAmount,
       currency: chargeCurrency,
-      payment_method_types: allowedMethods,
+      automatic_payment_methods: { enabled: true },
+      // One-click upsell only works with card; scope setup_future_usage to card so it
+      // does not hide the other methods (which don't support off_session reuse).
+      payment_method_options: { card: { setup_future_usage: "off_session" } },
       metadata: {
         transaction_id: tx.id,
         payment_link_id,
@@ -232,60 +214,11 @@ serve(async (req) => {
       description: `Payment for ${payment_link_id}`,
     };
 
-    const hasNonReusableMethod = allowedMethods.some((m) => !REUSABLE_METHODS.has(m));
-    if (!hasNonReusableMethod) {
-      // Only reusable methods -> enable one-click upsell for the whole intent.
-      piParams.setup_future_usage = "off_session";
-    } else if (allowedMethods.includes("card")) {
-      // Mixed methods -> keep one-click upsell on card only; leave the async
-      // methods (mbway/multibanco) untouched so Stripe doesn't reject the intent.
-      piParams.payment_method_options = { card: { setup_future_usage: "off_session" } };
-    }
-
     if (stripeCustomerId) {
       piParams.customer = stripeCustomerId;
     }
 
-    // Create the PaymentIntent. If Stripe rejects a method (e.g. a local method not yet
-    // activated on the account), we drop only that method and retry — so an active method
-    // like MB Way still shows even if Multibanco is still pending. Card always survives.
-    const buildParams = (methods: string[]): Record<string, unknown> => {
-      const p: Record<string, unknown> = { ...piParams, payment_method_types: methods };
-      delete p.setup_future_usage;
-      delete p.payment_method_options;
-      const hasNonReusable = methods.some((m) => !REUSABLE_METHODS.has(m));
-      if (!hasNonReusable) {
-        p.setup_future_usage = "off_session";
-      } else if (methods.includes("card")) {
-        p.payment_method_options = { card: { setup_future_usage: "off_session" } };
-      }
-      return p;
-    };
-
-    let methodsToTry = [...allowedMethods];
-    let paymentIntent: Stripe.PaymentIntent | null = null;
-    let lastErr: unknown = null;
-    while (methodsToTry.length > 0 && !paymentIntent) {
-      try {
-        paymentIntent = await stripe.paymentIntents.create(buildParams(methodsToTry) as Stripe.PaymentIntentCreateParams);
-      } catch (piErr) {
-        lastErr = piErr;
-        const msg = piErr instanceof Error ? piErr.message : String(piErr);
-        console.error("PaymentIntent create failed for methods", methodsToTry, "-", msg);
-        // Drop a non-card method and retry. Prefer the one named in the error message.
-        const named = methodsToTry.find((m) => m !== "card" && msg.toLowerCase().includes(m));
-        const dropIdx = named
-          ? methodsToTry.indexOf(named)
-          : methodsToTry.map((m) => m !== "card").lastIndexOf(true);
-        if (dropIdx === -1) break; // only card left and it failed -> real error
-        console.warn("Dropping payment method and retrying:", methodsToTry[dropIdx]);
-        methodsToTry = methodsToTry.filter((_, i) => i !== dropIdx);
-      }
-    }
-    if (!paymentIntent) throw lastErr ?? new Error("Failed to create PaymentIntent");
-    if (methodsToTry.length !== allowedMethods.length) {
-      console.log("PaymentIntent created with reduced methods:", methodsToTry.join(","), paymentIntent.id);
-    }
+    const paymentIntent = await stripe.paymentIntents.create(piParams as Stripe.PaymentIntentCreateParams);
 
     // Update transaction with stripe payment intent ID
     await supabaseAdmin
