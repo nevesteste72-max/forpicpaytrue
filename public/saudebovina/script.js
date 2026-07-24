@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Redirect to Complete Plan directly
     if (btnComprarCompleto) {
         btnComprarCompleto.addEventListener('click', () => {
-            redirectToCheckout('https://tecnhogar.store/pay/bb00b314-ac7e-4ec3-8bb1-7945607e8eb6');
+            redirectToCheckout('https://www.tecnhogar.store/pay/bb00b314-ac7e-4ec3-8bb1-7945607e8eb6');
         });
     }
 
@@ -90,14 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCloseUpsell) btnCloseUpsell.addEventListener('click', closeUpsell);
     if (btnUpsellDecline) btnUpsellDecline.addEventListener('click', () => {
         closeUpsell();
-        redirectToCheckout('https://tecnhogar.store/pay/6b47b157-7bfd-41bb-bdda-1d1036c7c805');
+        redirectToCheckout('https://www.tecnhogar.store/pay/6b47b157-7bfd-41bb-bdda-1d1036c7c805');
     });
 
     // Modal Action: Accept Upsell
     if (btnUpsellAccept) {
         btnUpsellAccept.addEventListener('click', () => {
             closeUpsell();
-            redirectToCheckout('https://tecnhogar.store/pay/a3783980-eac9-49c9-99d8-9f7bfec1093e');
+            redirectToCheckout('https://www.tecnhogar.store/pay/a3783980-eac9-49c9-99d8-9f7bfec1093e');
         });
     }
 
