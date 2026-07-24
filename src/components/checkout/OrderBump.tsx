@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, formatMoney } from "@/lib/utils";
 import { Check } from "lucide-react";
 
 interface OrderBumpProps {
@@ -58,8 +58,8 @@ export function OrderBump({
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center mb-1">
             <span className="font-bold text-foreground text-sm">{productName}</span>
-            <span className="text-sm font-bold text-foreground">
-              +{currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency} {amount.toLocaleString(locale)}
+            <span className="text-sm font-bold text-foreground whitespace-nowrap">
+              +{formatMoney(amount, currency, locale)}
             </span>
           </div>
           {productDescription && (

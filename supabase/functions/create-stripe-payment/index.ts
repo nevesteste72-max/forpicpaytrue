@@ -196,7 +196,7 @@ serve(async (req) => {
     // Map UI payment method names to valid Stripe payment_method_types
     // mbway + multibanco enabled for Portugal (EUR). They require the method to be
     // activated in the Stripe Dashboard and the PaymentIntent currency to be "eur".
-    const VALID_STRIPE_METHODS = new Set(["card", "link", "mbway", "multibanco"]);
+    const VALID_STRIPE_METHODS = new Set(["card", "link", "mbway", "multibanco", "pix", "bizum"]);
     // Methods that can be saved for the one-click upsell (setup_future_usage=off_session).
     // MB Way / Multibanco are not reusable off_session, so they must be excluded from it.
     const REUSABLE_METHODS = new Set(["card", "link"]);

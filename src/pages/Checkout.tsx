@@ -28,7 +28,7 @@ import {
   Award,
   Truck,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatMoney } from "@/lib/utils";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { CheckoutTimer } from "@/components/checkout/CheckoutTimer";
@@ -823,7 +823,7 @@ export default function Checkout() {
               <div className="bg-muted/50 rounded-xl p-4 mb-6">
                 <p className="text-sm text-muted-foreground mb-1">{t.totalValue}</p>
                 <p className="text-2xl font-bold text-primary">
-                  {totalAmount.toLocaleString(locale)} {currencySymbol}
+                  {formatMoney(totalAmount, currencySymbol, locale)}
                 </p>
               </div>
               {(() => {
@@ -1017,7 +1017,7 @@ export default function Checkout() {
                   <div className="min-w-0 flex-1">
                     <h2 className="text-sm md:text-base font-semibold text-foreground leading-snug">{link.product_name}</h2>
                     <p className="text-xl md:text-2xl font-bold text-foreground mt-1">
-                      {currencySymbol === "ZAR" ? "R" : currencySymbol === "NGN" ? "₦" : currencySymbol} {Number(link.amount).toLocaleString(currencySymbol === "NGN" ? "en-NG" : locale, { minimumFractionDigits: 2 })}
+                      {formatMoney(Number(link.amount), currencySymbol, locale)}
                     </p>
                   </div>
                 </div>
@@ -1328,17 +1328,17 @@ export default function Checkout() {
               <div className="pt-6 border-t border-border space-y-2">
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>{link.product_name}</span>
-                  <span>{Number(link.amount).toLocaleString(locale)} {currencySymbol}</span>
+                  <span>{formatMoney(Number(link.amount), currencySymbol, locale)}</span>
                 </div>
                 {bumps.map((bump, idx) => bumpsAccepted[idx] && (
                   <div key={idx} className="flex justify-between text-sm text-muted-foreground">
                     <span>{bump.name}</span>
-                    <span>{Number(bump.price).toLocaleString(locale)} {currencySymbol}</span>
+                    <span>{formatMoney(Number(bump.price), currencySymbol, locale)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-lg font-bold text-foreground pt-2">
                   <span>{t.total}</span>
-                  <span>{totalAmount.toLocaleString(locale)} {currencySymbol}</span>
+                  <span>{formatMoney(totalAmount, currencySymbol, locale)}</span>
                 </div>
                 {localCurrency && link?.currency === "USD" && (
                   <p className="text-xs text-muted-foreground text-right mt-1">
@@ -1356,7 +1356,7 @@ export default function Checkout() {
                 <span className="relative z-10">
                   {(() => {
                     const method = isEmola ? "eMola" : "M-Pesa";
-                    const amt = `${totalAmount.toLocaleString(locale)} ${currencySymbol}`;
+                    const amt = formatMoney(totalAmount, currencySymbol, locale);
                     if (lang === "en") return `Pay ${amt} with ${method}`;
                     if (lang === "es") return `Pagar ${amt} con ${method}`;
                     return `Pagar ${amt} com ${method}`;

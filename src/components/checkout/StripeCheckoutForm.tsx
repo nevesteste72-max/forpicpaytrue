@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ShieldCheck, Mail, User, Phone } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatMoney } from "@/lib/utils";
 
 interface TrackingParams {
   src?: string | null;
@@ -92,10 +92,13 @@ export function StripeCheckoutForm({
 }: StripeCheckoutFormProps) {
   const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
   const walletOrNever = (method: string) => (enabledMethods.includes(method) ? "auto" : "never") as "auto" | "never";
+  // Local methods first (Pix in BR, MB Way/Multibanco in PT, Bizum in ES), card after.
   const paymentMethodOrder = [
-    "card",
+    ...(enabledMethods.includes("pix") ? ["pix"] : []),
     ...(enabledMethods.includes("mbway") ? ["mbway"] : []),
     ...(enabledMethods.includes("multibanco") ? ["multibanco"] : []),
+    ...(enabledMethods.includes("bizum") ? ["bizum"] : []),
+    "card",
     ...(enabledMethods.includes("link") ? ["link"] : []),
   ];
   const stripe = useStripe();
@@ -368,7 +371,7 @@ export function StripeCheckoutForm({
         <div className="flex justify-between text-lg font-bold text-foreground">
           <span>Total</span>
           <span>
-            {currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency} {totalAmount.toLocaleString(currency === "NGN" ? "en-NG" : isEn ? "en-ZA" : "pt-MZ", { minimumFractionDigits: 2 })}
+            {formatMoney(totalAmount, currency, isEn ? "en-US" : "pt-PT")}
           </span>
         </div>
       </div>
@@ -383,10 +386,8 @@ export function StripeCheckoutForm({
         ) : (
           <>
             {(() => {
-              const sym = currency === "ZAR" ? "R" : currency === "NGN" ? "₦" : currency;
-              const loc = currency === "NGN" ? "en-NG" : isEn ? "en-ZA" : "pt-MZ";
-              const formatted = totalAmount.toLocaleString(loc, { minimumFractionDigits: 2 });
-              return isEn ? `Pay Now - ${sym} ${formatted}` : isEs ? `Pagar Ahora - ${sym} ${formatted}` : `Pagar Agora - ${sym} ${formatted}`;
+              const amt = formatMoney(totalAmount, currency, isEn ? "en-US" : "pt-PT");
+              return isEn ? `Pay Now - ${amt}` : isEs ? `Pagar Ahora - ${amt}` : `Pagar Agora - ${amt}`;
             })()}
           </>
         )}

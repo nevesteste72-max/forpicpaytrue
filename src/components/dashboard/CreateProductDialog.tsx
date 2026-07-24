@@ -21,12 +21,14 @@ interface Product {
 }
 
 const STRIPE_METHODS = [
-  { value: "card", label: "Card (Visa/Mastercard)" },
+  { value: "card", label: "Cartão (Visa/Mastercard)" },
+  { value: "pix", label: "Pix (Brasil, BRL)" },
+  { value: "mbway", label: "MB Way (Portugal, EUR)" },
+  { value: "multibanco", label: "Multibanco (Portugal, EUR)" },
+  { value: "bizum", label: "Bizum (Espanha, EUR)" },
   { value: "apple_pay", label: "Apple Pay" },
   { value: "google_pay", label: "Google Pay" },
   { value: "link", label: "Link (Stripe)" },
-  { value: "mbway", label: "MB Way (Portugal, EUR)" },
-  { value: "multibanco", label: "Multibanco (Portugal, EUR)" },
 ];
 
 interface CreateProductDialogProps {
@@ -116,7 +118,7 @@ export function CreateProductDialog({
   const [checkoutAccentColor, setCheckoutAccentColor] = useState("#16a34a");
   const { toast } = useToast();
 
-  const isStripe = currency === "ZAR" || currency === "USD" || currency === "NGN" || currency === "EUR";
+  const isStripe = currency !== "MZN";
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -368,6 +370,21 @@ export function CreateProductDialog({
                     )}
                   >
                     🇪🇺 EUR
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrency("BRL");
+                      setCheckoutLanguage("pt");
+                    }}
+                    className={cn(
+                      "p-3 rounded-xl border-2 text-center transition-all text-sm font-semibold",
+                      currency === "BRL"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    🇧🇷 BRL
                   </button>
                 </div>
               </div>
