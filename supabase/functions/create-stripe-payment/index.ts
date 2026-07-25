@@ -54,7 +54,7 @@ serve(async (req) => {
       // Fetch authoritative prices from database
       const { data: linkData, error: linkErr } = await supabaseAdmin
         .from("payment_links")
-        .select("amount, currency, order_bump_price, order_bump_2_price, order_bump_3_price")
+        .select("amount, currency, order_bump_price, order_bump_2_price, order_bump_3_price, stripe_payment_methods")
         .eq("id", payment_link_id)
         .single();
 
@@ -120,7 +120,7 @@ serve(async (req) => {
     // Fetch authoritative prices from database (never trust client amounts)
     const { data: linkData, error: linkErr } = await supabaseAdmin
       .from("payment_links")
-        .select("amount, currency, order_bump_price, order_bump_2_price, order_bump_3_price")
+        .select("amount, currency, order_bump_price, order_bump_2_price, order_bump_3_price, stripe_payment_methods")
       .eq("id", payment_link_id)
       .single();
 
@@ -198,10 +198,19 @@ serve(async (req) => {
     // currency/amount (card, MB Way, Multibanco, Klarna, PayPal, SEPA, ...). Stripe renders
     // each with its own info card and a "show more" section automatically. Enable/disable
     // which methods appear from the Stripe Dashboard (Settings → Payment methods).
+    // Respect the product's configured methods (stripe_payment_methods) as an explicit
+    // allowlist, so we can hide specific methods (e.g. Multibanco). Falls back to
+    // automatic_payment_methods when the product has no list configured.
+    const linkMethods = (linkData as { stripe_payment_methods?: unknown }).stripe_payment_methods;
+    const configuredMethods = Array.isArray(linkMethods) && linkMethods.length
+      ? (linkMethods as string[])
+      : null;
     const piParams: Record<string, unknown> = {
       amount: stripeAmount,
       currency: chargeCurrency,
-      automatic_payment_methods: { enabled: true },
+      ...(configuredMethods
+        ? { payment_method_types: configuredMethods }
+        : { automatic_payment_methods: { enabled: true } }),
       // One-click upsell only works with card; scope setup_future_usage to card so it
       // does not hide the other methods (which don't support off_session reuse).
       payment_method_options: { card: { setup_future_usage: "off_session" } },
