@@ -456,6 +456,7 @@ button {
 .mockup-img {
     width: 100%;
     height: auto;
+    aspect-ratio: 3 / 2;
     display: block;
     position: relative;
     z-index: 2;
