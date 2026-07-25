@@ -399,18 +399,19 @@ button {
 }
 
 .hero-title {
-    font-size: 2.5rem;
-    line-height: 1.2;
+    font-size: clamp(1.7rem, 6.2vw, 2.5rem);
+    line-height: 1.18;
+    text-wrap: balance;
     margin-bottom: 1rem;
     font-weight: 800;
     color: var(--color-brown-dark);
 }
 
 .hero-subtitle {
-    font-size: 0.9rem;
+    font-size: clamp(0.95rem, 3.6vw, 1.05rem);
     color: var(--color-brown-medium);
     margin-bottom: 1.75rem;
-    line-height: 1.5;
+    line-height: 1.55;
 }
 
 .hero-cta-group {
