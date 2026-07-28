@@ -544,6 +544,14 @@ export default function Checkout() {
         setStripeTransactionId(result.transaction_id);
         const piId = result.client_secret.split("_secret_")[0];
         setStripePaymentIntentId(piId);
+        // Persist so we can fire the browser Purchase when a redirect method
+        // (MB Way / Multibanco / Klarna) returns via ?payment=success.
+        try {
+          localStorage.setItem(
+            "pending_purchase",
+            JSON.stringify({ txid: result.transaction_id, value: totalAmount, currency: link.currency })
+          );
+        } catch { /* ignore */ }
       } else {
         console.error("Failed to create PaymentIntent:", result.error);
       }
@@ -593,7 +601,24 @@ export default function Checkout() {
 
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
-    if (paymentStatus === "success") setPaymentState("success");
+    if (paymentStatus === "success") {
+      setPaymentState("success");
+      // Redirect payment methods (MB Way / Multibanco / Klarna) land here after
+      // the bank. Fire the browser Purchase now — the browser carries fbc/fbp
+      // cookies (strong attribution), deduplicated with the server CAPI via the
+      // transaction id as eventID.
+      try {
+        const raw = localStorage.getItem("pending_purchase");
+        if (raw) {
+          const p = JSON.parse(raw) as { txid?: string; value?: number; currency?: string };
+          if (p.txid) {
+            trackPurchase(p.value ?? totalAmount, p.currency ?? currencySymbol, p.txid);
+            localStorage.removeItem("pending_purchase");
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // Polling for M-Pesa payment status
