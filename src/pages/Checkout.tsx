@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import SocialProofToast from "@/components/SocialProofToast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1171,6 +1172,7 @@ export default function Checkout() {
   // --- MAIN FORM (M-Pesa only) ---
   return (
     <div className="min-h-screen bg-muted flex flex-col md:items-center md:justify-center" style={accentColorToCssVars(link.checkout_accent_color)}>
+      <SocialProofToast />
       <div className="w-full md:max-w-lg md:p-4">
         <div className="bg-card md:rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden md:border border-border min-h-screen md:min-h-0">
           {/* Countdown Timer */}
