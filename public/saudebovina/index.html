@@ -140,18 +140,6 @@
                                 class="highlight-underline">muitas vezes já é tarde</span></h1>
                         <p class="hero-subtitle">Uma doença não identificada a tempo <strong>espalha-se pelo rebanho</strong> e custa-te animais — e milhares de euros. Aprende a reconhecer <strong>+300 doenças bovinas</strong> pelos sinais visuais, em segundos e sem seres veterinário. Age <strong>antes que seja tarde</strong>.</p>
 
-                        <div class="hero-visual">
-                            <div style="position:relative;width:100%;max-width:400px;margin:0 auto;border-radius:18px;overflow:hidden;box-shadow:0 20px 44px -14px rgba(41,24,13,.45);background:#000;">
-                                <video id="heroVsl" src="/saudebovina/vsl.mp4" poster="/saudebovina/vsl-poster.jpg"
-                                    autoplay muted loop playsinline preload="metadata"
-                                    style="display:block;width:100%;height:auto;aspect-ratio:864/1080;"
-                                    onclick="this.muted=!this.muted;this.play();var b=document.getElementById('vslSound');if(b)b.style.display=this.muted?'flex':'none';"></video>
-                                <button id="vslSound" type="button" aria-label="Ativar som"
-                                    onclick="var v=document.getElementById('heroVsl');v.muted=false;v.play();this.style.display='none';"
-                                    style="position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.62);color:#fff;border:none;border-radius:999px;padding:8px 13px;font-size:.78rem;font-weight:700;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);">🔊 Toca para ouvir</button>
-                            </div>
-                        </div>
-
                         <div class="hero-cta-group">
                             <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin:0 0 12px;flex-wrap:wrap;">
                               <span style="font-size:.9rem;color:#6b5a49;font-weight:600;">Hoje por apenas</span>
@@ -184,6 +172,19 @@
                           <span style="display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:#3d2b1c;font-weight:700;">🛡️ Garantia 7 dias</span>
                           <span style="display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:#3d2b1c;font-weight:700;">⚡ Acesso imediato</span>
                           <span style="display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:#3d2b1c;font-weight:700;">🔒 MB Way / Multibanco</span>
+                        </div>
+
+                        <div class="hero-visual" style="margin-top:24px;">
+                            <p style="font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a97f22;margin:0 0 .6rem;">▶ Vê como funciona (30s)</p>
+                            <div style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:18px;overflow:hidden;box-shadow:0 20px 44px -14px rgba(41,24,13,.45);background:#000;">
+                                <video id="heroVsl" src="/saudebovina/vsl.mp4" poster="/saudebovina/vsl-poster.jpg"
+                                    autoplay muted loop playsinline preload="metadata"
+                                    style="display:block;width:100%;height:auto;aspect-ratio:864/1080;"
+                                    onclick="this.muted=!this.muted;this.play();var b=document.getElementById('vslSound');if(b)b.style.display=this.muted?'flex':'none';"></video>
+                                <button id="vslSound" type="button" aria-label="Ativar som"
+                                    onclick="var v=document.getElementById('heroVsl');v.muted=false;v.play();this.style.display='none';"
+                                    style="position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.62);color:#fff;border:none;border-radius:999px;padding:8px 13px;font-size:.78rem;font-weight:700;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);">🔊 Toca para ouvir</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1321,6 +1322,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Barra de compra fixa (CRO mobile) -->
+    <a href="#planos" id="sticky-buy" aria-label="Garantir o meu acesso"
+       style="position:fixed;left:0;right:0;bottom:0;z-index:900;display:none;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,#e67e0a,#f59e0b);color:#fff;font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;text-decoration:none;padding:15px 18px;box-shadow:0 -6px 20px rgba(0,0,0,.18);">
+       🛡️ GARANTIR O MEU ACESSO — €9,90 <span style="font-size:1.2rem;line-height:1;">→</span>
+    </a>
+    <script>
+      (function(){
+        var bar=document.getElementById('sticky-buy'), plans=document.getElementById('planos');
+        function upd(){
+          var y=window.scrollY||document.documentElement.scrollTop, show=y>500;
+          if(plans){var r=plans.getBoundingClientRect();if(r.top<window.innerHeight&&r.bottom>0)show=false;}
+          bar.style.display=show?'flex':'none';
+        }
+        window.addEventListener('scroll',upd,{passive:true});
+        window.addEventListener('resize',upd); upd();
+      })();
+    </script>
 
     <!-- Scripts -->
     <script src="/saudebovina/script.js"></script>
