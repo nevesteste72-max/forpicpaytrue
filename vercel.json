@@ -9,5 +9,13 @@
     { "source": "/saudebovina/upsell1", "destination": "/saudebovina/upsell1/index.html" },
     { "source": "/saudebovina/upsell1/", "destination": "/saudebovina/upsell1/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/saudebovina/(.*).(mp4|webm|webp|jpg|jpeg|png)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
   ]
 }

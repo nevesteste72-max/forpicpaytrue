@@ -313,6 +313,11 @@ export default function Checkout() {
   const icAlreadyFiredExternally = searchParams.get("ic") === "0";
 
   const [link, setLink] = useState<PaymentLink | null>(null);
+
+  // Trustworthy tab title at the payment moment (root index.html defaults to "PicPay").
+  useEffect(() => {
+    if (link?.product_name) document.title = `${link.product_name} — Pagamento seguro`;
+  }, [link?.product_name]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
