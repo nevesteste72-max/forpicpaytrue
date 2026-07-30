@@ -677,7 +677,7 @@ export default function Checkout() {
     }
   }, [paymentState, link?.redirect_url]);
 
-  const fetchLink = async () => {
+  const fetchLink = async (attempt = 0) => {
     try {
       const { data, error } = await supabase
         .from("payment_links")
@@ -686,15 +686,25 @@ export default function Checkout() {
         .eq("is_active", true)
         .maybeSingle();
 
-      if (error || !data) {
+      if (error) throw error; // transient (network / in-app webview) -> retry below
+      if (!data) {
+        // Genuinely no matching active link -> real "not found"; retrying won't help.
         setNotFound(true);
+        setLoading(false);
       } else {
         setLink(data);
+        setLoading(false);
       }
     } catch {
-      setNotFound(true);
-    } finally {
-      setLoading(false);
+      // Transient failures are common inside FB/IG in-app webviews (89% of traffic).
+      // Retry a few times before giving up, so the FIRST click never shows
+      // "link não encontrado" and kills the sale.
+      if (attempt < 3) {
+        setTimeout(() => fetchLink(attempt + 1), 500 * (attempt + 1));
+      } else {
+        setNotFound(true);
+        setLoading(false);
+      }
     }
   };
 
