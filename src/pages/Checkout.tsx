@@ -1122,8 +1122,9 @@ export default function Checkout() {
               </div>
             </div>
 
-            {/* Single-step form */}
-            <div className="p-6 md:p-8">
+            {/* Single-step form — reserve height so the Stripe form loading in
+                does not shift the layout (CLS was 0.33 at the payment moment). */}
+            <div className="p-6 md:p-8 min-h-[540px]">
               {clientSecret && stripeOptions && stripeInstance ? (
                 <Elements stripe={stripeInstance} options={stripeOptions}>
                   <StripeCheckoutForm
@@ -1160,7 +1161,7 @@ export default function Checkout() {
                   />
                 </Elements>
               ) : (
-                <div className="flex items-center justify-center py-12">
+                <div className="flex items-center justify-center min-h-[480px]">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               )}
