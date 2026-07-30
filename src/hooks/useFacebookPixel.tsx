@@ -57,12 +57,12 @@ export function useFacebookPixel(pixelId: string | null | undefined) {
     }, eventId ? { eventID: eventId } : undefined);
   };
 
-  const trackInitiateCheckout = (value: number, currency: string) => {
+  const trackInitiateCheckout = (value: number, currency: string, eventId?: string) => {
     if (!pixelId || !window.fbq) return;
     window.fbq("track", "InitiateCheckout", {
       value,
       currency,
-    });
+    }, eventId ? { eventID: eventId } : undefined);
   };
 
   const trackViewContent = (value: number, currency: string) => {

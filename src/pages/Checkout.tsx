@@ -718,6 +718,49 @@ export default function Checkout() {
   const bumpAccepted = bumpsAccepted.some(Boolean);
   const totalAmount = link ? Number(link.amount) + bumpAmount : 0;
 
+  // Fire InitiateCheckout on BOTH browser (Pixel) and server (CAPI) with a shared
+  // event_id, so the intermediate signal survives FB/IG in-app webviews (89% of
+  // traffic) that drop browser-only events. The access token stays server-side —
+  // facebook-conversion resolves it from link_id.
+  const fireInitiateCheckout = () => {
+    if (!link) return;
+    const eventId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `ic_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    const curr = link.currency || "EUR";
+    // Browser pixel (deduplicated by eventID with the server event below)
+    trackInitiateCheckout(totalAmount, curr, eventId);
+    // Server CAPI (best-effort)
+    try {
+      const readCookie = (n: string) => {
+        const m = document.cookie.match("(^|;)\\s*" + n + "\\s*=\\s*([^;]+)");
+        return m ? decodeURIComponent(m.pop() as string) : undefined;
+      };
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-conversion`, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          link_id: linkId,
+          event_name: "InitiateCheckout",
+          event_id: eventId,
+          value: totalAmount,
+          currency: curr,
+          fbc: readCookie("_fbc"),
+          fbp: readCookie("_fbp"),
+          event_source_url: window.location.href,
+        }),
+      }).catch(() => {});
+    } catch {
+      /* best-effort — never block the payment */
+    }
+  };
+
   // --- M-Pesa / eMola submit ---
   const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -751,7 +794,7 @@ export default function Checkout() {
       }
     }
 
-    if (!icAlreadyFiredExternally) trackInitiateCheckout(totalAmount, link.currency || "MZN");
+    if (!icAlreadyFiredExternally) fireInitiateCheckout();
     setPaymentState("processing");
 
     try {
@@ -1099,7 +1142,7 @@ export default function Checkout() {
                     onCustomerPhoneChange={setPhone}
                     hideCustomerFields={false}
                     trackingParams={trackingParams}
-                    onInitiateCheckout={() => { if (!icAlreadyFiredExternally) trackInitiateCheckout(totalAmount, currencySymbol); }}
+                    onInitiateCheckout={() => { if (!icAlreadyFiredExternally) fireInitiateCheckout(); }}
                     onSuccess={async () => {
                       trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);
                       const hasFlow = await checkAndRedirectToFlow(stripeTransactionId || "");
