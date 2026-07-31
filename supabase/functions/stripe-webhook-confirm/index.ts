@@ -386,6 +386,18 @@ serve(async (req) => {
 
     updateData.status = resolvedStatus;
 
+    // Read the current status BEFORE updating so side-effects (Purchase/CAPI, delivery
+    // email, UTMify, WhatsApp) fire exactly once — on the real pending -> successful (or
+    // -> failed) transition. Without this guard, a card confirmed by the browser AND then
+    // re-confirmed by the real Stripe webhook would send duplicate emails and UTMify events.
+    const { data: prevRow } = await supabaseAdmin
+      .from("transactions")
+      .select("status")
+      .eq("id", transaction_id)
+      .maybeSingle();
+    const previousStatus = prevRow?.status;
+    const alreadySuccessful = previousStatus === "successful" || previousStatus === "completed";
+    const alreadyFailed = previousStatus === "failed";
 
     const { error } = await supabaseAdmin
       .from("transactions")
@@ -400,7 +412,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Transaction updated:", transaction_id, "status:", resolvedStatus);
+    console.log("Transaction updated:", transaction_id, "status:", resolvedStatus, "(was:", previousStatus, ")");
 
     // Fetch full transaction + product data for UTMify & Facebook
     const { data: txRow } = await supabaseAdmin
@@ -410,8 +422,9 @@ serve(async (req) => {
       .single();
 
     if (txRow) {
-      // Only fire UTMify, Facebook, and email for successful payments
-      if (resolvedStatus === "successful") {
+      // Only fire UTMify, Facebook, and email for successful payments — and only on the
+      // first transition into "successful" (idempotent against browser + webhook both firing).
+      if (resolvedStatus === "successful" && !alreadySuccessful) {
         // Build order bumps array for UTMify products[]
         const pl = txRow.payment_links;
         const orderBumps: { id: string; name: string; price: number }[] = [];
@@ -477,20 +490,27 @@ serve(async (req) => {
         });
       }
 
-      // Fire auto WhatsApp message based on payment status
+      // Fire auto WhatsApp message based on payment status. Skip if this status was
+      // already recorded before (avoids duplicate messages on webhook + browser re-confirm).
+      const statusChanged = !(
+        (resolvedStatus === "successful" && alreadySuccessful) ||
+        (resolvedStatus === "failed" && alreadyFailed)
+      );
       const whatsappEvent = resolvedStatus === "successful" ? "approved"
         : resolvedStatus === "failed" ? "failed"
         : "pending";
 
-      await sendAutoWhatsApp(supabaseAdmin, {
-        customer_phone: txRow.customer_phone || "",
-        customer_name: txRow.customer_name || customer_name || "Cliente",
-        amount: Number(txRow.amount),
-        currency: txRow.currency || "ZAR",
-        product_name: txRow.payment_links?.product_name || "Product",
-      }, whatsappEvent);
+      if (statusChanged) {
+        await sendAutoWhatsApp(supabaseAdmin, {
+          customer_phone: txRow.customer_phone || "",
+          customer_name: txRow.customer_name || customer_name || "Cliente",
+          amount: Number(txRow.amount),
+          currency: txRow.currency || "ZAR",
+          product_name: txRow.payment_links?.product_name || "Product",
+        }, whatsappEvent);
+      }
 
-      if (resolvedStatus === "failed" && txRow.customer_email) {
+      if (resolvedStatus === "failed" && !alreadyFailed && txRow.customer_email) {
         await sendPaymentReminderEmail(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
           customer_email: txRow.customer_email,
           customer_name: txRow.customer_name || customer_name || "",
