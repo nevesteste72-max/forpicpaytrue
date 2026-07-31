@@ -92,10 +92,18 @@ export function StripeCheckoutForm({
 }: StripeCheckoutFormProps) {
   const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
   const walletOrNever = (method: string) => (enabledMethods.includes(method) ? "auto" : "never") as "auto" | "never";
-  // Display methods in the exact order configured on the product (e.g. card, mbway,
-  // multibanco). Wallets (apple/google pay) are handled separately via `wallets`.
-  const paymentMethodOrder = enabledMethods.filter(
-    (m) => m !== "apple_pay" && m !== "google_pay"
+  // Display methods in the product's configured order, mapped to Stripe's canonical
+  // ids ("mbway" -> "mb_way"). MB Way (instant) is forced ABOVE Multibanco (slow
+  // reference) by listing multibanco last. Wallets (apple/google pay) are handled
+  // separately via `wallets`. Extra ids not offered by the account are ignored by Stripe.
+  const toStripeId = (m: string) => (m === "mbway" ? "mb_way" : m);
+  const paymentMethodOrder = Array.from(
+    new Set([
+      ...enabledMethods
+        .filter((m) => m !== "apple_pay" && m !== "google_pay")
+        .map(toStripeId),
+      "multibanco",
+    ])
   );
   const stripe = useStripe();
   const elements = useElements();
