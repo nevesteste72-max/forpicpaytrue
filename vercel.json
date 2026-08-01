@@ -10,6 +10,8 @@
     { "source": "/saudebovina/upsell1/", "destination": "/saudebovina/upsell1/index.html" },
     { "source": "/painel", "destination": "/painel/index.html" },
     { "source": "/painel/", "destination": "/painel/index.html" },
+    { "source": "/aves", "destination": "/aves/index.html" },
+    { "source": "/aves/", "destination": "/aves/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
