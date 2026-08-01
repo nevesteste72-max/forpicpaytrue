@@ -123,7 +123,7 @@
     <div class="app-wrapper">
         <!-- Barra de Escassez Fixa no Topo -->
         <div class="scarcity-top-bar">
-            <span>🔥 PREÇO DE LANÇAMENTO · acesso imediato após o pagamento</span>
+            <span id="cd-hero-wrap">🔥 Preço de lançamento termina em <strong id="cd-hero">15:00</strong></span>
         </div>
 
         <main>
@@ -139,7 +139,7 @@
                         <div class="hero-cta-group">
                             <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin:0 0 12px;flex-wrap:wrap;">
                               <span style="font-size:.9rem;color:#6b5a49;font-weight:600;">Planos desde</span>
-                              <span style="font-size:1.7rem;font-weight:800;color:#1b7a34;font-family:'Outfit',sans-serif;line-height:1;">€9,90</span>
+                              <span id="px-hero" style="font-size:1.7rem;font-weight:800;color:#1b7a34;font-family:'Outfit',sans-serif;line-height:1;">€9,90</span>
                               <span style="font-size:.78rem;color:#8a7a68;font-weight:600;">· acesso imediato</span>
                             </div>
                             <a href="#planos" class="btn btn-cta" id="cta-hero">
@@ -891,7 +891,7 @@
                                 class="highlight-title-italic">Para Ti!</span></h2>
 
                         <div class="countdown-container">
-                            <span class="countdown-label">🔥 PREÇO DE LANÇAMENTO — pagamento único, sem mensalidades</span>
+                            <span class="countdown-label" id="cd-planos-wrap">⏳ O preço de lançamento sobe em <strong id="cd-planos">15:00</strong></span>
                         </div>
                     </div>
 
@@ -904,7 +904,7 @@
                             </div>
                             <div class="plan-price-wrapper">
                                 <span class="currency">€</span>
-                                <span class="price-val">9</span>
+                                <span class="price-val" id="px-basico-val">9</span>
                                 <span class="price-cents">,90</span>
                                 <span class="price-period">/ pagamento único</span>
                             </div>
@@ -988,7 +988,7 @@
                             </div>
                             <div class="plan-price-wrapper">
                                 <span class="currency">€</span>
-                                <span class="price-val">19</span>
+                                <span class="price-val" id="px-completo-val">19</span>
                                 <span class="price-cents">,90</span>
                                 <span class="price-period">/ pagamento único</span>
                             </div>
@@ -1306,7 +1306,7 @@
     <!-- Barra de compra fixa (CRO mobile) -->
     <a href="#planos" id="sticky-buy" aria-label="Garantir o meu acesso"
        style="position:fixed;left:0;right:0;bottom:0;z-index:900;display:none;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,#e67e0a,#f59e0b);color:#fff;font-family:'Outfit',sans-serif;font-weight:800;font-size:clamp(.85rem,3.7vw,1.05rem);white-space:nowrap;text-decoration:none;padding:15px 14px;padding-bottom:calc(15px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.18);">
-       🛡️ GARANTIR O MEU ACESSO — €9,90 <span style="font-size:1.15em;line-height:1;">→</span>
+       🛡️ GARANTIR O MEU ACESSO — <span id="px-sticky">€9,90</span> <span style="font-size:1.15em;line-height:1;">→</span>
     </a>
     <script>
       (function(){

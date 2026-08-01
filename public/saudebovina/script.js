@@ -74,10 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = getCheckoutUrlWithUtms(url);
     }
 
+    // Links de checkout (mutáveis: o contador de lançamento troca-os ao expirar)
+    let LINK_COMPLETO = 'https://www.tecnhogar.store/pay/bb00b314-ac7e-4ec3-8bb1-7945607e8eb6'; // €19,90
+    let LINK_BASICO   = 'https://www.tecnhogar.store/pay/6b47b157-7bfd-41bb-bdda-1d1036c7c805'; // €9,90
+
     // Redirect to Complete Plan directly
     if (btnComprarCompleto) {
         btnComprarCompleto.addEventListener('click', () => {
-            redirectToCheckout('https://www.tecnhogar.store/pay/bb00b314-ac7e-4ec3-8bb1-7945607e8eb6');
+            redirectToCheckout(LINK_COMPLETO);
         });
     }
 
@@ -90,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCloseUpsell) btnCloseUpsell.addEventListener('click', closeUpsell);
     if (btnUpsellDecline) btnUpsellDecline.addEventListener('click', () => {
         closeUpsell();
-        redirectToCheckout('https://www.tecnhogar.store/pay/6b47b157-7bfd-41bb-bdda-1d1036c7c805');
+        redirectToCheckout(LINK_BASICO);
     });
 
     // Modal Action: Accept Upsell
@@ -154,68 +158,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ==========================================================================
-       DYNAMIC COUNTDOWN TIMER (EVERGREEN & PERSISTENT)
+       COUNTDOWN DE LANÇAMENTO (minutos, REAL) — ao expirar, o preço sobe mesmo
        ========================================================================== */
-    const hoursVal = document.getElementById('hours');
-    const minutesVal = document.getElementById('minutes');
-    const secondsVal = document.getElementById('seconds');
+    (function () {
+        const DURATION_MS = 15 * 60 * 1000; // 15 minutos
+        const KEY = 'launch_deadline_v2';
 
-    const sHoursVal = document.getElementById('scarcity-hours');
-    const sMinutesVal = document.getElementById('scarcity-minutes');
-    const sSecondsVal = document.getElementById('scarcity-seconds');
+        // Links de preço mais alto (pós-lançamento) — verificados e ativos
+        const LINK_COMPLETO_UP = 'https://www.tecnhogar.store/pay/74344e80-2ecb-4610-9d55-061d431b06e7'; // €24,90
+        const LINK_BASICO_UP   = 'https://www.tecnhogar.store/pay/0ae38341-b25f-48b9-beaa-43f8d7d9e042'; // €12,90
 
-    if ((hoursVal && minutesVal && secondsVal) || (sHoursVal && sMinutesVal && sSecondsVal)) {
-        const timerDurationSeconds = (76 * 60) + 2; // 1h 16m 02s = 4562s
-        
-        let deadline = localStorage.getItem('pricing_countdown_deadline');
-        
-        // If deadline is not set or is corrupted, set a new one
-        if (!deadline || isNaN(parseInt(deadline))) {
-            const newDeadline = new Date().getTime() + (timerDurationSeconds * 1000);
-            localStorage.setItem('pricing_countdown_deadline', newDeadline.toString());
-            deadline = newDeadline;
-        } else {
-            deadline = parseInt(deadline);
+        const cdHero = document.getElementById('cd-hero');
+        const cdPlanos = document.getElementById('cd-planos');
+        const cdHeroWrap = document.getElementById('cd-hero-wrap');
+        const cdPlanosWrap = document.getElementById('cd-planos-wrap');
+
+        let deadline = parseInt(localStorage.getItem(KEY), 10);
+        if (!deadline || isNaN(deadline)) {
+            deadline = Date.now() + DURATION_MS;
+            localStorage.setItem(KEY, String(deadline));
         }
 
-        function updateTimer() {
-            const now = new Date().getTime();
-            let remaining = deadline - now;
+        let expiredApplied = false;
 
-            // Reset deadline if it has expired
-            if (remaining <= 0) {
-                const newDeadline = now + (timerDurationSeconds * 1000);
-                localStorage.setItem('pricing_countdown_deadline', newDeadline.toString());
-                deadline = newDeadline;
-                remaining = timerDurationSeconds * 1000;
-            }
-
-            const totalSeconds = Math.floor(remaining / 1000);
-            const hrs = Math.floor(totalSeconds / 3600);
-            const mins = Math.floor((totalSeconds % 3600) / 60);
-            const secs = totalSeconds % 60;
-
-            const padHrs = hrs.toString().padStart(2, '0');
-            const padMins = mins.toString().padStart(2, '0');
-            const padSecs = secs.toString().padStart(2, '0');
-
-            // Update main timer
-            if (hoursVal) hoursVal.innerText = padHrs;
-            if (minutesVal) minutesVal.innerText = padMins;
-            if (secondsVal) secondsVal.innerText = padSecs;
-
-            // Update sticky scarcity timer
-            if (sHoursVal) sHoursVal.innerText = padHrs;
-            if (sMinutesVal) sMinutesVal.innerText = padMins;
-            if (sSecondsVal) sSecondsVal.innerText = padSecs;
+        function applyExpired() {
+            if (expiredApplied) return;
+            expiredApplied = true;
+            // Sobe os preços a sério — os botões passam a cobrar mais
+            LINK_COMPLETO = LINK_COMPLETO_UP;
+            LINK_BASICO = LINK_BASICO_UP;
+            const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+            setTxt('px-basico-val', '12');
+            setTxt('px-completo-val', '24');
+            setTxt('px-hero', '€12,90');
+            setTxt('px-sticky', '€12,90');
+            if (cdHeroWrap) cdHeroWrap.innerHTML = '⏰ O preço de lançamento terminou — e pode subir mais';
+            if (cdPlanosWrap) cdPlanosWrap.innerHTML = '⏰ Preço de lançamento terminou — garante antes que suba mais';
         }
 
-        // Run immediately once
-        updateTimer();
-        
-        // Update timer every second
-        setInterval(updateTimer, 1000);
-    }
+        function tick() {
+            const remaining = deadline - Date.now();
+            if (remaining <= 0) { applyExpired(); return; }
+            const total = Math.floor(remaining / 1000);
+            const mins = Math.floor(total / 60);
+            const secs = total % 60;
+            const txt = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            if (cdHero) cdHero.innerText = txt;
+            if (cdPlanos) cdPlanos.innerText = txt;
+        }
+
+        tick();
+        const iv = setInterval(function () {
+            tick();
+            if (expiredApplied) clearInterval(iv);
+        }, 1000);
+    })();
 
     /* ==========================================================================
        BACK REDIRECT & EXIT INTENT LOGIC
