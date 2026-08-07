@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ==========================================================================
        CHECKOUT REDIRECT WITH UTM PASSTHROUGH
        ========================================================================== */
-    const CHECKOUT_BASICO  = 'https://www.tecnhogar.store/pay/5733db24-362a-403e-994e-9471cff39989';
-    const CHECKOUT_COMPLETO = 'https://www.tecnhogar.store/pay/a39f1c26-f19a-4109-a3d6-6d700d0367af';
+    const CHECKOUT_BASICO  = 'https://www.tecnhogar.store/pay/2d2aa3ba-92d2-4790-9388-85bf5e42badb';
+    const CHECKOUT_COMPLETO = 'https://www.tecnhogar.store/pay/16877070-2ad6-4cee-a0ef-a01029f35e5d';
 
     function redirectToCheckout(baseUrl, planName, price) {
         // Meta Pixel — Initiate Checkout Event
