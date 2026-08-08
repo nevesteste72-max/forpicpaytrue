@@ -55,6 +55,12 @@ export default function Membros() {
   const mainItems = normalItems.filter((i) => i.kind === "main");
   const extraItems = normalItems.filter((i) => i.kind !== "main");
 
+  // Marca por oferta (deteta a partir dos produtos que o cliente comprou)
+  const isAves = items.some((i) => /aves|galinh|frango/i.test(i.title));
+  const isBovinos = items.some((i) => /bovin|gado|vaca/i.test(i.title));
+  const brandEmoji = isAves ? "🐔" : isBovinos ? "🐄" : "🐾";
+  const brandName = isAves ? "Saúde das Aves" : isBovinos ? "Saúde Bovina" : "Identificação Animal";
+
   const brand = {
     forest: "#0f2e19",
     forest2: "#1a4d2b",
@@ -114,9 +120,9 @@ export default function Membros() {
     <div className="min-h-screen bg-[#f3f5ef]">
       <header style={{ background: brand.forest }} className="text-[#eef3ea] sticky top-0 z-10">
         <div className="max-w-[940px] mx-auto px-5 h-[62px] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg grid place-items-center text-lg" style={{ background: brand.forest2 }}>🐄</div>
+          <div className="w-9 h-9 rounded-lg grid place-items-center text-lg" style={{ background: brand.forest2 }}>{brandEmoji}</div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold">Técnicas de Identificação Animal</div>
+            <div className="text-sm font-semibold">{brandName}</div>
             <div className="text-[11px] text-[#9db69f]">Área de Membros</div>
           </div>
           <div className="flex-1" />
@@ -138,6 +144,15 @@ export default function Membros() {
               : ""}
           </p>
         </div>
+
+        {items.length > 0 && (
+          <div className="mt-2 mb-1 rounded-2xl border p-4 flex gap-3 items-start" style={{ background: "#fff8e8", borderColor: "#efdca8" }}>
+            <span className="text-xl leading-none">🔔</span>
+            <div className="text-sm text-[#6a5320]">
+              <strong>Estamos sempre a melhorar o teu material.</strong> Vais receber <strong>novos conteúdos e atualizações</strong> automaticamente aqui, sem custo adicional. Guarda esta página nos favoritos. 🐔
+            </div>
+          </div>
+        )}
 
         {items.length === 0 ? (
           <div className="bg-white rounded-2xl border border-[#e0e4da] p-10 text-center mt-4">
