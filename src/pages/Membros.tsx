@@ -195,13 +195,13 @@ export default function Membros() {
       </main>
 
       {certOpen && (
-        <CertificateModal defaultName={customerName || ""} onClose={() => setCertOpen(false)} gold={brand.gold} forest={brand.forest} />
+        <CertificateModal defaultName={customerName || ""} template={isAves ? "/aves/certificado-base.webp" : "/saudebovina/certificado-base.webp"} onClose={() => setCertOpen(false)} gold={brand.gold} forest={brand.forest} />
       )}
     </div>
   );
 }
 
-function CertificateModal({ defaultName, onClose, gold, forest }: { defaultName: string; onClose: () => void; gold: string; forest: string }) {
+function CertificateModal({ defaultName, template, onClose, gold, forest }: { defaultName: string; template: string; onClose: () => void; gold: string; forest: string }) {
   const [name, setName] = useState(defaultName);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const templateRef = useRef<HTMLImageElement | null>(null);
@@ -210,7 +210,7 @@ function CertificateModal({ defaultName, onClose, gold, forest }: { defaultName:
   useEffect(() => {
     const img = new Image();
     img.onload = () => { templateRef.current = img; setReady(true); };
-    img.src = "/saudebovina/certificado-base.webp";
+    img.src = template;
   }, []);
 
   useEffect(() => {
