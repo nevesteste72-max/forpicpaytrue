@@ -1,5 +1,6 @@
 import { cn, formatMoney } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 
 interface OrderBumpProps {
   productName: string;
@@ -22,6 +23,10 @@ export function OrderBump({
   currency = "MZN",
   locale = "pt-MZ",
 }: OrderBumpProps) {
+  const [expanded, setExpanded] = useState(false);
+  // Só mostra o "Ver tudo" quando a descrição é longa o suficiente para ser cortada
+  const isLong = !!productDescription && productDescription.length > 90;
+
   return (
     <label className="cursor-pointer block group">
       <input
@@ -63,9 +68,36 @@ export function OrderBump({
             </span>
           </div>
           {productDescription && (
-            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+            <p
+              className={cn(
+                "text-xs text-muted-foreground leading-relaxed",
+                !expanded && "line-clamp-2"
+              )}
+            >
               {productDescription}
             </p>
+          )}
+          {isLong && (
+            <button
+              type="button"
+              onClick={(e) => {
+                // Não marcar o checkout ao clicar em "ver tudo"
+                e.preventDefault();
+                e.stopPropagation();
+                setExpanded((v) => !v);
+              }}
+              className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            >
+              {expanded ? (
+                <>
+                  Ver menos <ChevronUp className="w-3.5 h-3.5" />
+                </>
+              ) : (
+                <>
+                  Ver descrição completa <ChevronDown className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
           )}
         </div>
       </div>
