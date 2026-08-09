@@ -327,4 +327,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.protocol === 'file:') {
         window.location.replace("https://youtu.be/McV2ZagvA_g?si=NTPdJHHGmj7UL9J8");
     }
+
+    /* ==========================================================================
+       CORREÇÃO DE ÂNCORAS (#planos etc.)
+       As imagens de depoimentos usam loading="lazy" sem altura reservada; ao
+       saltar para #planos o layout ainda cresce por cima e o utilizador acaba
+       nos depoimentos. Rolamos e reajustamos depois de o layout assentar.
+       ========================================================================== */
+    document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        const id = a.getAttribute('href').slice(1);
+        if (!id) return;
+        a.addEventListener('click', (e) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            e.preventDefault();
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Reajustes após imagens lazy acima do alvo carregarem e deslocarem o layout
+            [250, 600, 1000].forEach((t) =>
+                setTimeout(() => el.scrollIntoView({ behavior: 'auto', block: 'start' }), t)
+            );
+        });
+    });
 });
