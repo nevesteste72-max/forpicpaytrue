@@ -91,6 +91,7 @@ serve(async (req) => {
           amount: serverTotal,
           order_bump_accepted: order_bump_accepted || false,
           order_bump_amount: bumpAmount,
+          bumps_accepted: bumpsAccepted,
         })
         .eq("id", transaction_id);
 
