@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ==========================================================================
        BACK REDIRECT & EXIT INTENT LOGIC
        ========================================================================== */
-    const backRedirectUrl = '/saudebovina/back/';
+    const backRedirectUrl = '/aves/back/';
 
     function setupBackRedirect() {
         // Envia estado para o histórico para capturar ação de voltar
