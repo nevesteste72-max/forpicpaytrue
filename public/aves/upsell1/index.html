@@ -1002,16 +1002,49 @@
                 }
             });
 
-            // Action: Buy Upsell
-            document.getElementById('btn-buy-upsell').addEventListener('click', () => {
-                const targetUrl = 'https://www.tecnhogar.store/pay/df9fadac-ea86-429a-99c6-7fd9b154e9b0';
-                window.location.href = getCheckoutUrlWithUtms(targetUrl);
+            // Guardar o tx da compra principal (vem do checkout via ?cashpay_tx=)
+            const parentTxParam = params.get('cashpay_tx');
+            if (parentTxParam) localStorage.setItem('aves_parent_tx', parentTxParam);
+
+            const SUPABASE_URL = 'https://gbtlzwzmbgkcdkdnnbxg.supabase.co';
+            const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdidGx6d3ptYmdrY2RrZG5uYnhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwOTY1MDgsImV4cCI6MjA5ODY3MjUwOH0.8l1wrBk6hC0yKXLpflyZMWTyiDZ2Vbkp4jwFXHazLQM';
+            const UPSELL_PAYMENT_LINK = 'df9fadac-ea86-429a-99c6-7fd9b154e9b0';
+            const CHECKOUT_FALLBACK = 'https://www.tecnhogar.store/pay/' + UPSELL_PAYMENT_LINK;
+            const MEMBROS = 'https://www.tecnhogar.store/membros';
+
+            const btnBuy = document.getElementById('btn-buy-upsell');
+            const originalBuyHtml = btnBuy ? btnBuy.innerHTML : '';
+            function goFallback() { window.location.href = getCheckoutUrlWithUtms(CHECKOUT_FALLBACK); }
+
+            // Action: Buy Upsell — 1 clique (cobra o cartão guardado) com fallback
+            if (btnBuy) btnBuy.addEventListener('click', async () => {
+                const tx = localStorage.getItem('aves_parent_tx');
+                if (!tx) { goFallback(); return; } // sem cartão guardado (ex: MB Way) -> checkout normal
+                btnBuy.disabled = true;
+                btnBuy.style.opacity = '0.7';
+                btnBuy.innerHTML = 'A processar o teu pagamento...';
+                try {
+                    const r = await fetch(SUPABASE_URL + '/functions/v1/one-click-upsell', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON, 'apikey': SUPABASE_ANON, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ parent_transaction_id: tx, upsell_payment_link_id: UPSELL_PAYMENT_LINK })
+                    });
+                    const data = await r.json().catch(() => ({}));
+                    if (data && data.success) {
+                        localStorage.removeItem('aves_parent_tx');
+                        window.location.href = getCheckoutUrlWithUtms(MEMBROS);
+                    } else {
+                        goFallback(); // cartão recusado / 3DS / sem método -> checkout normal
+                    }
+                } catch (e) {
+                    goFallback();
+                }
             });
 
             // Action: Decline Upsell
             document.getElementById('btn-decline-upsell').addEventListener('click', () => {
-                const targetUrl = 'https://www.tecnhogar.store/membros';
-                window.location.href = getCheckoutUrlWithUtms(targetUrl);
+                localStorage.removeItem('aves_parent_tx');
+                window.location.href = getCheckoutUrlWithUtms(MEMBROS);
             });
         });
     </script>
