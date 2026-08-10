@@ -1023,11 +1023,17 @@
                 btnBuy.disabled = true;
                 btnBuy.style.opacity = '0.7';
                 btnBuy.innerHTML = 'A processar o teu pagamento...';
+                // Recolhe os UTMs guardados para atribuir o upsell à mesma origem
+                const tp = {};
+                ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'].forEach(function (k) {
+                    const v = localStorage.getItem(k) || localStorage.getItem('utmify_' + k);
+                    if (v) tp[k] = v;
+                });
                 try {
                     const r = await fetch(SUPABASE_URL + '/functions/v1/one-click-upsell', {
                         method: 'POST',
                         headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON, 'apikey': SUPABASE_ANON, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ parent_transaction_id: tx, upsell_payment_link_id: UPSELL_PAYMENT_LINK })
+                        body: JSON.stringify({ parent_transaction_id: tx, upsell_payment_link_id: UPSELL_PAYMENT_LINK, tracking_params: tp })
                     });
                     const data = await r.json().catch(() => ({}));
                     if (data && data.success) {
