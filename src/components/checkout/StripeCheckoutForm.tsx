@@ -154,6 +154,12 @@ export function StripeCheckoutForm({
       return;
     }
 
+    // Telefone obrigatório: métodos como MB Way exigem um número válido, senão o pagamento falha.
+    if (!customerPhone || customerPhone.replace(/\D/g, "").length < 6) {
+      onError(t("Introduza um número de telefone válido", "Please enter a valid phone number", "Ingrese un número de teléfono válido"));
+      return;
+    }
+
     onInitiateCheckout?.();
     setProcessing(true);
 
@@ -333,6 +339,7 @@ export function StripeCheckoutForm({
                 value={customerPhone}
                 onChange={(e) => handlePhoneChange(e.target.value.replace(/\D/g, "").slice(0, phoneMaxLen))}
                 placeholder={phonePlaceholder}
+                required
                 className="flex-1 rounded-l-none h-12 rounded-r-xl border-border text-sm font-mono"
               />
             </div>
