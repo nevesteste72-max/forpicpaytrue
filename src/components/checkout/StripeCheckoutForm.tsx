@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ShieldCheck, Mail, User, Phone } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, User, Phone, Lock, Clock, RotateCcw } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
 
 interface TrackingParams {
@@ -395,6 +395,21 @@ export function StripeCheckoutForm({
         </div>
       </div>
 
+      {/* Garantia — reduz o medo mesmo antes de pagar */}
+      <div className="flex items-center gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] p-3">
+        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center">
+          <ShieldCheck className="w-5 h-5 text-emerald-600" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground leading-tight">
+            {t("Garantia de 7 dias — risco zero", "7-day guarantee — zero risk", "Garantía de 7 días — riesgo cero")}
+          </p>
+          <p className="text-xs text-muted-foreground leading-tight mt-0.5">
+            {t("Se não gostares, devolvemos 100% do teu dinheiro.", "Not happy? We refund 100%, no questions.", "Si no te gusta, te devolvemos el 100%.")}
+          </p>
+        </div>
+      </div>
+
       <Button
         type="submit"
         disabled={!stripe || processing}
@@ -412,11 +427,31 @@ export function StripeCheckoutForm({
         )}
       </Button>
 
-      <div className="text-center">
-        <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
+      {/* Rodapé de confiança */}
+      <div className="pt-1 space-y-3">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-col items-center gap-1 text-center">
+            <Lock className="w-4 h-4 text-muted-foreground" />
+            <span className="text-[10px] leading-tight text-muted-foreground">{t("Pagamento encriptado", "Encrypted payment", "Pago encriptado")}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <span className="text-[10px] leading-tight text-muted-foreground">{t("Acesso imediato", "Instant access", "Acceso inmediato")}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <RotateCcw className="w-4 h-4 text-muted-foreground" />
+            <span className="text-[10px] leading-tight text-muted-foreground">{t("Reembolso 7 dias", "7-day refund", "Reembolso 7 días")}</span>
+          </div>
+        </div>
+        <p className="text-center text-[10px] text-muted-foreground flex items-center justify-center gap-1">
           <ShieldCheck className="w-3 h-3" />
-          {t("Pagamento seguro e encriptado.", "Your payment is secure and encrypted.", "Su pago es seguro y encriptado.")}
+          {t("Compra 100% segura · processada pela Stripe", "100% secure checkout · processed by Stripe", "Compra 100% segura · procesada por Stripe")}
         </p>
+        <div className="flex items-center justify-center gap-1.5 opacity-70 flex-wrap">
+          {["Visa", "Mastercard", "MB WAY", "Multibanco"].map((m) => (
+            <span key={m} className="text-[9px] font-semibold tracking-wide text-muted-foreground border border-border rounded px-1.5 py-0.5">{m}</span>
+          ))}
+        </div>
       </div>
     </form>
   );
