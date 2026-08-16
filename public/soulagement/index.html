@@ -1,606 +1,2537 @@
 <!DOCTYPE html>
 <html lang="fr-FR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>+500 Recettes Anti-Inflammatoires | Soulagement Dans Chaque Assiette</title>
-    <meta name="description"
-        content="Dites adieu aux ballonnements et à la fatigue avec plus de 500 recettes anti-inflammatoires faciles, sans sucre et sans gluten. Accès immédiat, garantie 30 jours.">
-
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Fatiguée des ballonnements et du manque d'énergie ?">
-    <meta property="og:description"
-        content="+500 recettes anti-inflammatoires rapides, sans sucre et sans gluten. Sentez-vous plus légère dès les premiers jours.">
-    <meta property="og:locale" content="fr_FR">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-
-    <style>
-        :root {
-            --vert: #2f7a4f;
-            --vert-clair: #eaf5ee;
-            --vert-fonce: #1e5335;
-            --or: #e0a020;
-            --rouge: #c2452d;
-            --texte: #23302a;
-            --texte-doux: #5d6b64;
-            --fond: #fbfaf6;
-            --carte: #ffffff;
-            --bord: #e6e3da;
-            --rayon: 16px;
-            --ombre: 0 4px 20px rgba(35, 48, 42, .07);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: var(--fond);
-            color: var(--texte);
-            line-height: 1.65;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        h1, h2, h3, .titre { font-family: 'Outfit', system-ui, sans-serif; line-height: 1.2; }
-
-        .wrap { width: min(100% - 2.5rem, 780px); margin-inline: auto; }
-
-        section { padding: 3.25rem 0; }
-
-        /* ---------- Barre d'urgence ---------- */
-        .barre-urgence {
-            position: sticky; top: 0; z-index: 50;
-            background: var(--rouge); color: #fff;
-            text-align: center; font-size: .9rem; font-weight: 600;
-            padding: .6rem 1rem;
-        }
-        .barre-urgence strong { font-variant-numeric: tabular-nums; }
-
-        /* ---------- Hero ---------- */
-        .hero { background: linear-gradient(180deg, var(--vert-clair), var(--fond)); padding-top: 2.5rem; }
-        .hero h1 { font-size: clamp(1.85rem, 6vw, 2.9rem); font-weight: 800; letter-spacing: -.02em; }
-        .hero .sous { font-size: clamp(1.02rem, 2.6vw, 1.2rem); color: var(--texte-doux); margin-top: 1rem; }
-
-        .visuel {
-            margin: 1.75rem 0;
-            aspect-ratio: 16 / 10;
-            border-radius: var(--rayon);
-            background: linear-gradient(135deg, #d7eadd, #bfe0c9);
-            display: grid; place-items: center;
-            color: var(--vert-fonce); font-weight: 600; text-align: center; padding: 1rem;
-            border: 1px solid var(--bord);
-        }
-        .visuel img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--rayon); }
-
-        .attributs {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem;
-            margin-top: 1.25rem;
-        }
-        @media (min-width: 620px) { .attributs { grid-template-columns: repeat(4, 1fr); } }
-        .attribut {
-            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
-            padding: .7rem .5rem; text-align: center; font-size: .82rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: .03em; color: var(--vert-fonce);
-        }
-
-        .tagline {
-            margin-top: 1.25rem; text-align: center; font-family: 'Outfit', sans-serif;
-            font-weight: 700; letter-spacing: .04em; color: var(--vert);
-            text-transform: uppercase; font-size: .95rem;
-        }
-
-        /* ---------- CTA ---------- */
-        .cta {
-            display: block; width: 100%; max-width: 460px; margin: 1.5rem auto 0;
-            background: var(--vert); color: #fff; border: none; cursor: pointer;
-            font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;
-            padding: 1.05rem 1.5rem; border-radius: 999px; text-align: center;
-            text-decoration: none; box-shadow: 0 8px 22px rgba(47, 122, 79, .28);
-            transition: transform .15s ease, box-shadow .15s ease;
-        }
-        .cta:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(47, 122, 79, .34); }
-        .cta-note { text-align: center; font-size: .85rem; color: var(--texte-doux); margin-top: .7rem; }
-
-        /* ---------- Blocs génériques ---------- */
-        h2.titre-section {
-            font-size: clamp(1.45rem, 4.5vw, 2rem); font-weight: 800;
-            text-align: center; margin-bottom: 1.75rem; letter-spacing: -.015em;
-        }
-
-        .liste-douleur { list-style: none; display: grid; gap: .75rem; }
-        .liste-douleur li {
-            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
-            padding: .9rem 1.1rem; display: flex; gap: .8rem; align-items: flex-start;
-        }
-        .liste-douleur li span { flex-shrink: 0; font-size: 1.15rem; }
-
-        .duo { display: grid; gap: 1rem; }
-        @media (min-width: 620px) { .duo { grid-template-columns: 1fr 1fr; } }
-        .colonne {
-            border-radius: var(--rayon); padding: 1.25rem; border: 1px solid var(--bord);
-            background: var(--carte);
-        }
-        .colonne.negatif { border-color: #f0d4cd; background: #fdf5f3; }
-        .colonne.positif { border-color: #cfe6d8; background: var(--vert-clair); }
-        .colonne h3 { font-size: 1.05rem; margin-bottom: .75rem; }
-        .colonne ul { list-style: none; display: grid; gap: .5rem; font-size: .95rem; }
-        .colonne li::before { content: "✕ "; color: var(--rouge); font-weight: 700; }
-        .colonne.positif li::before { content: "✓ "; color: var(--vert); }
-
-        .grille-contenu { display: grid; gap: .8rem; }
-        @media (min-width: 620px) { .grille-contenu { grid-template-columns: 1fr 1fr; } }
-        .carte-contenu {
-            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
-            padding: 1rem 1.15rem;
-        }
-        .carte-contenu h3 { font-size: 1rem; margin-bottom: .25rem; }
-        .carte-contenu p { font-size: .9rem; color: var(--texte-doux); }
-
-        /* ---------- Offre ---------- */
-        .offre {
-            background: var(--carte); border: 2px solid var(--vert); border-radius: 20px;
-            padding: 1.75rem 1.35rem; box-shadow: var(--ombre); text-align: center;
-        }
-        .badge-remise {
-            display: inline-block; background: var(--rouge); color: #fff;
-            font-weight: 700; font-size: .82rem; padding: .3rem .85rem; border-radius: 999px;
-        }
-        .prix-barre { color: var(--texte-doux); text-decoration: line-through; font-size: 1.1rem; margin-top: .9rem; }
-        .prix { font-family: 'Outfit', sans-serif; font-size: clamp(2.6rem, 9vw, 3.4rem); font-weight: 800; color: var(--vert-fonce); letter-spacing: -.03em; }
-        .prix-note { font-size: .9rem; color: var(--texte-doux); }
-
-        .bonus-liste { list-style: none; display: grid; gap: .6rem; margin-top: 1.5rem; text-align: left; }
-        .bonus-liste li {
-            display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
-            background: var(--vert-clair); border-radius: 10px; padding: .7rem .9rem; font-size: .92rem;
-        }
-        .bonus-liste li b { display: block; font-family: 'Outfit', sans-serif; }
-        .bonus-liste li small { color: var(--texte-doux); }
-        .bonus-liste .valeur { flex-shrink: 0; color: var(--vert); font-weight: 700; text-decoration: line-through; }
-        .total-bonus {
-            margin-top: .9rem; font-weight: 700; font-family: 'Outfit', sans-serif;
-            color: var(--vert-fonce); font-size: 1.05rem;
-        }
-
-        .rarete { margin-top: 1rem; font-size: .88rem; color: var(--rouge); font-weight: 600; }
-        .social-live { font-size: .85rem; color: var(--texte-doux); margin-top: .3rem; }
-
-        /* ---------- Garantie ---------- */
-        .garantie {
-            background: var(--vert-clair); border: 1px dashed var(--vert);
-            border-radius: var(--rayon); padding: 1.5rem; text-align: center;
-        }
-        .garantie .sceau { font-size: 2.4rem; }
-        .badges { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1rem; }
-        .badges span {
-            background: var(--carte); border: 1px solid var(--bord); border-radius: 8px;
-            padding: .35rem .75rem; font-size: .8rem; font-weight: 600; color: var(--texte-doux);
-        }
-
-        /* ---------- Avis ---------- */
-        .note-globale { text-align: center; margin-bottom: 1.5rem; }
-        .note-globale .chiffre { font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: var(--vert-fonce); }
-        .avis { display: grid; gap: .8rem; }
-        @media (min-width: 620px) { .avis { grid-template-columns: 1fr 1fr; } }
-        .avis article {
-            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; padding: 1rem 1.15rem;
-        }
-        .avis .etoiles { color: var(--or); font-size: .9rem; }
-        .avis p { font-size: .93rem; margin: .4rem 0 .5rem; }
-        .avis cite { font-style: normal; font-weight: 700; font-size: .85rem; color: var(--texte-doux); }
-        .avis .verifie { font-size: .75rem; color: var(--vert); font-weight: 600; }
-
-        /* ---------- FAQ ---------- */
-        .faq details {
-            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
-            padding: .95rem 1.15rem; margin-bottom: .65rem;
-        }
-        .faq summary {
-            cursor: pointer; font-weight: 700; font-family: 'Outfit', sans-serif;
-            list-style: none; display: flex; justify-content: space-between; gap: 1rem;
-        }
-        .faq summary::-webkit-details-marker { display: none; }
-        .faq summary::after { content: "+"; color: var(--vert); font-size: 1.3rem; line-height: 1; }
-        .faq details[open] summary::after { content: "–"; }
-        .faq details p { margin-top: .65rem; font-size: .93rem; color: var(--texte-doux); }
-
-        /* ---------- Clôture / pied ---------- */
-        .cloture { background: var(--vert-fonce); color: #fff; text-align: center; }
-        .cloture h2 { font-size: clamp(1.5rem, 5vw, 2.1rem); font-weight: 800; }
-        .cloture p { color: #cfe0d5; margin-top: .8rem; }
-        .cloture .cta { background: #fff; color: var(--vert-fonce); box-shadow: none; }
-
-        footer { padding: 2rem 0 3rem; text-align: center; font-size: .8rem; color: var(--texte-doux); }
-        footer a { color: var(--texte-doux); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>+500 Recettes Anti-Inflammatoires | Soulagement Dans Chaque Assiette</title>
+<meta name="description" content="Dites adieu aux ballonnements et au manque d'energie avec plus de 500 recettes anti-inflammatoires faciles, sans sucre et sans gluten. Acces immediat, garantie 30 jours.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Fatiguee des ballonnements et du manque d'energie ?">
+<meta property="og:description" content="+500 recettes anti-inflammatoires rapides, sans sucre et sans gluten.">
+<meta property="og:image" content="assets/WhatsApp_Image_2026-05-29_at_18.21.45.jpg">
+<!-- PIXEL / CLARITY / UTMIFY: colar aqui -->
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:#fff;color:#2C1A0E;
+       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  img{max-width:100%;height:auto;}
+  .color-scheme-1,.gradient{background:#fff;}
+  .fr-topbar{position:sticky;top:0;z-index:60;background:#C2452D;color:#fff;text-align:center;
+             font-size:13px;font-weight:700;padding:9px 14px;font-family:sans-serif;}
+</style>
 </head>
-
 <body>
+<div class="fr-topbar">&#9888;&#65039; Offre disponible pour une dur&eacute;e limit&eacute;e &mdash; expire dans <span id="fr-timer">15:00</span></div>
+<main>
+      <section id="page-section-sca-custom_liquid_DQnC6T" class="page-section section"><style data-sec>.section-sca-custom_liquid_DQnC6T-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
 
-    <!-- ============ BARRE D'URGENCE ============ -->
-    <div class="barre-urgence">
-        ⚠️ Offre disponible pour une durée limitée — expire dans <strong id="compteur">15:00</strong>
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_DQnC6T-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_DQnC6T-padding">
+    <style>
+.alivio-section{
+  background:#f8f4ed;
+  padding:60px 20px;
+  text-align:center;
+  font-family: Georgia, serif;
+}
+
+.alivio-container{
+  max-width:900px;
+  margin:0 auto;
+}
+
+.alivio-title{
+  font-size:clamp(42px,7vw,90px);
+  line-height:1.05;
+  font-weight:700;
+  color:#184726;
+  margin:0 0 0px;
+}
+
+.alivio-title .highlight{
+  color:#c9952e;
+}
+
+.alivio-divider{
+  color:#c9952e;
+  font-size:32px;
+  margin-bottom:0px;
+}
+
+.alivio-subtitle{
+  font-size:clamp(28px,4vw,52px);
+  color:#c9952e;
+  font-weight:700;
+  margin-bottom:0px;
+}
+
+.alivio-text{
+  font-size:clamp(22px,2.8vw,40px);
+  line-height:1.1;
+  color:#184726;
+  max-width:800px;
+  margin:0 auto 5px;
+}
+
+.alivio-book{
+  display:block;
+  text-decoration:none;
+  margin-bottom:35px;
+}
+
+.alivio-book img{
+  width:100%;
+  max-width:380px;
+  height:auto;
+  transition:transform .3s ease;
+}
+
+.alivio-book img:hover{
+  transform:scale(1.03);
+}
+
+.alivio-highlight{
+  background:#184726;
+  color:white;
+  padding:18px 25px;
+  border-radius:16px;
+  display:inline-block;
+  font-size:clamp(18px,2vw,26px);
+  line-height:1.4;
+  margin-bottom:40px;
+  max-width:800px;
+}
+
+.alivio-icons{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:50px;
+}
+
+.alivio-icon{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  flex:1;
+  min-width:0;
+}
+
+.alivio-icon-circle{
+  width:50px;
+  height:50px;
+  border:2px solid #c9952e;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  margin-bottom:10px;
+}
+
+.alivio-icon-text{
+  color:#184726;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.2;
+}
+
+.alivio-footer{
+  margin-top:20px;
+  background:#184726;
+  color:white;
+  padding:18px 20px;
+  border-radius:14px;
+  font-size:clamp(18px,2vw,28px);
+  font-weight:600;
+  letter-spacing:.5px;
+}
+
+@media(max-width:768px){
+
+  .alivio-section{
+    padding:40px 15px;
+  }
+
+  .alivio-title{
+    font-size:46px;
+    line-height:1.05;
+  }
+
+  .alivio-subtitle{
+    font-size:30px;
+  }
+
+  .alivio-text{
+    font-size:24px;
+  }
+
+  .alivio-icons{
+    gap:6px;
+  }
+
+  .alivio-icon-circle{
+    width:42px;
+    height:42px;
+    font-size:18px;
+  }
+
+  .alivio-icon-text{
+    font-size:10px;
+  }
+
+  .alivio-footer{
+    font-size:16px;
+  }
+}
+</style>
+
+<section class="alivio-section">
+  <div class="alivio-container">
+
+    <h1 class="alivio-title">
+      Fatiguée des <span class="highlight">ballonnements</span>
+      et du manque d’<span class="highlight">énergie</span>&nbsp;?
+    </h1>
+
+    <div class="alivio-divider">♥</div>
+
+    <div class="alivio-subtitle">
+      Dites adieu à l’inflammation
     </div>
 
-    <!-- ============ HERO ============ -->
-    <header class="hero">
-        <div class="wrap">
-            <h1>Fatiguée des ballonnements et du manque d'énergie&nbsp;?</h1>
-            <p class="sous">
-                Dites adieu à l'inflammation avec des recettes simples et gourmandes
-                qui vous aident à vous sentir plus légère dès les premiers jours.
-            </p>
+    <div class="alivio-text">
+      avec des recettes simples et gourmandes qui vous aident à vous sentir plus légère dès les premiers jours.
+    </div>
 
-            <div class="visuel">
-                <!-- Remplacer par : <img src="pack-mockup.webp" alt="Le pack Soulagement Dans Chaque Assiette"> -->
-                🥗 Visuel du pack (mockup)
-            </div>
+    <!-- MOCKUP -->
+    <a href="#offre" class="alivio-book">
+      <img
+        src="assets/WhatsApp_Image_2026-05-29_at_18.21.45.jpg"
+        alt="Soulagement Dans Chaque Assiette"
+      >
+    </a>
 
-            <p style="text-align:center;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.15rem;color:var(--vert-fonce)">
-                +500 recettes rapides et anti-inflammatoires
-            </p>
+    <!-- BENEFICIO PRINCIPAL -->
+    <div class="alivio-highlight">
+      Plus de 500 recettes rapides et anti-inflammatoires pour ne plus jamais vous demander quoi cuisiner.
+    </div>
 
-            <div class="attributs">
-                <div class="attribut">Sans sucre</div>
-                <div class="attribut">Sans gluten</div>
-                <div class="attribut">Simples &amp; rapides</div>
-                <div class="attribut">Plus d'énergie</div>
-            </div>
+    <!-- BENEFICIOS -->
+    <div class="alivio-icons">
 
-            <p class="tagline">Mangez bon · Sentez-vous mieux · Vivez avec plus d'énergie</p>
+      <div class="alivio-icon">
+        <div class="alivio-icon-circle">🌿</div>
+        <div class="alivio-icon-text">SANS SUCRE</div>
+      </div>
 
-            <a href="#offre" class="cta" data-cta>Je veux dégonfler →</a>
-            <p class="cta-note">🔒 Paiement sécurisé · Accès immédiat · Garantie 30 jours</p>
+      <div class="alivio-icon">
+        <div class="alivio-icon-circle">🌾</div>
+        <div class="alivio-icon-text">SANS GLUTEN</div>
+      </div>
+
+      <div class="alivio-icon">
+        <div class="alivio-icon-circle">⏱️</div>
+        <div class="alivio-icon-text">SIMPLES ET RAPIDES</div>
+      </div>
+
+      <div class="alivio-icon">
+        <div class="alivio-icon-circle">❤️</div>
+        <div class="alivio-icon-text">PLUS D’ÉNERGIE</div>
+      </div>
+
+    </div>
+
+    <div class="alivio-footer">
+      MANGEZ BON, SENTEZ-VOUS MIEUX, VIVEZ AVEC PLUS D’ÉNERGIE.
+    </div>
+
+  </div>
+</section>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_YxgXFQ" class="page-section section"><style data-sec>.section-sca-custom_liquid_YxgXFQ-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_YxgXFQ-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_YxgXFQ-padding">
+    <style>
+  .bpsg-hero2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .bpsg-hero2-img {
+    width: 100%;
+    display: block;
+  }
+  .bpsg-chef {
+    width: 100%;
+    position: relative;
+  }
+  .bpsg-chef img {
+    width: 100%;
+    display: block;
+  }
+  .bpsg-chef-caption {
+    background: #fff;
+    padding: 20px 24px;
+    border-top: 3px solid #C8813A;
+    text-align: center;
+    font-family: sans-serif;
+  }
+  .bpsg-chef-caption h3 {
+    font-family: Georgia, serif;
+    font-size: 18px;
+    color: #2C1A0E;
+    margin: 0 0 4px;
+  }
+  .bpsg-chef-caption p {
+    font-size: 13px;
+    color: #7A6248;
+    margin: 0;
+  }
+</style>
+
+<div class="bpsg-hero2">
+
+  <img
+    class="bpsg-hero2-img"
+    src="assets/WhatsApp_Image_2026-05-29_at_18.42.11.jpg"
+    alt="Apprenez a cuisiner sans gluten"
+  />
+
+ 
+  </div>
+
+</div>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_PW3MG7" class="page-section section"><style data-sec>.section-sca-custom_liquid_PW3MG7-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_PW3MG7-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_PW3MG7-padding">
+    <style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@400;500;600;700&display=swap');
+
+  .bpsg-pain {
+    background: #F5EDD8;
+    padding: 64px 24px;
+  }
+
+  .bpsg-pain-inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .bpsg-pain-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Montserrat', sans-serif;
+    color: #C8813A;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .bpsg-pain h2 {
+    font-size: clamp(30px, 4vw, 44px);
+    font-family: 'Playfair Display', serif;
+    color: #2C1A0E;
+    margin-bottom: 14px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .bpsg-pain h2 span {
+    color: #C8813A;
+  }
+
+  /* ACÁ ESTÁ EL CAMBIO DE TIPOGRAFÍA */
+  .bpsg-pain-sub {
+    font-size: 19px;
+    color: #7A6248;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    margin-bottom: 42px;
+    line-height: 1.8;
+    max-width: 760px;
+  }
+
+  .bpsg-pain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .bpsg-pain-card {
+    background: #fff;
+    border: 1.5px solid #E8D0C0;
+    border-left: 6px solid #C0392B;
+    border-radius: 14px;
+    padding: 24px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: 0 4px 12px rgba(192,57,43,0.08);
+  }
+
+  .bpsg-pain-icon {
+    width: 44px;
+    height: 44px;
+    background: #FADADD;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+  }
+
+  .bpsg-pain-text {
+    font-size: 16px;
+    color: #2C1A0E;
+    line-height: 1.6;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+  }
+
+  .bpsg-pain-text strong {
+    color: #C0392B;
+    font-weight: 700;
+    font-size: 17px;
+  }
+
+  @media(max-width:768px){
+
+    .bpsg-pain{
+      padding:56px 20px;
+    }
+
+    .bpsg-pain-sub{
+      font-size:17px;
+      line-height:1.75;
+      margin-bottom:34px;
+    }
+
+  }
+</style>
+
+<div class="bpsg-pain">
+  <div class="bpsg-pain-inner">
+
+    <div class="bpsg-pain-label">
+      Ça vous parle&nbsp;?
+    </div>
+
+    <h2>
+      Le problème, ce n’est pas le <span>manque de volonté</span>
+    </h2>
+
+    <p class="bpsg-pain-sub">
+      C’est de vous sentir gonflée après manger, de ne pas savoir quoi cuisiner et de vous épuiser à prendre soin de vous sans jamais voir de vrai changement.
+    </p>
+
+    <div class="bpsg-pain-grid">
+
+      <div class="bpsg-pain-card">
+        <div class="bpsg-pain-icon">🤰</div>
+        <p class="bpsg-pain-text">
+          Vous finissez de manger et vous sentez le ventre <strong>lourd ou ballonné</strong>, même quand vous faites attention&nbsp;?
+        </p>
+      </div>
+
+      <div class="bpsg-pain-card">
+        <div class="bpsg-pain-icon">😣</div>
+        <p class="bpsg-pain-text">
+          Vous voulez mieux manger mais vous ne savez plus <strong>quoi cuisiner</strong> pour vous sentir bien&nbsp;?
+        </p>
+      </div>
+
+      <div class="bpsg-pain-card">
+        <div class="bpsg-pain-icon">😤</div>
+        <p class="bpsg-pain-text">
+          Vous avez l’impression de faire des efforts et pourtant vous restez avec ce <strong>manque d’énergie et cette lourdeur</strong>?
+        </p>
+      </div>
+
+      <div class="bpsg-pain-card">
+        <div class="bpsg-pain-icon">😰</div>
+        <p class="bpsg-pain-text">
+          Vous commencez à manger sainement… et vous abandonnez parce que ce n’est ni pratique ni tenable&nbsp;?
+        </p>
+      </div>
+
+      <div class="bpsg-pain-card">
+        <div class="bpsg-pain-icon">🍬</div>
+        <p class="bpsg-pain-text">
+          Vous finissez par manger n’importe quoi par stress, fatigue ou manque d’idées&nbsp;?
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_dCiCLQ" class="page-section section"><style data-sec>.section-sca-custom_liquid_dCiCLQ-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_dCiCLQ-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_dCiCLQ-padding">
+    <style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@400;500;600;700&display=swap');
+
+  .bpsg-shift {
+    background: #fff;
+    padding: 72px 24px;
+  }
+
+  .bpsg-shift-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .bpsg-shift-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Montserrat', sans-serif;
+    color: #C8813A;
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+
+  .bpsg-shift h2 {
+    font-size: clamp(32px, 4vw, 48px);
+    font-family: 'Playfair Display', serif;
+    color: #2C1A0E;
+    line-height: 1.2;
+    margin-bottom: 18px;
+    font-weight: 700;
+  }
+
+  .bpsg-shift h2 span {
+    color: #C8813A;
+  }
+
+  .bpsg-shift-sub {
+    max-width: 760px;
+    margin: 0 auto 48px;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #7A6248;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+  }
+
+  .bpsg-shift-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+  }
+
+  .bpsg-shift-card {
+    border-radius: 18px;
+    padding: 28px 24px;
+    text-align: left;
+    background: #FAF7F1;
+    border: 1.5px solid #E8DCCB;
+  }
+
+  .bpsg-shift-card.bad {
+    border-left: 6px solid #C0392B;
+  }
+
+  .bpsg-shift-card.good {
+    border-left: 6px solid #4A7C59;
+    background: #F5FBF7;
+  }
+
+  .bpsg-shift-title {
+    font-size: 22px;
+    margin-bottom: 18px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: #2C1A0E;
+  }
+
+  .bpsg-shift-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .bpsg-shift-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #2C1A0E;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+  }
+
+  .bpsg-shift-icon {
+    font-size: 18px;
+    line-height: 1;
+    margin-top: 2px;
+  }
+</style>
+
+<div class="bpsg-shift">
+  <div class="bpsg-shift-inner">
+
+    <div class="bpsg-shift-label">
+      La vraie différence
+    </div>
+
+    <h2>
+      La différence, ce n’est pas de faire un <span>régime</span>
+    </h2>
+
+    <p class="bpsg-shift-sub">
+      C’est d’avoir des recettes simples, organisées et gourmandes que vous pouvez tenir même dans les semaines les plus chargées, sans avoir faim ni avoir l’impression de vous priver.
+    </p>
+
+    <div class="bpsg-shift-grid">
+
+      <div class="bpsg-shift-card bad">
+        <div class="bpsg-shift-title">
+          ❌ Les régimes extrêmes
         </div>
-    </header>
 
-    <!-- ============ DOULEURS ============ -->
-    <section>
-        <div class="wrap">
-            <h2 class="titre-section">Est-ce que vous vous reconnaissez&nbsp;?</h2>
-            <ul class="liste-douleur">
-                <li><span>😖</span><div>Vous vous sentez lourde et ballonnée après presque chaque repas.</div></li>
-                <li><span>🤯</span><div>Vous ouvrez le frigo et vous ne savez jamais quoi cuisiner.</div></li>
-                <li><span>🔋</span><div>Vous vous levez déjà fatiguée et l'énergie ne revient jamais vraiment.</div></li>
-                <li><span>🔁</span><div>Vous commencez à bien manger… et vous abandonnez au bout de trois jours.</div></li>
-                <li><span>🍫</span><div>Vous grignotez par stress ou par anxiété, puis vous culpabilisez.</div></li>
-            </ul>
+        <div class="bpsg-shift-list">
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✕</div>
+            <div>Impossibles à tenir : on finit toujours par abandonner.</div>
+          </div>
+
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✕</div>
+            <div>Ils vous laissent sans idées et obsédée par la nourriture.</div>
+          </div>
+
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✕</div>
+            <div>Ils créent de l’anxiété et un sentiment de privation permanent.</div>
+          </div>
+
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✕</div>
+            <div>On revient toujours aux mêmes vieilles habitudes.</div>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- ============ RÉGIMES VS ANTI-INFLAMMATOIRE ============ -->
-    <section>
-        <div class="wrap">
-            <h2 class="titre-section">Le problème n'est pas vous. C'est la méthode.</h2>
-            <div class="duo">
-                <div class="colonne negatif">
-                    <h3>Les régimes extrêmes</h3>
-                    <ul>
-                        <li>Impossibles à tenir dans la durée</li>
-                        <li>Génèrent frustration et privation</li>
-                        <li>Toujours les mêmes plats tristes</li>
-                        <li>On reprend tout dès qu'on arrête</li>
-                    </ul>
-                </div>
-                <div class="colonne positif">
-                    <h3>L'alimentation anti-inflammatoire</h3>
-                    <ul>
-                        <li>Des recettes gourmandes et accessibles</li>
-                        <li>Des ingrédients simples, trouvables partout</li>
-                        <li>Moins de ballonnements, plus de légèreté</li>
-                        <li>Tenable, sans jamais avoir l'impression de se priver</li>
-                    </ul>
-                </div>
-            </div>
+      <div class="bpsg-shift-card good">
+        <div class="bpsg-shift-title">
+          ✅ L’alimentation anti-inflammatoire, en pratique
         </div>
-    </section>
 
-    <!-- ============ CONTENU ============ -->
-    <section>
-        <div class="wrap">
-            <h2 class="titre-section">Ce que vous recevez</h2>
-            <div class="grille-contenu">
-                <div class="carte-contenu">
-                    <h3>🍲 Plats anti-inflammatoires complets</h3>
-                    <p>Des repas rassasiants du déjeuner au dîner, prêts en moins de 30 minutes.</p>
-                </div>
-                <div class="carte-contenu">
-                    <h3>🥣 Petits-déjeuners &amp; goûters énergisants</h3>
-                    <p>Pour démarrer la journée sans coup de barre à 11 h.</p>
-                </div>
-                <div class="carte-contenu">
-                    <h3>🥕 Snacks rapides anti-fringales</h3>
-                    <p>De quoi couper l'envie de grignoter sans craquer sur le sucre.</p>
-                </div>
-                <div class="carte-contenu">
-                    <h3>🍰 Desserts sans sucre</h3>
-                    <p>Gâteaux, mousses et brownies gourmands, sans sucre raffiné.</p>
-                </div>
-                <div class="carte-contenu">
-                    <h3>🔄 Guide des substitutions</h3>
-                    <p>Remplacez sucre et farines blanches sans rien perdre en goût.</p>
-                </div>
-                <div class="carte-contenu">
-                    <h3>📅 Organisation de la semaine</h3>
-                    <p>Un planificateur pour ne plus jamais improviser vos repas.</p>
-                </div>
-            </div>
+        <div class="bpsg-shift-list">
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✓</div>
+            <div>Des recettes faciles, rapides et gourmandes pour tous les jours.</div>
+          </div>
+
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✓</div>
+            <div>Des ingrédients simples et des plats que vous allez vraiment aimer.</div>
+          </div>
+
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✓</div>
+            <div>Moins de ballonnements, plus de légèreté et plus d’énergie.</div>
+          </div>
+
+          <div class="bpsg-shift-item">
+            <div class="bpsg-shift-icon">✓</div>
+            <div>Une façon pratique et durable de se sentir mieux sans vivre au régime.</div>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- ============ OFFRE ============ -->
-    <section id="offre">
-        <div class="wrap">
-            <h2 class="titre-section">Le pack complet, aujourd'hui</h2>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
 
-            <div class="offre">
-                <span class="badge-remise">−60 % aujourd'hui seulement</span>
 
-                <p class="prix-barre">47,00 €</p>
-                <p class="prix">19,00 €</p>
-                <p class="prix-note">Paiement unique · Accès à vie · Aucun abonnement</p>
+</section><section id="page-section-sca-custom_liquid_D6MVTV" class="page-section section"><style data-sec>.section-sca-custom_liquid_D6MVTV-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
 
-                <p style="margin-top:1.5rem;font-family:'Outfit',sans-serif;font-weight:700;color:var(--vert-fonce)">
-                    + 9 bonus offerts avec votre commande
-                </p>
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_D6MVTV-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_D6MVTV-padding">
+    <style>
+  .bpsg-cont {
+    background: #E8D5B0;
+    padding: 72px 24px;
+  }
 
-                <ul class="bonus-liste">
-                    <li><div><b>Sauces &amp; assaisonnements sains</b><small>Vinaigrettes et dips maison</small></div><span class="valeur">7 €</span></li>
-                    <li><div><b>Le glacier sain</b><small>Glaces et sorbets sans sucre</small></div><span class="valeur">9 €</span></li>
-                    <li><div><b>Desserts sains</b><small>Gâteaux et brownies gourmands</small></div><span class="valeur">9 €</span></li>
-                    <li><div><b>Planificateur hebdomadaire</b><small>Vos menus organisés en 10 minutes</small></div><span class="valeur">10 €</span></li>
-                    <li><div><b>Mini-guide snacks express</b><small>Des recettes en moins de 10 minutes</small></div><span class="valeur">7 €</span></li>
-                    <li><div><b>Pain maison sain</b><small>Des pains réussis sans se compliquer</small></div><span class="valeur">11 €</span></li>
-                    <li><div><b>Recettes libres</b><small>Des plats qui plaisent à toute la famille</small></div><span class="valeur">9 €</span></li>
-                    <li><div><b>Sans lactose, avec du goût</b><small>Des recettes crémeuses sans produits laitiers</small></div><span class="valeur">8 €</span></li>
-                    <li><div><b>Bonus surprise</b><small>Révélé juste après votre commande</small></div><span class="valeur">12 €</span></li>
-                </ul>
+  .bpsg-cont-inner {
+    max-width: 980px;
+    margin: 0 auto;
+  }
 
-                <p class="total-bonus">Valeur totale des bonus : 82 € — offerts</p>
+  .bpsg-cont-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    color: #C8813A;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
 
-                <a href="#" class="cta" data-cta>Je veux dégonfler →</a>
-                <p class="cta-note">🔒 Paiement sécurisé · Accès immédiat · Garantie 30 jours</p>
+  .bpsg-cont h2 {
+    font-size: clamp(30px, 4vw, 46px);
+    font-family: Georgia, serif;
+    color: #2C1A0E;
+    margin-bottom: 18px;
+    line-height: 1.2;
+  }
 
-                <p class="rarete">⚡ Il ne reste que 3 places à ce tarif</p>
-                <p class="social-live">👁 <span id="spectateurs">83</span> personnes consultent cette page en ce moment</p>
-            </div>
+  .bpsg-cont h2 span {
+    color: #C8813A;
+  }
+
+  .bpsg-cont-sub {
+    max-width: 760px;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #7A6248;
+    margin-bottom: 42px;
+    font-family: sans-serif;
+  }
+
+  .bpsg-cont-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+  }
+
+  .bpsg-cont-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(44, 26, 14, 0.08);
+    transition: transform 0.2s ease;
+  }
+
+  .bpsg-cont-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .bpsg-cont-card-img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .bpsg-cont-card-body {
+    padding: 20px;
+  }
+
+  .bpsg-cont-card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2C1A0E;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    font-family: sans-serif;
+  }
+
+  .bpsg-cont-card-desc {
+    font-size: 14px;
+    color: #7A6248;
+    font-family: sans-serif;
+    line-height: 1.6;
+  }
+</style>
+
+<div class="bpsg-cont">
+  <div class="bpsg-cont-inner">
+
+    <div class="bpsg-cont-label">
+      Tout réuni au même endroit
+    </div>
+
+    <h2>
+      Tout ce qu’il vous faut pour <span>vous sentir plus légère</span> et arrêter de vous casser la tête à chaque repas
+    </h2>
+
+    <p class="bpsg-cont-sub">
+      Des recettes simples, rapides et gourmandes pour que prendre soin de soi cesse d’être compliqué, même quand le temps manque.
+    </p>
+
+    <div class="bpsg-cont-grid">
+
+      <div class="bpsg-cont-card">
+        <img src="assets/Healthy_Eating_Ideas_for_a_Balanced_Lifestyle.jpg" alt="Plats anti-inflammatoires" class="bpsg-cont-card-img" />
+
+        <div class="bpsg-cont-card-body">
+          <div class="bpsg-cont-card-title">
+            Des plats anti-inflammatoires qui rassasient et laissent légère
+          </div>
+
+          <div class="bpsg-cont-card-desc">
+            Des plats complets, savoureux, sans sucre ni gluten, pour se régaler sans se sentir lourde après.
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- ============ ACCÈS ============ -->
-    <section>
-        <div class="wrap">
-            <h2 class="titre-section">Comment vous recevez tout</h2>
-            <div class="grille-contenu">
-                <div class="carte-contenu"><h3>⚡ Accès immédiat</h3><p>Dès le paiement validé, tout est débloqué.</p></div>
-                <div class="carte-contenu"><h3>📧 Envoi par e-mail</h3><p>Vous recevez vos liens de téléchargement en quelques secondes.</p></div>
-                <div class="carte-contenu"><h3>📱 Sur tous vos appareils</h3><p>Mobile, tablette ou ordinateur — même à côté des plaques.</p></div>
-                <div class="carte-contenu"><h3>⬇️ Déjà téléchargé</h3><p>Plus de 3 579 téléchargements enregistrés à ce jour.</p></div>
-            </div>
+      <div class="bpsg-cont-card">
+        <img src="assets/Easy_Yogurt_Granola_Bowls_4_Ways___Begin_With_Balance.webp" alt="Petits-dejeuners anti-inflammatoires" class="bpsg-cont-card-img" />
+
+        <div class="bpsg-cont-card-body">
+          <div class="bpsg-cont-card-title">
+            Petits-déjeuners et goûters pour démarrer avec plus d’énergie
+          </div>
+
+          <div class="bpsg-cont-card-desc">
+            Des options rapides et faciles pour se sentir bien dès le premier repas de la journée.
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- ============ GARANTIE ============ -->
-    <section>
-        <div class="wrap">
-            <div class="garantie">
-                <div class="sceau">🛡️</div>
-                <h2 style="font-size:1.4rem;margin:.4rem 0">Garantie 30 jours, sans discussion</h2>
-                <p style="color:var(--texte-doux)">
-                    Testez toutes les recettes pendant 30 jours. Si vous n'êtes pas satisfaite,
-                    écrivez-nous un simple e-mail et nous vous remboursons <b>100 % de votre argent</b>.
-                    Vous gardez les bonus.
-                </p>
-                <div class="badges">
-                    <span>Visa</span><span>Mastercard</span><span>Maestro</span><span>Apple Pay</span><span>Google Pay</span>
-                </div>
-            </div>
+      <div class="bpsg-cont-card">
+        <img src="assets/Frozen_Yogurt_Bark_with_Berries_and_Granola.webp" alt="Snacks sains" class="bpsg-cont-card-img" />
+
+        <div class="bpsg-cont-card-body">
+          <div class="bpsg-cont-card-title">
+            Des options express pour ne plus grignoter n’importe quoi
+          </div>
+
+          <div class="bpsg-cont-card-desc">
+            Des snacks simples et rassasiants pour ces moments où l’envie ou le stress arrivent.
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- ============ AVIS ============ -->
-    <section>
-        <div class="wrap">
-            <h2 class="titre-section">Ce qu'elles en disent</h2>
-            <div class="note-globale">
-                <div class="chiffre">4,9/5</div>
-                <div class="etoiles" style="color:var(--or)">★★★★★</div>
-                <p style="font-size:.9rem;color:var(--texte-doux)">Sur 12 avis vérifiés</p>
-            </div>
+      <div class="bpsg-cont-card">
+        <img src="assets/WhatsApp_Image_2026-04-15_at_11.26.21.jpg" alt="Desserts sans sucre" class="bpsg-cont-card-img" />
 
-            <div class="avis">
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Depuis des années je finissais chaque dîner gonflée. En 4 jours je me sentais déjà beaucoup plus légère. »</p>
-                    <cite>Marie L.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Je pensais tomber sur de la cuisine fade et triste. En fait les recettes sont VRAIMENT bonnes. »</p>
-                    <cite>Gabrielle S.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Le mieux, c'est de ne plus me demander tous les jours ce que je vais cuisiner. Ça m'a enlevé un stress énorme. »</p>
-                    <cite>Carole R.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« J'ai le côlon irritable et beaucoup de plats passaient mal. Là j'ai enfin des repas qui ne me font pas souffrir. »</p>
-                    <cite>Valentine P.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Les desserts sans sucre m'ont sauvée, j'étais TRÈS accro au sucré. »</p>
-                    <cite>Danièle M.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« J'ai perdu 3 kilos sans jamais avoir l'impression de faire un régime. »</p>
-                    <cite>Pauline C.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Mon mari mange la même chose que moi sans même s'en rendre compte. C'est ça la vraie victoire. »</p>
-                    <cite>Nathalie B.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Le planificateur hebdomadaire vaut à lui seul le prix du pack. Mes courses prennent deux fois moins de temps. »</p>
-                    <cite>Sylvie D.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Je me réveille sans cette lourdeur au ventre. Je ne pensais pas que ça viendrait de l'assiette. »</p>
-                    <cite>Isabelle F.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Tout est expliqué étape par étape. Et je suis une catastrophe en cuisine. »</p>
-                    <cite>Céline T.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★★</div>
-                    <p>« Le pain maison sans gluten est devenu un rituel du dimanche chez nous. »</p>
-                    <cite>Amélie G.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-                <article>
-                    <div class="etoiles">★★★★☆</div>
-                    <p>« Très content du contenu. Il m'a juste fallu deux ou trois jours pour trouver certaines farines spéciales. »</p>
-                    <cite>Sophie M.</cite> · <span class="verifie">Achat vérifié</span>
-                </article>
-            </div>
+        <div class="bpsg-cont-card-body">
+          <div class="bpsg-cont-card-title">
+            Des desserts sans sucre pour se faire plaisir sans se sentir lourde
+          </div>
+
+          <div class="bpsg-cont-card-desc">
+            Des recettes gourmandes à savourer sans culpabilité et sans retomber dans les vieux réflexes.
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- ============ FAQ ============ -->
-    <section class="faq">
-        <div class="wrap">
-            <h2 class="titre-section">Questions fréquentes</h2>
+      <div class="bpsg-cont-card">
+        <img src="assets/10_Best_Foods_To_Eat_On_a_Keto_Diet.jpg" alt="Guide pratique" class="bpsg-cont-card-img" />
 
-            <details open>
-                <summary>Faut-il savoir cuisiner&nbsp;?</summary>
-                <p>Pas du tout. Chaque recette est expliquée étape par étape, avec des gestes simples. Si vous savez utiliser une poêle et un four, vous savez déjà tout ce qu'il faut.</p>
-            </details>
-            <details>
-                <summary>Les ingrédients sont-ils faciles à trouver&nbsp;?</summary>
-                <p>Oui. Tout se trouve en supermarché classique. Et pour les rares ingrédients moins courants, une alternative est toujours indiquée.</p>
-            </details>
-            <details>
-                <summary>Quand est-ce que je reçois le pack&nbsp;?</summary>
-                <p>Immédiatement après le paiement. Vous recevez vos accès par e-mail en quelques secondes, 24h/24.</p>
-            </details>
-            <details>
-                <summary>C'est vraiment sans gluten et sans sucre raffiné&nbsp;?</summary>
-                <p>Oui, l'intégralité des recettes est sans gluten et sans sucre raffiné. Un guide de substitutions vous permet aussi d'adapter d'autres recettes de votre côté.</p>
-            </details>
-            <details>
-                <summary>Au bout de combien de temps je vais sentir la différence&nbsp;?</summary>
-                <p>Beaucoup de personnes ressentent moins de ballonnements et plus de légèreté dès les premiers jours. Cela varie d'une personne à l'autre.</p>
-            </details>
-            <details>
-                <summary>Et si ça ne me convient pas&nbsp;?</summary>
-                <p>Vous avez 30 jours pour tout tester. Si vous n'êtes pas satisfaite, un e-mail suffit et vous êtes intégralement remboursée.</p>
-            </details>
+        <div class="bpsg-cont-card-body">
+          <div class="bpsg-cont-card-title">
+            Comment remplacer sucre et farines sans rien perdre en plaisir
+          </div>
+
+          <div class="bpsg-cont-card-desc">
+            Des idées pratiques et faciles pour transformer vos repas sans avoir l’impression d’être au régime.
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- ============ CLÔTURE ============ -->
-    <section class="cloture">
-        <div class="wrap">
-            <h2>Commencez aujourd'hui à vous sentir plus légère après chaque repas</h2>
-            <p>+500 recettes sans gluten et sans sucre pour arrêter de gonfler et retrouver le plaisir de manger.</p>
-            <a href="#" class="cta" data-cta>Je veux dégonfler →</a>
-            <p style="color:#cfe0d5;font-size:.85rem;margin-top:.7rem">🔒 Paiement sécurisé · Accès immédiat · Garantie 30 jours</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+
+</section>
+<section class="fr-offre-section">
+  <style>
+    .fr-offre-section{background:#fff;padding:8px 20px 28px;}
+    .fr-offre{max-width:560px;margin:0 auto;text-align:center;font-family:sans-serif;}
+    .fr-offre-badge{display:inline-block;background:#4A7C59;color:#fff;font-size:12px;font-weight:700;
+      padding:5px 14px;border-radius:999px;letter-spacing:.04em;margin-bottom:14px;}
+    .fr-offre img{width:100%;max-width:420px;border-radius:14px;display:block;margin:0 auto 18px;}
+    .fr-offre-nom{font-size:22px;font-weight:800;color:#2C1A0E;margin-bottom:6px;}
+    .fr-offre-desc{font-size:14px;color:#7A6248;line-height:1.6;margin-bottom:18px;}
+    .fr-offre-prix-old{font-size:17px;color:#9A8булье;}
+    .fr-offre-prix-old{font-size:17px;color:#9A8B76;text-decoration:line-through;}
+    .fr-offre-prix{font-size:44px;font-weight:800;color:#4A7C59;line-height:1.1;margin:2px 0 4px;}
+    .fr-offre-note{font-size:13px;color:#7A6248;margin-bottom:18px;}
+    .fr-offre-btn{display:block;width:100%;background:#4A7C59;color:#fff;border:none;cursor:pointer;
+      font-size:18px;font-weight:700;font-family:sans-serif;padding:17px 20px;border-radius:999px;
+      text-decoration:none;box-shadow:0 8px 20px rgba(74,124,89,.3);}
+    .fr-offre-btn:hover{background:#3d6849;}
+    .fr-offre-secure{font-size:12px;color:#7A6248;margin-top:10px;}
+  </style>
+  <div class="fr-offre">
+    <div class="fr-offre-badge">+3 579 TELECHARGEMENTS</div>
+    <img src="assets/WhatsApp_Image_2026-05-29_at_18.21.45.jpg" alt="Soulagement Dans Chaque Assiette">
+    <div class="fr-offre-nom">Soulagement Dans Chaque Assiette</div>
+    <div class="fr-offre-desc">
+      Plus de 500 recettes sans gluten et sans sucre pour degonfler, vous sentir plus legere
+      et retrouver le plaisir de chaque repas.
+    </div>
+    <div class="fr-offre-prix-old">47,00 &euro;</div>
+    <div class="fr-offre-prix">19,00 &euro;</div>
+    <div class="fr-offre-note">Paiement unique &middot; Acces a vie &middot; Sans abonnement</div>
+    <a href="#" class="fr-offre-btn" data-checkout>Je veux degonfler &rarr;</a>
+    <div class="fr-offre-secure">&#128274; Paiement securise &middot; Acces immediat &middot; Garantie 30 jours</div>
+  </div>
+
+</section><section id="page-section-sca-custom_liquid_Dk7cUV" class="page-section section"><style data-sec>.section-sca-custom_liquid_Dk7cUV-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_Dk7cUV-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_Dk7cUV-padding">
+    <style>
+  .bpsg-medios-pago {
+    text-align: center;
+    padding: 16px 24px;
+    background: #fff;
+  }
+  .bpsg-medios-pago img {
+    max-width: 380px;
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+  }
+</style>
+
+<div class="bpsg-medios-pago">
+  <img
+    src="assets/Diseno_sin_titulo_20.png"
+    alt="Paiement sécurisé garanti - Visa, Mastercard, Maestro"
+  />
+</div>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_8cMw8L" class="page-section section"><style data-sec>.section-sca-custom_liquid_8cMw8L-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_8cMw8L-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_8cMw8L-padding">
+    <style>
+  .bpsg-garantia {
+    background: #fff;
+    padding: 16px 20px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .bpsg-garantia-box {
+    border: 2px solid #4A7C59;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #F0F7F2;
+  }
+  .bpsg-garantia-icon {
+    font-size: 36px;
+    flex-shrink: 0;
+  }
+  .bpsg-garantia-content {}
+  .bpsg-garantia-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2C1A0E;
+    font-family: sans-serif;
+    margin-bottom: 4px;
+  }
+  .bpsg-garantia-title span { color: #4A7C59; }
+  .bpsg-garantia-desc {
+    font-size: 12px;
+    color: #7A6248;
+    font-family: sans-serif;
+    line-height: 1.5;
+  }
+</style>
+
+<div class="bpsg-garantia">
+  <div class="bpsg-garantia-box">
+    <div class="bpsg-garantia-icon">🛡️</div>
+    <div class="bpsg-garantia-content">
+      <div class="bpsg-garantia-title">Garantie <span>30 jours — remboursement intégral</span></div>
+      <div class="bpsg-garantia-desc">Si vous n’êtes pas satisfaite, nous vous remboursons 100&nbsp;% de votre argent. Sans question, sans discussion.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_PHFwnC" class="page-section section"><style data-sec>.section-sca-custom_liquid_PHFwnC-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_PHFwnC-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_PHFwnC-padding">
+    <style>
+  .bpsg-urgencia {
+    background: #fff;
+    padding: 24px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .bpsg-urgencia-cupos {
+    text-align: center;
+    font-size: 14px;
+    font-family: sans-serif;
+    color: #2C1A0E;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .bpsg-urgencia-cupos span { color: #C0392B; }
+  .bpsg-urgencia-box {
+    border: 2px solid #C8813A;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    background: #FFFDF8;
+  }
+  .bpsg-urgencia-title {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: sans-serif;
+    color: #C0392B;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .bpsg-urgencia-sub {
+    font-size: 13px;
+    color: #7A6248;
+    font-family: sans-serif;
+    margin-bottom: 16px;
+  }
+  .bpsg-urgencia-sub span { font-weight: 700; color: #2C1A0E; }
+  .bpsg-counter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .bpsg-counter-block { text-align: center; }
+  .bpsg-counter-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: #2C1A0E;
+    color: #F5EDD8;
+    font-size: 32px;
+    font-weight: 700;
+    font-family: sans-serif;
+    border-radius: 10px;
+  }
+  .bpsg-counter-label {
+    font-size: 10px;
+    color: #7A6248;
+    font-family: sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .bpsg-counter-sep {
+    font-size: 32px;
+    font-weight: 700;
+    color: #C8813A;
+    margin-bottom: 20px;
+    font-family: sans-serif;
+  }
+  .bpsg-urgencia-promo {
+    background: #C8813A;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: sans-serif;
+    padding: 10px 20px;
+    border-radius: 50px;
+    display: inline-block;
+    letter-spacing: 0.3px;
+  }
+  .bpsg-urgencia-viendo {
+    text-align: center;
+    font-size: 13px;
+    font-family: sans-serif;
+    color: #7A6248;
+    margin-top: 14px;
+  }
+  .bpsg-urgencia-viendo span { font-weight: 700; color: #C0392B; }
+</style>
+
+<div class="bpsg-urgencia">
+  <div class="bpsg-urgencia-cupos">
+    ⚡ Plus que <span>3 places</span> à ce tarif&nbsp;!
+  </div>
+  <div class="bpsg-urgencia-box">
+    <div class="bpsg-urgencia-title" id="bpsg-dia-titulo"></div>
+    <div class="bpsg-urgencia-sub">Votre prix réservé pendant <span>15 minutes</span></div>
+    <div class="bpsg-counter">
+      <div class="bpsg-counter-block">
+        <div class="bpsg-counter-num" id="bpsg-min">15</div>
+        <div class="bpsg-counter-label">Minutes</div>
+      </div>
+      <div class="bpsg-counter-sep">:</div>
+      <div class="bpsg-counter-block">
+        <div class="bpsg-counter-num" id="bpsg-seg">00</div>
+        <div class="bpsg-counter-label">Secondes</div>
+      </div>
+    </div>
+    <div class="bpsg-urgencia-promo">
+      Aujourd’hui &minus;60&nbsp;% + les BONUS offerts
+    </div>
+  </div>
+  <div class="bpsg-urgencia-viendo">
+    👁 <span id="bpsg-viendo">83</span> personnes consultent cette page en ce moment
+  </div>
+</div>
+
+<script>
+  (function() {
+    var dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var hoy = dias[new Date().getDay()];
+    document.getElementById('bpsg-dia-titulo').textContent = '¡Oferta solo por hoy ' + hoy + '!';
+
+    var DURACION = 15 * 60 * 1000;
+    var endTime = Date.now() + DURACION;
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function tick() {
+      var diff = endTime - Date.now();
+      if (diff <= 0) {
+        endTime = Date.now() + DURACION;
+        diff = DURACION;
+      }
+      var m = Math.floor(diff / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('bpsg-min').textContent = pad(m);
+      document.getElementById('bpsg-seg').textContent = pad(s);
+    }
+
+    tick();
+    setInterval(tick, 1000);
+
+    var viendo = document.getElementById('bpsg-viendo');
+    var base = 75 + Math.floor(Math.random() * 20);
+    viendo.textContent = base;
+    setInterval(function() {
+      var delta = Math.random() > 0.5 ? 1 : -1;
+      base = Math.max(60, Math.min(99, base + delta));
+      viendo.textContent = base;
+    }, 4000);
+  })();
+</script>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_XMTRLp" class="page-section section"><style data-sec>.section-sca-custom_liquid_XMTRLp-padding {
+    padding-top: calc(40px * 0.75);
+    padding-bottom: calc(52px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_XMTRLp-padding {
+      padding-top: 40px;
+      padding-bottom: 52px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_XMTRLp-padding">
+    <style>
+.bpsg-miniinc {
+  background: #fff;
+  padding: 42px 24px;
+}
+
+.bpsg-miniinc-inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.bpsg-miniinc-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #C8813A;
+  font-family: sans-serif;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.bpsg-miniinc h2 {
+  font-size: clamp(28px,4vw,40px);
+  line-height: 1.2;
+  color: #2C1A0E;
+  font-family: Georgia, serif;
+  margin-bottom: 14px;
+}
+
+.bpsg-miniinc h2 span {
+  color: #C8813A;
+}
+
+.bpsg-miniinc-sub {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #7A6248;
+  margin-bottom: 32px;
+  font-family: sans-serif;
+  max-width: 720px;
+}
+
+.bpsg-miniinc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+  gap: 14px;
+}
+
+.bpsg-miniinc-item {
+  background: #F9F4EA;
+  border: 1px solid #E8D5B0;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.bpsg-miniinc-item strong {
+  display: block;
+  color: #2C1A0E;
+  font-size: 15px;
+  margin-bottom: 8px;
+  font-family: sans-serif;
+}
+
+.bpsg-miniinc-item p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #7A6248;
+  font-family: sans-serif;
+}
+</style>
+
+<section class="bpsg-miniinc">
+
+  <div class="bpsg-miniinc-inner">
+
+    <div class="bpsg-miniinc-label">
+      Ce que vous allez recevoir
+    </div>
+
+    <h2>
+      Tout est pensé pour que bien manger devienne <span>simple</span>
+    </h2>
+
+    <p class="bpsg-miniinc-sub">
+      Vous aurez les recettes, la planification et les idées pratiques pour ne plus jamais improviser vos repas.
+    </p>
+
+    <div class="bpsg-miniinc-grid">
+
+      <div class="bpsg-miniinc-item">
+        <strong>🥗 +500 recettes saines</strong>
+        <p>Des options rapides, savoureuses et faciles pour tous les jours.</p>
+      </div>
+
+      <div class="bpsg-miniinc-item">
+        <strong>🍞 Sans gluten et sans sucre</strong>
+        <p>Des recettes conçues pour vous sentir plus légère après manger.</p>
+      </div>
+
+      <div class="bpsg-miniinc-item">
+        <strong>📅 Organisation de la semaine</strong>
+        <p>Planificateurs et guides pour gagner du temps en cuisine.</p>
+      </div>
+
+      <div class="bpsg-miniinc-item">
+        <strong>🍫 Snacks et desserts</strong>
+        <p>Des idées sucrées et rassasiantes pour couper les envies de grignotage.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_9B9cp8" class="page-section section"><style data-sec>.section-sca-custom_liquid_9B9cp8-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_9B9cp8-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_9B9cp8-padding">
+    
+
+<style>
+  .bonos-section {
+    background-color: #FAF6F1;
+    padding: 60px 20px;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .bonos-eyebrow {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #C8873A;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .bonos-alerta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #1C1C1C;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 30px;
+    padding: 10px 24px;
+    max-width: 380px;
+    margin: 0 auto 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .bonos-titulo {
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1C1C1C;
+    margin-bottom: 8px;
+  }
+
+  .bonos-titulo span {
+    color: #C8873A;
+  }
+
+  .bonos-subtitulo {
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 40px;
+  }
+
+  .bonos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 680px;
+    margin: 0 auto 32px;
+  }
+
+  .bono-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+  }
+
+ .bono-card-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    background: #f0ebe4;
+  }
+
+  .bono-card-body {
+    padding: 14px 16px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bono-emoji {
+    font-size: 18px;
+  }
+
+  .bono-nombre {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1C1C1C;
+    line-height: 1.3;
+  }
+
+  .bono-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .bono-precio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .bono-precio-tachado {
+    font-size: 12px;
+    color: #aaa;
+    text-decoration: line-through;
+  }
+
+  .bono-precio-gratis {
+    font-size: 13px;
+    font-weight: 800;
+    color: #2E7D52;
+    letter-spacing: 0.5px;
+  }
+
+  .bono-card.sorpresa {
+    background: linear-gradient(135deg, #2C1A0E, #4A2C10);
+    grid-column: span 2;
+    flex-direction: row;
+    align-items: center;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .bono-card.sorpresa .bono-card-img {
+    width: 90px;
+    height: 90px;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .bono-card.sorpresa .bono-nombre {
+    color: #fff;
+    font-size: 16px;
+  }
+
+  .bono-card.sorpresa .bono-desc {
+    color: #d4b896;
+  }
+
+  .bono-card.sorpresa .bono-precio-tachado {
+    color: #8a6a4a;
+  }
+
+  .bono-card.sorpresa .bono-precio-gratis {
+    color: #C8873A;
+  }
+
+  .bonos-total {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .bonos-total-texto {
+    font-size: 15px;
+    color: #555;
+  }
+
+  .bonos-total-texto s {
+    color: #aaa;
+  }
+
+  .bonos-total-texto strong {
+    color: #1C1C1C;
+    font-size: 17px;
+  }
+
+  .bonos-cta {
+    display: block;
+    background: #C8873A;
+    color: #fff;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 16px 24px;
+    border-radius: 50px;
+    max-width: 360px;
+    margin: 0 auto;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 480px) {
+    .bonos-titulo { font-size: 26px; }
+    .bono-card.sorpresa {
+      flex-direction: column;
+      text-align: center;
+    }
+    .bono-card.sorpresa .bono-card-img {
+      width: 100%;
+      height: 120px;
+      aspect-ratio: auto;
+    }
+  }
+</style>
+
+<section class="bonos-section">
+
+  <p class="bonos-eyebrow">Et vous recevez aussi</p>
+
+
+
+  <h2 class="bonos-titulo">TOUT ceci <span>offert</span></h2>
+  <p class="bonos-subtitulo">Avec votre commande, ces bonus vous sont offerts sans frais supplémentaires.</p>
+
+  <div class="bonos-grid">
+
+    <!-- BONO 1 → reemplazá TU_URL_IMAGEN_AQUI_BONO1 -->
+    <div class="bono-card">
+      <img class="bono-card-img" src="assets/WhatsApp_Image_2026-05-05_at_00.48.41_2.jpg" alt="Sauces &amp; Assaisonnements Sains">
+      <div class="bono-card-body">
+        <span class="bono-emoji">🥗</span>
+        <p class="bono-nombre">Sauces &amp; Assaisonnements Sains</p>
+        <p class="bono-desc">Sauces, vinaigrettes et dips maison pour sublimer chacune de vos recettes.</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$7.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
         </div>
-    </section>
+      </div>
+    </div>
 
-    <footer>
-        <div class="wrap">
-            <p>Soulagement Dans Chaque Assiette — Produit numérique · Prix en euros (EUR)</p>
-            <p style="margin-top:.5rem">
-                Ce contenu est à visée informative et ne remplace pas un avis médical.
-                Consultez un professionnel de santé en cas de pathologie.
-            </p>
-            <p style="margin-top:.5rem"><a href="#">Mentions légales</a> · <a href="#">Confidentialité</a> · <a href="#">Contact</a></p>
+   <!-- BONO 2 → reemplazá TU_URL_IMAGEN_AQUI_BONO2 -->
+<div class="bono-card">
+  <img class="bono-card-img" src="assets/ChatGPT_Image_7_may_2026_01_32_52_a.m..jpg" alt="Le Glacier Sain">
+  <div class="bono-card-body">
+    <span class="bono-emoji">🍦</span>
+    <p class="bono-nombre">Le Glacier Sain</p>
+    <p class="bono-desc">Des glaces crémeuses et sans sucre pour les jours de chaleur, sans culpabilité et sans sortir de l’alimentation anti-inflammatoire.</p>
+    <div class="bono-precio">
+      <span class="bono-precio-tachado">$8.900</span>
+      <span class="bono-precio-gratis">OFFERT</span>
+    </div>
+  </div>
+</div>
+
+    <!-- BONO 3 → reemplazá TU_URL_IMAGEN_AQUI_BONO3 -->
+    <div class="bono-card">
+      <img class="bono-card-img" src="assets/WhatsApp_Image_2026-05-05_at_00.48.41_3.jpg" alt="Desserts Sains">
+      <div class="bono-card-body">
+        <span class="bono-emoji">🍫</span>
+        <p class="bono-nombre">Desserts Sains</p>
+        <p class="bono-desc">Gâteaux, brownies et douceurs qui ont un goût de luxe sans peser sur le corps.</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$8.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
         </div>
-    </footer>
+      </div>
+    </div>
 
-    <script>
-        // ⚠️ À REMPLACER par l'URL de paiement réelle du produit FR
-        const CHECKOUT_URL = 'https://www.tecnhogar.store/pay/REMPLACER-PAR-UUID-PRODUIT-FR';
+    <!-- BONO 4 → reemplazá TU_URL_IMAGEN_AQUI_BONO4 -->
+    <div class="bono-card">
+      <img class="bono-card-img" src="assets/WhatsApp_Image_2026-05-05_at_00.48.41_1.jpg" alt="Planificateur Hebdomadaire de Repas">
+      <div class="bono-card-body">
+        <span class="bono-emoji">📅</span>
+        <p class="bono-nombre">Planificateur Hebdomadaire de Repas</p>
+        <p class="bono-desc">Organisez toute votre semaine en quelques minutes. Fini le "on mange quoi ce soir ?"</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$9.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
+        </div>
+      </div>
+    </div>
 
-        // --- Propagation des UTM jusqu'au checkout (même logique que les autres offres) ---
-        const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
+    <!-- BONO 5 → reemplazá TU_URL_IMAGEN_AQUI_BONO5 -->
+    <div class="bono-card">
+      <img class="bono-card-img" src="assets/WhatsApp_Image_2026-05-05_at_01.02.13.jpg" alt="Mini-Guide Snacks Express">
+      <div class="bono-card-body">
+        <span class="bono-emoji">🍿</span>
+        <p class="bono-nombre">Mini-Guide Snacks Express</p>
+        <p class="bono-desc">Les meilleurs snacks express : prêts en moins de 10 minutes.</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$6.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
+        </div>
+      </div>
+    </div>
 
-        (function memoriserUtms() {
-            const params = new URLSearchParams(window.location.search);
-            UTM_KEYS.forEach(k => {
-                const v = params.get(k);
-                if (v && v.trim() !== '') localStorage.setItem(k, v);
-            });
-        })();
+    <!-- BONO 6 → reemplazá TU_URL_IMAGEN_AQUI_BONO6 -->
+    <div class="bono-card">
+      <img class="bono-card-img" src="assets/WhatsApp_Image_2026-05-05_at_01.02.13_1.jpg" alt="Pain Maison Sain">
+      <div class="bono-card-body">
+        <span class="bono-emoji">🍞</span>
+        <p class="bono-nombre">Pain Maison Sain</p>
+        <p class="bono-desc">Des pains moelleux, dorés et savoureux faits maison, sans se compliquer la vie.</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$10.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
+        </div>
+      </div>
+    </div>
 
-        function checkoutAvecUtms(baseUrl) {
-            let queryString = window.location.search;
-            if (!queryString || !queryString.includes('utm_')) {
-                const utms = [];
-                UTM_KEYS.forEach(k => {
-                    const val = localStorage.getItem(k) || localStorage.getItem('utmify_' + k);
-                    if (val) utms.push(k + '=' + encodeURIComponent(val));
-                });
-                if (utms.length) queryString = '?' + utms.join('&');
-            }
-            if (!queryString) return baseUrl;
-            const sep = baseUrl.includes('?') ? '&' : '?';
-            const clean = queryString.startsWith('?') ? queryString.slice(1) : queryString;
-            return baseUrl + sep + clean;
-        }
+    <!-- BONO 7 → reemplazá TU_URL_IMAGEN_AQUI_BONO7 -->
+    <div class="bono-card">
+      <img class="bono-card-img" src="assets/WhatsApp_Image_2026-05-05_at_00.48.41.jpg" alt="Recettes Libres">
+      <div class="bono-card-body">
+        <span class="bono-emoji">🍽️</span>
+        <p class="bono-nombre">Recettes Libres</p>
+        <p class="bono-desc">Cuisinez sans restriction : des recettes pensées pour que toute la tablée se régale.</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$8.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
+        </div>
+      </div>
+    </div>
 
-        document.querySelectorAll('[data-cta]').forEach(btn => {
-            btn.addEventListener('click', e => {
-                // Le 1er CTA du hero scrolle vers l'offre, les autres partent au checkout
-                if (btn.getAttribute('href') === '#offre') return;
-                e.preventDefault();
-                if (typeof fbq === 'function') fbq('track', 'InitiateCheckout');
-                window.location.href = checkoutAvecUtms(CHECKOUT_URL);
-            });
+    <!-- BONO 8 → reemplazá TU_URL_IMAGEN_AQUI_BONO8 -->
+    <div class="bono-card">
+      <img class="bono-card-img" src="assets/WhatsApp_Image_2026-05-05_at_01.12.14.jpg" alt="Sans Lactose Avec Du Gout">
+      <div class="bono-card-body">
+        <span class="bono-emoji">🥛</span>
+        <p class="bono-nombre">Sans Lactose, Avec Du Goût</p>
+        <p class="bono-desc">Des recettes crémeuses, savoureuses et rassasiantes — sans une goutte de produits laitiers.</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$7.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BONO 9 SORPRESA → reemplazá TU_URL_IMAGEN_AQUI_BONO9 -->
+    <div class="bono-card sorpresa">
+      <img class="bono-card-img" src="assets/ChatGPT_Image_28_abr_2026_06_44_21_p.m..jpg" alt="Bonus Surprise">
+      <div class="bono-card-body">
+        <span class="bono-emoji">🎁</span>
+        <p class="bono-nombre">Bonus Surprise</p>
+        <p class="bono-desc">Révélé juste après votre commande. Quelque chose que vous n’attendez pas et que vous allez adorer.</p>
+        <div class="bono-precio">
+          <span class="bono-precio-tachado">$11.900</span>
+          <span class="bono-precio-gratis">OFFERT</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bonos-total">
+    <div style="background: #fff; border: 2px dashed #C8873A; border-radius: 16px; padding: 20px 24px; max-width: 400px; margin: 0 auto;">
+      <p style="font-size: 13px; color: #888; font-family: sans-serif; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Valeur totale des bonus</p>
+      <p style="font-size: 28px; font-family: 'Playfair Display', serif; color: #aaa; text-decoration: line-through; margin: 0 0 4px;">$79.200</p>
+      <p style="font-size: 32px; font-family: 'Playfair Display', serif; font-weight: 700; color: #2E7D52; margin: 0;">OFFERT 🎁</p>
+    </div>
+  </div>
+
+  <a href="#agregar-al-carrito" class="bonos-cta">
+    🎁 Inclus gratuitement aujourd’hui
+  </a>
+
+
+
+</section>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_xrDdLe" class="page-section section"><style data-sec>.section-sca-custom_liquid_xrDdLe-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_xrDdLe-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_xrDdLe-padding">
+    <style>
+  .bpsg-rev {
+    background: #fff;
+    padding: 72px 20px;
+  }
+  .bpsg-rev-inner {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .bpsg-rev-label {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #C8813A;
+    font-family: sans-serif;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .bpsg-rev h2 {
+    text-align: center;
+    font-size: clamp(30px,4vw,46px);
+    line-height: 1.18;
+    color: #2C1A0E;
+    font-family: Georgia, serif;
+    margin-bottom: 16px;
+  }
+  .bpsg-rev h2 span {
+    color: #C8813A;
+  }
+  .bpsg-rev-sub {
+    text-align: center;
+    font-size: 17px;
+    line-height: 1.75;
+    color: #7A6248;
+    font-family: sans-serif;
+    max-width: 720px;
+    margin: 0 auto 44px;
+  }
+  .bpsg-rev-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 44px;
+    flex-wrap: wrap;
+  }
+  .bpsg-rev-stars {
+    color: #C8873A;
+    font-size: 21px;
+    letter-spacing: 2px;
+  }
+  .bpsg-rev-score {
+    font-size: 15px;
+    color: #2C1A0E;
+    font-family: sans-serif;
+    font-weight: 600;
+  }
+  .bpsg-rev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+    gap: 18px;
+  }
+  .bpsg-rev-card {
+    background: #FAF6F1;
+    border: 1px solid #E8D5B0;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  }
+  .bpsg-rev-photo {
+    display: block;
+    width: calc(100% + 40px);
+    margin: -20px -20px 14px -20px;
+    border-radius: 18px 18px 0 0;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .bpsg-rev-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .bpsg-rev-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #E8D5B0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2C1A0E;
+    font-family: sans-serif;
+    flex-shrink: 0;
+  }
+  .bpsg-rev-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2C1A0E;
+    font-family: sans-serif;
+  }
+  .bpsg-rev-verified {
+    font-size: 11px;
+    color: #4A7C59;
+    font-family: sans-serif;
+    margin-top: 2px;
+  }
+  .bpsg-rev-text {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #2C1A0E;
+    font-family: sans-serif;
+    margin-bottom: 14px;
+  }
+  .bpsg-rev-reply {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid #E8D5B0;
+  }
+  .bpsg-rev-reply strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #C8873A;
+    font-family: sans-serif;
+  }
+  .bpsg-rev-reply p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #7A6248;
+    font-family: sans-serif;
+  }
+  @media(max-width:768px){
+    .bpsg-rev{
+      padding:56px 14px;
+    }
+    .bpsg-rev-grid{
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .bpsg-rev-card{
+      padding:14px;
+      border-radius:14px;
+    }
+    .bpsg-rev-photo{
+      width: calc(100% + 28px);
+      margin: -14px -14px 10px -14px;
+      border-radius: 14px 14px 0 0;
+    }
+    .bpsg-rev-avatar{
+      width:34px;
+      height:34px;
+      font-size:11px;
+    }
+    .bpsg-rev-name{
+      font-size:12px;
+    }
+    .bpsg-rev-verified{
+      font-size:9px;
+    }
+    .bpsg-rev-text{
+      font-size:12px;
+      line-height:1.55;
+      margin-bottom:10px;
+    }
+    .bpsg-rev-reply{
+      padding:10px;
+    }
+    .bpsg-rev-reply strong{
+      font-size:10px;
+    }
+    .bpsg-rev-reply p{
+      font-size:11px;
+      line-height:1.45;
+    }
+  }
+</style>
+<section class="bpsg-rev">
+  <div class="bpsg-rev-inner">
+    <div class="bpsg-rev-label">
+      Avis vérifiés
+    </div>
+    <h2>
+      Elles ont arrêté de se sentir <span>ballonnées</span>
+    </h2>
+    <p class="bpsg-rev-sub">
+      Des milliers de personnes ont changé leur façon de se sentir après les repas grâce à ces recettes simples, savoureuses et faciles à tenir.
+    </p>
+    <div class="bpsg-rev-rating">
+      <div class="bpsg-rev-stars">★★★★★</div>
+      <div class="bpsg-rev-score">
+        4,9/5 · Plus de 3 000 téléchargements
+      </div>
+    </div>
+    <div class="bpsg-rev-grid">
+      <div class="bpsg-rev-card">
+        <img class="bpsg-rev-photo" src="assets/WhatsApp_Image_2026-08-01_at_16.27.49_1.jpg" alt="Assiette realisee par Marie L.">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">ML</div>
+          <div>
+            <div class="bpsg-rev-name">Marie L.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Depuis des années je finissais chaque dîner gonflée. En 4 jours je me sentais déjà tellement plus légère 😭 »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>C’est exactement ce que nous racontent nos clientes ❤️</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <img class="bpsg-rev-photo" src="assets/WhatsApp_Image_2026-08-01_at_16.27.49_2.jpg" alt="Assiette realisee par Gabrielle S.">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">GS</div>
+          <div>
+            <div class="bpsg-rev-name">Gabrielle S.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Je pensais tomber sur de la cuisine fade, en fait les recettes sont VRAIMENT bonnes. Mon mari me réclame les desserts 😂 »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>Et sans sucre raffiné 🙌</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <img class="bpsg-rev-photo" src="assets/WhatsApp_Image_2026-08-01_at_16.27.49.jpg" alt="Assiette realisee par Carole R.">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">CR</div>
+          <div>
+            <div class="bpsg-rev-name">Carole R.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Le mieux, c’est de ne plus me demander chaque jour quoi cuisiner. Ça m’a enlevé un stress énorme. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>L’organisation change tout ❤️</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">VP</div>
+          <div>
+            <div class="bpsg-rev-name">Valentine P.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « J’ai le côlon irritable et beaucoup de plats passaient mal. Ces recettes m’ont énormément aidée. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>Merci de nous faire confiance 🙌</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">DM</div>
+          <div>
+            <div class="bpsg-rev-name">Danièle M.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Les desserts sains m’ont sauvée, j’étais TRÈS accro au sucre 😭 »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>Les préférés de la communauté 🍫</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">LF</div>
+          <div>
+            <div class="bpsg-rev-name">Lucie F.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Je ne savais plus quoi manger car TOUT me pesait. Maintenant j’ai des recettes dont je sais qu’elles me font du bien. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>On vous comprend parfaitement ❤️</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">AR</div>
+          <div>
+            <div class="bpsg-rev-name">Andrée R.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Certaines recettes me prennent littéralement 15 minutes. Ça a réglé mes dîners. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>Simple, rapide et bon 🙌</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">NM</div>
+          <div>
+            <div class="bpsg-rev-name">Nathalie M.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Ma famille croyait à de la “bouffe saine ennuyeuse” et ils ont tous fini conquis 😂 »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>Ça arrive tout le temps 😭</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">PC</div>
+          <div>
+            <div class="bpsg-rev-name">Pauline C.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « J’ai perdu 3 kilos sans avoir l’impression d’être au régime. Ça ne m’était jamais arrivé. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>C’est ça, bien manger ❤️</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">SM</div>
+          <div>
+            <div class="bpsg-rev-name">Sophie M.</div>
+            <div class="bpsg-rev-verified">★★★★☆ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « J’ai dû chercher certaines farines en magasin bio, mais les recettes restent faciles. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>Et vous pouvez toujours remplacer les ingrédients 🙌</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">CF</div>
+          <div>
+            <div class="bpsg-rev-name">Caroline F.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « Je l’ai acheté en pensant utiliser 4 ou 5 recettes, et j’utilise le livre TOUS les jours. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>C’était exactement le but ❤️</p>
+        </div>
+      </div>
+      <div class="bpsg-rev-card">
+        <div class="bpsg-rev-top">
+          <div class="bpsg-rev-avatar">AL</div>
+          <div>
+            <div class="bpsg-rev-name">Amélie L.</div>
+            <div class="bpsg-rev-verified">★★★★★ · Achat vérifié</div>
+          </div>
+        </div>
+        <div class="bpsg-rev-text">
+          « La sensation de dégonfler après les repas n’a pas de prix. Ça a tout changé pour moi. »
+        </div>
+        <div class="bpsg-rev-reply">
+          <strong>Soulagement Dans Chaque Assiette</strong>
+          <p>Merci de l’avoir partagé ❤️</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+  </div>
+</div>
+
+
+</section><section id="page-section-sca-custom_liquid_w6tKQx" class="page-section section"><style data-sec>.section-sca-custom_liquid_w6tKQx-padding {
+    padding-top: calc(0px * 0.75);
+    padding-bottom: calc(0px  * 0.75);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-sca-custom_liquid_w6tKQx-padding {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }</style><div class="color-scheme-1 gradient">
+  <div class="section-sca-custom_liquid_w6tKQx-padding">
+    <style>
+  .bpsg-faq {
+    background: #F5EDD8;
+    padding: 64px 24px;
+  }
+
+  .bpsg-faq-inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .bpsg-faq-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    color: #C8813A;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .bpsg-faq h2 {
+    font-size: clamp(26px, 4vw, 40px);
+    font-family: Georgia, serif;
+    color: #2C1A0E;
+    margin-bottom: 40px;
+    line-height: 1.2;
+  }
+
+  .bpsg-faq h2 span {
+    color: #C8813A;
+  }
+
+  .bpsg-faq-item {
+    border-bottom: 1px solid #E8D5B0;
+  }
+
+  .bpsg-faq-q {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 20px 0;
+    text-align: left;
+    font-size: 16px;
+    font-family: sans-serif;
+    font-weight: 600;
+    color: #2C1A0E;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .bpsg-faq-q:hover {
+    color: #C8813A;
+  }
+
+  .bpsg-faq-icon {
+    font-size: 22px;
+    color: #C8813A;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    display: inline-block;
+    font-style: normal;
+  }
+
+  .bpsg-faq-a {
+    display: none;
+    font-size: 15px;
+    color: #7A6248;
+    font-family: sans-serif;
+    line-height: 1.7;
+    padding-bottom: 20px;
+  }
+
+  .bpsg-faq-item.open .bpsg-faq-a {
+    display: block;
+  }
+
+  .bpsg-faq-item.open .bpsg-faq-icon {
+    transform: rotate(45deg);
+  }
+
+  /* CIERRE */
+
+  .bpsg-cierre {
+    background: #2C1A0E;
+    padding: 80px 24px;
+    text-align: center;
+  }
+
+  .bpsg-cierre-inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .bpsg-cierre h2 {
+    font-size: clamp(30px, 4vw, 46px);
+    font-family: Georgia, serif;
+    color: #F5EDD8;
+    margin-bottom: 18px;
+    line-height: 1.2;
+  }
+
+  .bpsg-cierre h2 span {
+    color: #C8813A;
+  }
+
+  .bpsg-cierre p {
+    font-size: 17px;
+    color: #D2C2A8;
+    line-height: 1.7;
+    font-family: sans-serif;
+    margin-bottom: 34px;
+  }
+
+  .bpsg-cierre-btn {
+    display: inline-block;
+    background: #C8813A;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 700;
+    font-family: sans-serif;
+    padding: 22px 52px;
+    border-radius: 60px;
+    text-decoration: none;
+    transition: all .2s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  }
+
+  .bpsg-cierre-btn:hover {
+    background: #A8681E;
+    transform: translateY(-2px);
+  }
+
+  .bpsg-cierre-guarantee {
+    margin-top: 18px;
+    font-size: 13px;
+    color: #BCA98E;
+    font-family: sans-serif;
+  }
+
+  .bpsg-cierre-stock {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #C4B49A;
+    font-family: sans-serif;
+  }
+
+  @media(max-width:768px){
+
+    .bpsg-cierre{
+      padding:64px 20px;
+    }
+
+    .bpsg-cierre-btn{
+      width:100%;
+      max-width:100%;
+      padding:20px 24px;
+      font-size:18px;
+    }
+
+  }
+</style>
+
+<!-- FAQ -->
+<div class="bpsg-faq">
+
+  <div class="bpsg-faq-inner">
+
+    <div class="bpsg-faq-label">
+      Questions fréquentes
+    </div>
+
+    <h2>
+      Vous avez des <span>questions</span>?
+    </h2>
+
+    <div class="bpsg-faq-item">
+      <button class="bpsg-faq-q">
+        Faut-il savoir cuisiner pour utiliser ce guide&nbsp;?
+        <span class="bpsg-faq-icon">+</span>
+      </button>
+
+      <div class="bpsg-faq-a">
+        Pas du tout. Chaque recette est expliquée étape par étape et pensée pour des gens normaux qui veulent mieux manger sans se compliquer la vie.
+      </div>
+    </div>
+
+    <div class="bpsg-faq-item">
+      <button class="bpsg-faq-q">
+        Les ingrédients sont-ils faciles à trouver&nbsp;?
+        <span class="bpsg-faq-icon">+</span>
+      </button>
+
+      <div class="bpsg-faq-a">
+        Oui. Toutes les recettes utilisent des ingrédients courants, et nous incluons des variantes et des substitutions pour les adapter facilement.
+      </div>
+    </div>
+
+    <div class="bpsg-faq-item">
+      <button class="bpsg-faq-q">
+        Quand est-ce que je reçois mes accès&nbsp;?
+        <span class="bpsg-faq-icon">+</span>
+      </button>
+
+      <div class="bpsg-faq-a">
+        Immédiatement après le paiement. Vous recevez tout par e-mail et vous pouvez le consulter sur téléphone, tablette ou ordinateur.
+      </div>
+    </div>
+
+    <div class="bpsg-faq-item">
+      <button class="bpsg-faq-q">
+        Les recettes sont-elles sans gluten et sans sucre&nbsp;?
+        <span class="bpsg-faq-icon">+</span>
+      </button>
+
+      <div class="bpsg-faq-a">
+        Oui. Tout le contenu est conçu pour vous aider à dégonfler en évitant les farines raffinées et le sucre ajouté.
+      </div>
+    </div>
+
+    <div class="bpsg-faq-item">
+      <button class="bpsg-faq-q">
+        En combien de temps vais-je voir la différence&nbsp;?
+        <span class="bpsg-faq-icon">+</span>
+      </button>
+
+      <div class="bpsg-faq-a">
+        Beaucoup de personnes ressentent moins de ballonnements et plus de légèreté dès les premiers jours. Chaque corps est différent, mais améliorer ce que l’on mange produit souvent des changements rapides.
+      </div>
+    </div>
+
+    <div class="bpsg-faq-item">
+      <button class="bpsg-faq-q">
+        Y a-t-il une garantie&nbsp;?
+        <span class="bpsg-faq-icon">+</span>
+      </button>
+
+      <div class="bpsg-faq-a">
+        Oui. Vous avez 30 jours de garantie totale. Si vous estimez que ce n’était pas pour vous, nous vous remboursons.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- CIERRE -->
+<div class="bpsg-cierre">
+
+  <div class="bpsg-cierre-inner">
+
+    <h2>
+      Commencez dès aujourd’hui à vous sentir <span>plus légère</span><br>
+      après chaque repas
+    </h2>
+
+    <p>
+      Plus de 500 recettes sans gluten et sans sucre pour arrêter de gonfler et retrouver le plaisir de manger.
+    </p>
+
+    <a 
+      href="#" 
+      class="bpsg-cierre-btn"
+      onclick="var btn=document.querySelector('.product-form__submit, [name=add]'); if(btn){btn.scrollIntoView({behavior:'smooth'}); setTimeout(function(){btn.click();},600);} return false;"
+    >
+      Je veux dégonfler →
+    </a>
+
+    <p class="bpsg-cierre-guarantee">
+      🔒 Paiement sécurisé · Accès immédiat · Garantie 30 jours
+    </p>
+
+    <p class="bpsg-cierre-stock">
+      ⚠️ Offre disponible pour une durée limitée
+    </p>
+
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.bpsg-faq-q').forEach(function(btn) {
+
+    btn.addEventListener('click', function() {
+
+      var item = this.closest('.bpsg-faq-item');
+      var wasOpen = item.classList.contains('open');
+
+      document.querySelectorAll('.bpsg-faq-item').forEach(function(i) {
+        i.classList.remove('open');
+      });
+
+      if (!wasOpen) {
+        item.classList.add('open');
+      }
+
+    });
+
+  });
+
+  document.querySelectorAll('.bpsg-cierre-btn').forEach(function(btn) {
+
+    btn.addEventListener('click', function(e) {
+
+      e.preventDefault();
+
+      var addBtn = document.querySelector('.product-form__submit, [name=add]');
+
+      if (addBtn) {
+
+        addBtn.scrollIntoView({
+          behavior:'smooth'
         });
 
-        // --- Compte à rebours 15 min, persistant par session ---
-        (function compteARebours() {
-            const el = document.getElementById('compteur');
-            const CLE = 'fin_offre_fr';
-            let fin = parseInt(sessionStorage.getItem(CLE), 10);
-            if (!fin || isNaN(fin) || fin < Date.now()) {
-                fin = Date.now() + 15 * 60 * 1000;
-                sessionStorage.setItem(CLE, String(fin));
-            }
-            setInterval(() => {
-                const reste = Math.max(0, fin - Date.now());
-                const m = Math.floor(reste / 60000);
-                const s = Math.floor((reste % 60000) / 1000);
-                el.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-            }, 1000);
-        })();
+        setTimeout(function(){
+          addBtn.click();
+        },600);
 
-        // --- Compteur de spectateurs (légère variation) ---
-        (function spectateurs() {
-            const el = document.getElementById('spectateurs');
-            let n = 83;
-            setInterval(() => {
-                n = Math.max(61, Math.min(112, n + (Math.random() < .5 ? -1 : 1) * Math.ceil(Math.random() * 3)));
-                el.textContent = n;
-            }, 7000);
-        })();
-    </script>
+      }
 
+    });
+
+  });
+</script>
+  </div>
+</div>
+
+
+</section>
+
+</main>
+<footer style="padding:26px 20px 40px;text-align:center;font-size:12px;color:#7A6248;font-family:sans-serif;background:#fff;">
+  <p style="margin:0 0 8px">Soulagement Dans Chaque Assiette &mdash; produit num&eacute;rique &middot; prix en euros (EUR)</p>
+  <p style="margin:0 0 8px;max-width:560px;margin-inline:auto">
+    Contenu &agrave; vis&eacute;e informative, il ne remplace pas un avis m&eacute;dical.
+    Consultez un professionnel de sant&eacute; en cas de pathologie.
+  </p>
+  <p style="margin:0"><a href="#" style="color:#7A6248">Mentions l&eacute;gales</a> &middot;
+     <a href="#" style="color:#7A6248">Confidentialit&eacute;</a> &middot;
+     <a href="#" style="color:#7A6248">Contact</a></p>
+</footer>
+
+<script>
+// A REMPLACER pelo UUID real do produto FR
+var CHECKOUT_URL = 'https://www.tecnhogar.store/pay/REMPLACER-PAR-UUID-PRODUIT-FR';
+var UTM_KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck'];
+
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  UTM_KEYS.forEach(function(k){ var v=p.get(k); if(v && v.trim()) localStorage.setItem(k,v); });
+})();
+
+function checkoutUrl(){
+  var qs = window.location.search;
+  if(!qs || qs.indexOf('utm_')===-1){
+    var a=[]; UTM_KEYS.forEach(function(k){
+      var v=localStorage.getItem(k)||localStorage.getItem('utmify_'+k);
+      if(v) a.push(k+'='+encodeURIComponent(v));
+    });
+    if(a.length) qs='?'+a.join('&');
+  }
+  if(!qs) return CHECKOUT_URL;
+  var sep = CHECKOUT_URL.indexOf('?')>-1 ? '&' : '?';
+  return CHECKOUT_URL + sep + (qs.charAt(0)==='?' ? qs.slice(1) : qs);
+}
+
+// todos os CTAs vao para o checkout
+document.addEventListener('click', function(e){
+  var el = e.target.closest('[data-checkout], .bpsg-cta-btn, .bpsg-final-btn, .alivio-cta');
+  if(!el) return;
+  e.preventDefault();
+  if(typeof fbq==='function') fbq('track','InitiateCheckout');
+  window.location.href = checkoutUrl();
+});
+
+// contador 15 min persistente
+(function(){
+  var el=document.getElementById('fr-timer'); if(!el) return;
+  var K='fr_offre_fin', fin=parseInt(sessionStorage.getItem(K),10);
+  if(!fin||isNaN(fin)||fin<Date.now()){ fin=Date.now()+15*60*1000; sessionStorage.setItem(K,String(fin)); }
+  setInterval(function(){
+    var r=Math.max(0,fin-Date.now()), m=Math.floor(r/60000), s=Math.floor((r%60000)/1000);
+    el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  },1000);
+})();
+</script>
 </body>
-
 </html>
