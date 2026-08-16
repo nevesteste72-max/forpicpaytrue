@@ -154,6 +154,30 @@ export default function Membros() {
           </div>
         )}
 
+        {isAves && items.length > 0 && (
+          <a
+            href="https://www.tecnhogar.store/aves/especialista/"
+            className="mt-3 mb-1 block rounded-2xl border p-5 text-white shadow-sm transition-transform hover:-translate-y-0.5"
+            style={{ background: `linear-gradient(150deg, ${brand.forest2}, ${brand.forest})`, borderColor: "#194a2b" }}
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-3xl leading-none flex-none">🩺</span>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold leading-snug">Fala com um especialista sobre as tuas aves</h3>
+                <p className="text-[13px] text-[#cfe0cd] mt-0.5">
+                  A tua galinha está estranha? Envia foto ou vídeo e recebe resposta em 24-48h por WhatsApp. Assinatura €9,90/mês, cancelas quando quiseres.
+                </p>
+              </div>
+              <span
+                className="flex-none inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                style={{ background: "#25D366", color: "#062a12" }}
+              >
+                Ativar
+              </span>
+            </div>
+          </a>
+        )}
+
         {items.length === 0 ? (
           <div className="bg-white rounded-2xl border border-[#e0e4da] p-10 text-center mt-4">
             <PackageOpen className="w-10 h-10 mx-auto mb-3 text-[#9aa896]" />
