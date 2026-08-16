@@ -142,12 +142,31 @@
                                 class="highlight-underline">muitas vezes já é tarde</span></h1>
                         <p class="hero-subtitle">No calor do verão, uma doença não apanhada a tempo <strong>espalha-se pelo galinheiro em 48h</strong> e pode levar-te as aves todas à frente — até a tua preferida. Aprende a reconhecer as doenças das tuas aves por <strong>+300 sinais visuais ilustrados</strong>, em segundos e sem seres veterinário. Age <strong>antes que seja tarde</strong>.</p>
 
-                        <!-- VSL (quadrado, vídeo inteiro sem corte) -->
-                        <div style="width:min(440px,94%);margin:6px auto 22px;aspect-ratio:1/1;border-radius:18px;overflow:hidden;box-shadow:0 12px 34px rgba(0,0,0,.22);background:#0d1f12;">
-                            <video src="/aves/vsl.mp4" poster="/aves/vsl-poster.jpg"
-                                   controls playsinline preload="metadata"
+                        <!-- VSL (arranca sozinho mudo p/ prender atenção no browser do FB/IG; toca p/ ouvir) -->
+                        <div id="vsl-wrap" style="position:relative;width:min(440px,94%);margin:6px auto 22px;aspect-ratio:1/1;border-radius:18px;overflow:hidden;box-shadow:0 12px 34px rgba(0,0,0,.22);background:#0d1f12;">
+                            <video id="vsl-video" src="/aves/vsl.mp4" poster="/aves/vsl-poster.jpg"
+                                   autoplay muted loop playsinline preload="metadata"
                                    style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+                            <button id="vsl-unmute" type="button" aria-label="Ativar som"
+                                    style="position:absolute;inset:0;width:100%;height:100%;border:none;background:rgba(0,0,0,.30);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;">
+                                <span style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.4);">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#0d1f12"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                                </span>
+                                <span style="font-size:.85rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);letter-spacing:.3px;">Toca para ouvir 🔊</span>
+                            </button>
                         </div>
+                        <script>
+                        (function(){
+                          var v=document.getElementById('vsl-video'), b=document.getElementById('vsl-unmute');
+                          if(!v||!b) return;
+                          b.addEventListener('click', function(){
+                            v.muted=false; v.loop=false; try{ v.currentTime=0; }catch(e){}
+                            v.setAttribute('controls','controls');
+                            var p=v.play(); if(p&&p.catch) p.catch(function(){});
+                            b.style.display='none';
+                          });
+                        })();
+                        </script>
 
                         <div class="hero-cta-group">
                             <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin:0 0 12px;flex-wrap:wrap;">
@@ -1112,7 +1131,7 @@
       (function(){
         var bar=document.getElementById('sticky-buy'), plans=document.getElementById('planos');
         function upd(){
-          var y=window.scrollY||document.documentElement.scrollTop, show=y>500;
+          var y=window.scrollY||document.documentElement.scrollTop, show=y>240;
           if(plans){var r=plans.getBoundingClientRect();if(r.top<window.innerHeight&&r.bottom>0)show=false;}
           bar.style.display=show?'flex':'none';
         }
