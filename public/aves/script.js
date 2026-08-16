@@ -296,8 +296,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function triggerScreenBlackout() {
         if (printShield) {
             printShield.style.display = 'block';
-            // Tenta copiar algo vazio ou aviso para a área de transferência para anular o print
-            navigator.clipboard.writeText("Aviso: Capturas de tela são bloqueadas nesta página.").catch(() => {});
+            // Tenta copiar aviso para a área de transferência (guardado: navigator.clipboard
+            // não existe em alguns browsers in-app e rebentava aqui um erro de script).
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText("Aviso: Capturas de tela são bloqueadas nesta página.").catch(() => {});
+            }
             
             setTimeout(() => {
                 printShield.style.display = 'none';
@@ -305,22 +308,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Monitora o foco da janela: muitas ferramentas de print tiram o foco momentaneamente ou dependem de mudança de visibilidade
-    window.addEventListener('blur', () => {
-        // Se o utilizador sair da página para usar ferramenta de captura, podemos colocar uma tela preta rápida
-        if (printShield) {
-            printShield.style.display = 'block';
-        }
-    });
-
-    window.addEventListener('focus', () => {
-        if (printShield) {
-            // Remove o blackout com um pequeno delay após a volta do foco
-            setTimeout(() => {
-                printShield.style.display = 'none';
-            }, 300);
-        }
-    });
+    // NOTA: removido o blackout no evento 'blur'. No telemóvel (83% do tráfego, quase
+    // tudo no browser interno do Facebook/Instagram) o foco perde-se constantemente
+    // (vídeo, notificações, troca de app) e a página ficava PRETA — as pessoas pensavam
+    // que estava partida e saíam. A proteção de PrintScreen (desktop) mantém-se abaixo.
 
     // 4. Medida anti-HTTrack / Clonadores offline
     // Se o site for aberto de um protocolo "file://" ou localhost com porta estranha que indique emulação offline, redireciona

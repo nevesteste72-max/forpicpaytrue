@@ -216,28 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function triggerScreenBlackout() {
         if (printShield) {
             printShield.style.display = 'block';
-            navigator.clipboard.writeText("Aviso: Capturas de tela são bloqueadas nesta página.").catch(() => {});
-            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText("Aviso: Capturas de tela são bloqueadas nesta página.").catch(() => {});
+            }
             setTimeout(() => {
                 printShield.style.display = 'none';
             }, 2500);
         }
     }
 
-    // Monitora o foco da janela
-    window.addEventListener('blur', () => {
-        if (printShield) {
-            printShield.style.display = 'block';
-        }
-    });
-
-    window.addEventListener('focus', () => {
-        if (printShield) {
-            setTimeout(() => {
-                printShield.style.display = 'none';
-            }, 300);
-        }
-    });
+    // NOTA: removido o blackout no 'blur' — no telemóvel pintava a página de preto
+    // sempre que se perdia o foco (vídeo/notificações), afugentando visitantes.
 
     // 4. Medida anti-HTTrack / Clonadores offline
     if (window.location.protocol === 'file:') {
