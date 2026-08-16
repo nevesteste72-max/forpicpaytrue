@@ -12,6 +12,8 @@
     { "source": "/painel/", "destination": "/painel/index.html" },
     { "source": "/aves", "destination": "/aves/index.html" },
     { "source": "/aves/", "destination": "/aves/index.html" },
+    { "source": "/soulagement", "destination": "/soulagement/index.html" },
+    { "source": "/soulagement/", "destination": "/soulagement/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

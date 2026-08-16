@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>+500 Recettes Anti-Inflammatoires | Soulagement Dans Chaque Assiette</title>
+    <meta name="description"
+        content="Dites adieu aux ballonnements et à la fatigue avec plus de 500 recettes anti-inflammatoires faciles, sans sucre et sans gluten. Accès immédiat, garantie 30 jours.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Fatiguée des ballonnements et du manque d'énergie ?">
+    <meta property="og:description"
+        content="+500 recettes anti-inflammatoires rapides, sans sucre et sans gluten. Sentez-vous plus légère dès les premiers jours.">
+    <meta property="og:locale" content="fr_FR">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --vert: #2f7a4f;
+            --vert-clair: #eaf5ee;
+            --vert-fonce: #1e5335;
+            --or: #e0a020;
+            --rouge: #c2452d;
+            --texte: #23302a;
+            --texte-doux: #5d6b64;
+            --fond: #fbfaf6;
+            --carte: #ffffff;
+            --bord: #e6e3da;
+            --rayon: 16px;
+            --ombre: 0 4px 20px rgba(35, 48, 42, .07);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, .titre { font-family: 'Outfit', system-ui, sans-serif; line-height: 1.2; }
+
+        .wrap { width: min(100% - 2.5rem, 780px); margin-inline: auto; }
+
+        section { padding: 3.25rem 0; }
+
+        /* ---------- Barre d'urgence ---------- */
+        .barre-urgence {
+            position: sticky; top: 0; z-index: 50;
+            background: var(--rouge); color: #fff;
+            text-align: center; font-size: .9rem; font-weight: 600;
+            padding: .6rem 1rem;
+        }
+        .barre-urgence strong { font-variant-numeric: tabular-nums; }
+
+        /* ---------- Hero ---------- */
+        .hero { background: linear-gradient(180deg, var(--vert-clair), var(--fond)); padding-top: 2.5rem; }
+        .hero h1 { font-size: clamp(1.85rem, 6vw, 2.9rem); font-weight: 800; letter-spacing: -.02em; }
+        .hero .sous { font-size: clamp(1.02rem, 2.6vw, 1.2rem); color: var(--texte-doux); margin-top: 1rem; }
+
+        .visuel {
+            margin: 1.75rem 0;
+            aspect-ratio: 16 / 10;
+            border-radius: var(--rayon);
+            background: linear-gradient(135deg, #d7eadd, #bfe0c9);
+            display: grid; place-items: center;
+            color: var(--vert-fonce); font-weight: 600; text-align: center; padding: 1rem;
+            border: 1px solid var(--bord);
+        }
+        .visuel img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--rayon); }
+
+        .attributs {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem;
+            margin-top: 1.25rem;
+        }
+        @media (min-width: 620px) { .attributs { grid-template-columns: repeat(4, 1fr); } }
+        .attribut {
+            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
+            padding: .7rem .5rem; text-align: center; font-size: .82rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .03em; color: var(--vert-fonce);
+        }
+
+        .tagline {
+            margin-top: 1.25rem; text-align: center; font-family: 'Outfit', sans-serif;
+            font-weight: 700; letter-spacing: .04em; color: var(--vert);
+            text-transform: uppercase; font-size: .95rem;
+        }
+
+        /* ---------- CTA ---------- */
+        .cta {
+            display: block; width: 100%; max-width: 460px; margin: 1.5rem auto 0;
+            background: var(--vert); color: #fff; border: none; cursor: pointer;
+            font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;
+            padding: 1.05rem 1.5rem; border-radius: 999px; text-align: center;
+            text-decoration: none; box-shadow: 0 8px 22px rgba(47, 122, 79, .28);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .cta:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(47, 122, 79, .34); }
+        .cta-note { text-align: center; font-size: .85rem; color: var(--texte-doux); margin-top: .7rem; }
+
+        /* ---------- Blocs génériques ---------- */
+        h2.titre-section {
+            font-size: clamp(1.45rem, 4.5vw, 2rem); font-weight: 800;
+            text-align: center; margin-bottom: 1.75rem; letter-spacing: -.015em;
+        }
+
+        .liste-douleur { list-style: none; display: grid; gap: .75rem; }
+        .liste-douleur li {
+            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
+            padding: .9rem 1.1rem; display: flex; gap: .8rem; align-items: flex-start;
+        }
+        .liste-douleur li span { flex-shrink: 0; font-size: 1.15rem; }
+
+        .duo { display: grid; gap: 1rem; }
+        @media (min-width: 620px) { .duo { grid-template-columns: 1fr 1fr; } }
+        .colonne {
+            border-radius: var(--rayon); padding: 1.25rem; border: 1px solid var(--bord);
+            background: var(--carte);
+        }
+        .colonne.negatif { border-color: #f0d4cd; background: #fdf5f3; }
+        .colonne.positif { border-color: #cfe6d8; background: var(--vert-clair); }
+        .colonne h3 { font-size: 1.05rem; margin-bottom: .75rem; }
+        .colonne ul { list-style: none; display: grid; gap: .5rem; font-size: .95rem; }
+        .colonne li::before { content: "✕ "; color: var(--rouge); font-weight: 700; }
+        .colonne.positif li::before { content: "✓ "; color: var(--vert); }
+
+        .grille-contenu { display: grid; gap: .8rem; }
+        @media (min-width: 620px) { .grille-contenu { grid-template-columns: 1fr 1fr; } }
+        .carte-contenu {
+            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
+            padding: 1rem 1.15rem;
+        }
+        .carte-contenu h3 { font-size: 1rem; margin-bottom: .25rem; }
+        .carte-contenu p { font-size: .9rem; color: var(--texte-doux); }
+
+        /* ---------- Offre ---------- */
+        .offre {
+            background: var(--carte); border: 2px solid var(--vert); border-radius: 20px;
+            padding: 1.75rem 1.35rem; box-shadow: var(--ombre); text-align: center;
+        }
+        .badge-remise {
+            display: inline-block; background: var(--rouge); color: #fff;
+            font-weight: 700; font-size: .82rem; padding: .3rem .85rem; border-radius: 999px;
+        }
+        .prix-barre { color: var(--texte-doux); text-decoration: line-through; font-size: 1.1rem; margin-top: .9rem; }
+        .prix { font-family: 'Outfit', sans-serif; font-size: clamp(2.6rem, 9vw, 3.4rem); font-weight: 800; color: var(--vert-fonce); letter-spacing: -.03em; }
+        .prix-note { font-size: .9rem; color: var(--texte-doux); }
+
+        .bonus-liste { list-style: none; display: grid; gap: .6rem; margin-top: 1.5rem; text-align: left; }
+        .bonus-liste li {
+            display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+            background: var(--vert-clair); border-radius: 10px; padding: .7rem .9rem; font-size: .92rem;
+        }
+        .bonus-liste li b { display: block; font-family: 'Outfit', sans-serif; }
+        .bonus-liste li small { color: var(--texte-doux); }
+        .bonus-liste .valeur { flex-shrink: 0; color: var(--vert); font-weight: 700; text-decoration: line-through; }
+        .total-bonus {
+            margin-top: .9rem; font-weight: 700; font-family: 'Outfit', sans-serif;
+            color: var(--vert-fonce); font-size: 1.05rem;
+        }
+
+        .rarete { margin-top: 1rem; font-size: .88rem; color: var(--rouge); font-weight: 600; }
+        .social-live { font-size: .85rem; color: var(--texte-doux); margin-top: .3rem; }
+
+        /* ---------- Garantie ---------- */
+        .garantie {
+            background: var(--vert-clair); border: 1px dashed var(--vert);
+            border-radius: var(--rayon); padding: 1.5rem; text-align: center;
+        }
+        .garantie .sceau { font-size: 2.4rem; }
+        .badges { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1rem; }
+        .badges span {
+            background: var(--carte); border: 1px solid var(--bord); border-radius: 8px;
+            padding: .35rem .75rem; font-size: .8rem; font-weight: 600; color: var(--texte-doux);
+        }
+
+        /* ---------- Avis ---------- */
+        .note-globale { text-align: center; margin-bottom: 1.5rem; }
+        .note-globale .chiffre { font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: var(--vert-fonce); }
+        .avis { display: grid; gap: .8rem; }
+        @media (min-width: 620px) { .avis { grid-template-columns: 1fr 1fr; } }
+        .avis article {
+            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; padding: 1rem 1.15rem;
+        }
+        .avis .etoiles { color: var(--or); font-size: .9rem; }
+        .avis p { font-size: .93rem; margin: .4rem 0 .5rem; }
+        .avis cite { font-style: normal; font-weight: 700; font-size: .85rem; color: var(--texte-doux); }
+        .avis .verifie { font-size: .75rem; color: var(--vert); font-weight: 600; }
+
+        /* ---------- FAQ ---------- */
+        .faq details {
+            background: var(--carte); border: 1px solid var(--bord); border-radius: 12px;
+            padding: .95rem 1.15rem; margin-bottom: .65rem;
+        }
+        .faq summary {
+            cursor: pointer; font-weight: 700; font-family: 'Outfit', sans-serif;
+            list-style: none; display: flex; justify-content: space-between; gap: 1rem;
+        }
+        .faq summary::-webkit-details-marker { display: none; }
+        .faq summary::after { content: "+"; color: var(--vert); font-size: 1.3rem; line-height: 1; }
+        .faq details[open] summary::after { content: "–"; }
+        .faq details p { margin-top: .65rem; font-size: .93rem; color: var(--texte-doux); }
+
+        /* ---------- Clôture / pied ---------- */
+        .cloture { background: var(--vert-fonce); color: #fff; text-align: center; }
+        .cloture h2 { font-size: clamp(1.5rem, 5vw, 2.1rem); font-weight: 800; }
+        .cloture p { color: #cfe0d5; margin-top: .8rem; }
+        .cloture .cta { background: #fff; color: var(--vert-fonce); box-shadow: none; }
+
+        footer { padding: 2rem 0 3rem; text-align: center; font-size: .8rem; color: var(--texte-doux); }
+        footer a { color: var(--texte-doux); }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============ BARRE D'URGENCE ============ -->
+    <div class="barre-urgence">
+        ⚠️ Offre disponible pour une durée limitée — expire dans <strong id="compteur">15:00</strong>
+    </div>
+
+    <!-- ============ HERO ============ -->
+    <header class="hero">
+        <div class="wrap">
+            <h1>Fatiguée des ballonnements et du manque d'énergie&nbsp;?</h1>
+            <p class="sous">
+                Dites adieu à l'inflammation avec des recettes simples et gourmandes
+                qui vous aident à vous sentir plus légère dès les premiers jours.
+            </p>
+
+            <div class="visuel">
+                <!-- Remplacer par : <img src="pack-mockup.webp" alt="Le pack Soulagement Dans Chaque Assiette"> -->
+                🥗 Visuel du pack (mockup)
+            </div>
+
+            <p style="text-align:center;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.15rem;color:var(--vert-fonce)">
+                +500 recettes rapides et anti-inflammatoires
+            </p>
+
+            <div class="attributs">
+                <div class="attribut">Sans sucre</div>
+                <div class="attribut">Sans gluten</div>
+                <div class="attribut">Simples &amp; rapides</div>
+                <div class="attribut">Plus d'énergie</div>
+            </div>
+
+            <p class="tagline">Mangez bon · Sentez-vous mieux · Vivez avec plus d'énergie</p>
+
+            <a href="#offre" class="cta" data-cta>Je veux dégonfler →</a>
+            <p class="cta-note">🔒 Paiement sécurisé · Accès immédiat · Garantie 30 jours</p>
+        </div>
+    </header>
+
+    <!-- ============ DOULEURS ============ -->
+    <section>
+        <div class="wrap">
+            <h2 class="titre-section">Est-ce que vous vous reconnaissez&nbsp;?</h2>
+            <ul class="liste-douleur">
+                <li><span>😖</span><div>Vous vous sentez lourde et ballonnée après presque chaque repas.</div></li>
+                <li><span>🤯</span><div>Vous ouvrez le frigo et vous ne savez jamais quoi cuisiner.</div></li>
+                <li><span>🔋</span><div>Vous vous levez déjà fatiguée et l'énergie ne revient jamais vraiment.</div></li>
+                <li><span>🔁</span><div>Vous commencez à bien manger… et vous abandonnez au bout de trois jours.</div></li>
+                <li><span>🍫</span><div>Vous grignotez par stress ou par anxiété, puis vous culpabilisez.</div></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ============ RÉGIMES VS ANTI-INFLAMMATOIRE ============ -->
+    <section>
+        <div class="wrap">
+            <h2 class="titre-section">Le problème n'est pas vous. C'est la méthode.</h2>
+            <div class="duo">
+                <div class="colonne negatif">
+                    <h3>Les régimes extrêmes</h3>
+                    <ul>
+                        <li>Impossibles à tenir dans la durée</li>
+                        <li>Génèrent frustration et privation</li>
+                        <li>Toujours les mêmes plats tristes</li>
+                        <li>On reprend tout dès qu'on arrête</li>
+                    </ul>
+                </div>
+                <div class="colonne positif">
+                    <h3>L'alimentation anti-inflammatoire</h3>
+                    <ul>
+                        <li>Des recettes gourmandes et accessibles</li>
+                        <li>Des ingrédients simples, trouvables partout</li>
+                        <li>Moins de ballonnements, plus de légèreté</li>
+                        <li>Tenable, sans jamais avoir l'impression de se priver</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CONTENU ============ -->
+    <section>
+        <div class="wrap">
+            <h2 class="titre-section">Ce que vous recevez</h2>
+            <div class="grille-contenu">
+                <div class="carte-contenu">
+                    <h3>🍲 Plats anti-inflammatoires complets</h3>
+                    <p>Des repas rassasiants du déjeuner au dîner, prêts en moins de 30 minutes.</p>
+                </div>
+                <div class="carte-contenu">
+                    <h3>🥣 Petits-déjeuners &amp; goûters énergisants</h3>
+                    <p>Pour démarrer la journée sans coup de barre à 11 h.</p>
+                </div>
+                <div class="carte-contenu">
+                    <h3>🥕 Snacks rapides anti-fringales</h3>
+                    <p>De quoi couper l'envie de grignoter sans craquer sur le sucre.</p>
+                </div>
+                <div class="carte-contenu">
+                    <h3>🍰 Desserts sans sucre</h3>
+                    <p>Gâteaux, mousses et brownies gourmands, sans sucre raffiné.</p>
+                </div>
+                <div class="carte-contenu">
+                    <h3>🔄 Guide des substitutions</h3>
+                    <p>Remplacez sucre et farines blanches sans rien perdre en goût.</p>
+                </div>
+                <div class="carte-contenu">
+                    <h3>📅 Organisation de la semaine</h3>
+                    <p>Un planificateur pour ne plus jamais improviser vos repas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ OFFRE ============ -->
+    <section id="offre">
+        <div class="wrap">
+            <h2 class="titre-section">Le pack complet, aujourd'hui</h2>
+
+            <div class="offre">
+                <span class="badge-remise">−60 % aujourd'hui seulement</span>
+
+                <p class="prix-barre">47,00 €</p>
+                <p class="prix">19,00 €</p>
+                <p class="prix-note">Paiement unique · Accès à vie · Aucun abonnement</p>
+
+                <p style="margin-top:1.5rem;font-family:'Outfit',sans-serif;font-weight:700;color:var(--vert-fonce)">
+                    + 9 bonus offerts avec votre commande
+                </p>
+
+                <ul class="bonus-liste">
+                    <li><div><b>Sauces &amp; assaisonnements sains</b><small>Vinaigrettes et dips maison</small></div><span class="valeur">7 €</span></li>
+                    <li><div><b>Le glacier sain</b><small>Glaces et sorbets sans sucre</small></div><span class="valeur">9 €</span></li>
+                    <li><div><b>Desserts sains</b><small>Gâteaux et brownies gourmands</small></div><span class="valeur">9 €</span></li>
+                    <li><div><b>Planificateur hebdomadaire</b><small>Vos menus organisés en 10 minutes</small></div><span class="valeur">10 €</span></li>
+                    <li><div><b>Mini-guide snacks express</b><small>Des recettes en moins de 10 minutes</small></div><span class="valeur">7 €</span></li>
+                    <li><div><b>Pain maison sain</b><small>Des pains réussis sans se compliquer</small></div><span class="valeur">11 €</span></li>
+                    <li><div><b>Recettes libres</b><small>Des plats qui plaisent à toute la famille</small></div><span class="valeur">9 €</span></li>
+                    <li><div><b>Sans lactose, avec du goût</b><small>Des recettes crémeuses sans produits laitiers</small></div><span class="valeur">8 €</span></li>
+                    <li><div><b>Bonus surprise</b><small>Révélé juste après votre commande</small></div><span class="valeur">12 €</span></li>
+                </ul>
+
+                <p class="total-bonus">Valeur totale des bonus : 82 € — offerts</p>
+
+                <a href="#" class="cta" data-cta>Je veux dégonfler →</a>
+                <p class="cta-note">🔒 Paiement sécurisé · Accès immédiat · Garantie 30 jours</p>
+
+                <p class="rarete">⚡ Il ne reste que 3 places à ce tarif</p>
+                <p class="social-live">👁 <span id="spectateurs">83</span> personnes consultent cette page en ce moment</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ACCÈS ============ -->
+    <section>
+        <div class="wrap">
+            <h2 class="titre-section">Comment vous recevez tout</h2>
+            <div class="grille-contenu">
+                <div class="carte-contenu"><h3>⚡ Accès immédiat</h3><p>Dès le paiement validé, tout est débloqué.</p></div>
+                <div class="carte-contenu"><h3>📧 Envoi par e-mail</h3><p>Vous recevez vos liens de téléchargement en quelques secondes.</p></div>
+                <div class="carte-contenu"><h3>📱 Sur tous vos appareils</h3><p>Mobile, tablette ou ordinateur — même à côté des plaques.</p></div>
+                <div class="carte-contenu"><h3>⬇️ Déjà téléchargé</h3><p>Plus de 3 579 téléchargements enregistrés à ce jour.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ GARANTIE ============ -->
+    <section>
+        <div class="wrap">
+            <div class="garantie">
+                <div class="sceau">🛡️</div>
+                <h2 style="font-size:1.4rem;margin:.4rem 0">Garantie 30 jours, sans discussion</h2>
+                <p style="color:var(--texte-doux)">
+                    Testez toutes les recettes pendant 30 jours. Si vous n'êtes pas satisfaite,
+                    écrivez-nous un simple e-mail et nous vous remboursons <b>100 % de votre argent</b>.
+                    Vous gardez les bonus.
+                </p>
+                <div class="badges">
+                    <span>Visa</span><span>Mastercard</span><span>Maestro</span><span>Apple Pay</span><span>Google Pay</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ AVIS ============ -->
+    <section>
+        <div class="wrap">
+            <h2 class="titre-section">Ce qu'elles en disent</h2>
+            <div class="note-globale">
+                <div class="chiffre">4,9/5</div>
+                <div class="etoiles" style="color:var(--or)">★★★★★</div>
+                <p style="font-size:.9rem;color:var(--texte-doux)">Sur 12 avis vérifiés</p>
+            </div>
+
+            <div class="avis">
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Depuis des années je finissais chaque dîner gonflée. En 4 jours je me sentais déjà beaucoup plus légère. »</p>
+                    <cite>Marie L.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Je pensais tomber sur de la cuisine fade et triste. En fait les recettes sont VRAIMENT bonnes. »</p>
+                    <cite>Gabrielle S.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Le mieux, c'est de ne plus me demander tous les jours ce que je vais cuisiner. Ça m'a enlevé un stress énorme. »</p>
+                    <cite>Carole R.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« J'ai le côlon irritable et beaucoup de plats passaient mal. Là j'ai enfin des repas qui ne me font pas souffrir. »</p>
+                    <cite>Valentine P.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Les desserts sans sucre m'ont sauvée, j'étais TRÈS accro au sucré. »</p>
+                    <cite>Danièle M.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« J'ai perdu 3 kilos sans jamais avoir l'impression de faire un régime. »</p>
+                    <cite>Pauline C.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Mon mari mange la même chose que moi sans même s'en rendre compte. C'est ça la vraie victoire. »</p>
+                    <cite>Nathalie B.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Le planificateur hebdomadaire vaut à lui seul le prix du pack. Mes courses prennent deux fois moins de temps. »</p>
+                    <cite>Sylvie D.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Je me réveille sans cette lourdeur au ventre. Je ne pensais pas que ça viendrait de l'assiette. »</p>
+                    <cite>Isabelle F.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Tout est expliqué étape par étape. Et je suis une catastrophe en cuisine. »</p>
+                    <cite>Céline T.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★★</div>
+                    <p>« Le pain maison sans gluten est devenu un rituel du dimanche chez nous. »</p>
+                    <cite>Amélie G.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+                <article>
+                    <div class="etoiles">★★★★☆</div>
+                    <p>« Très content du contenu. Il m'a juste fallu deux ou trois jours pour trouver certaines farines spéciales. »</p>
+                    <cite>Sophie M.</cite> · <span class="verifie">Achat vérifié</span>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="faq">
+        <div class="wrap">
+            <h2 class="titre-section">Questions fréquentes</h2>
+
+            <details open>
+                <summary>Faut-il savoir cuisiner&nbsp;?</summary>
+                <p>Pas du tout. Chaque recette est expliquée étape par étape, avec des gestes simples. Si vous savez utiliser une poêle et un four, vous savez déjà tout ce qu'il faut.</p>
+            </details>
+            <details>
+                <summary>Les ingrédients sont-ils faciles à trouver&nbsp;?</summary>
+                <p>Oui. Tout se trouve en supermarché classique. Et pour les rares ingrédients moins courants, une alternative est toujours indiquée.</p>
+            </details>
+            <details>
+                <summary>Quand est-ce que je reçois le pack&nbsp;?</summary>
+                <p>Immédiatement après le paiement. Vous recevez vos accès par e-mail en quelques secondes, 24h/24.</p>
+            </details>
+            <details>
+                <summary>C'est vraiment sans gluten et sans sucre raffiné&nbsp;?</summary>
+                <p>Oui, l'intégralité des recettes est sans gluten et sans sucre raffiné. Un guide de substitutions vous permet aussi d'adapter d'autres recettes de votre côté.</p>
+            </details>
+            <details>
+                <summary>Au bout de combien de temps je vais sentir la différence&nbsp;?</summary>
+                <p>Beaucoup de personnes ressentent moins de ballonnements et plus de légèreté dès les premiers jours. Cela varie d'une personne à l'autre.</p>
+            </details>
+            <details>
+                <summary>Et si ça ne me convient pas&nbsp;?</summary>
+                <p>Vous avez 30 jours pour tout tester. Si vous n'êtes pas satisfaite, un e-mail suffit et vous êtes intégralement remboursée.</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- ============ CLÔTURE ============ -->
+    <section class="cloture">
+        <div class="wrap">
+            <h2>Commencez aujourd'hui à vous sentir plus légère après chaque repas</h2>
+            <p>+500 recettes sans gluten et sans sucre pour arrêter de gonfler et retrouver le plaisir de manger.</p>
+            <a href="#" class="cta" data-cta>Je veux dégonfler →</a>
+            <p style="color:#cfe0d5;font-size:.85rem;margin-top:.7rem">🔒 Paiement sécurisé · Accès immédiat · Garantie 30 jours</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="wrap">
+            <p>Soulagement Dans Chaque Assiette — Produit numérique · Prix en euros (EUR)</p>
+            <p style="margin-top:.5rem">
+                Ce contenu est à visée informative et ne remplace pas un avis médical.
+                Consultez un professionnel de santé en cas de pathologie.
+            </p>
+            <p style="margin-top:.5rem"><a href="#">Mentions légales</a> · <a href="#">Confidentialité</a> · <a href="#">Contact</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // ⚠️ À REMPLACER par l'URL de paiement réelle du produit FR
+        const CHECKOUT_URL = 'https://www.tecnhogar.store/pay/REMPLACER-PAR-UUID-PRODUIT-FR';
+
+        // --- Propagation des UTM jusqu'au checkout (même logique que les autres offres) ---
+        const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
+
+        (function memoriserUtms() {
+            const params = new URLSearchParams(window.location.search);
+            UTM_KEYS.forEach(k => {
+                const v = params.get(k);
+                if (v && v.trim() !== '') localStorage.setItem(k, v);
+            });
+        })();
+
+        function checkoutAvecUtms(baseUrl) {
+            let queryString = window.location.search;
+            if (!queryString || !queryString.includes('utm_')) {
+                const utms = [];
+                UTM_KEYS.forEach(k => {
+                    const val = localStorage.getItem(k) || localStorage.getItem('utmify_' + k);
+                    if (val) utms.push(k + '=' + encodeURIComponent(val));
+                });
+                if (utms.length) queryString = '?' + utms.join('&');
+            }
+            if (!queryString) return baseUrl;
+            const sep = baseUrl.includes('?') ? '&' : '?';
+            const clean = queryString.startsWith('?') ? queryString.slice(1) : queryString;
+            return baseUrl + sep + clean;
+        }
+
+        document.querySelectorAll('[data-cta]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                // Le 1er CTA du hero scrolle vers l'offre, les autres partent au checkout
+                if (btn.getAttribute('href') === '#offre') return;
+                e.preventDefault();
+                if (typeof fbq === 'function') fbq('track', 'InitiateCheckout');
+                window.location.href = checkoutAvecUtms(CHECKOUT_URL);
+            });
+        });
+
+        // --- Compte à rebours 15 min, persistant par session ---
+        (function compteARebours() {
+            const el = document.getElementById('compteur');
+            const CLE = 'fin_offre_fr';
+            let fin = parseInt(sessionStorage.getItem(CLE), 10);
+            if (!fin || isNaN(fin) || fin < Date.now()) {
+                fin = Date.now() + 15 * 60 * 1000;
+                sessionStorage.setItem(CLE, String(fin));
+            }
+            setInterval(() => {
+                const reste = Math.max(0, fin - Date.now());
+                const m = Math.floor(reste / 60000);
+                const s = Math.floor((reste % 60000) / 1000);
+                el.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }, 1000);
+        })();
+
+        // --- Compteur de spectateurs (légère variation) ---
+        (function spectateurs() {
+            const el = document.getElementById('spectateurs');
+            let n = 83;
+            setInterval(() => {
+                n = Math.max(61, Math.min(112, n + (Math.random() < .5 ? -1 : 1) * Math.ceil(Math.random() * 3)));
+                el.textContent = n;
+            }, 7000);
+        })();
+    </script>
+
+</body>
+
+</html>
