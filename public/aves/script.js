@@ -74,6 +74,30 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = getCheckoutUrlWithUtms(url);
     }
 
+    // Top offer card + sticky bar: buy in one tap, no plan-choice detour.
+    const CHECKOUT_COMPLETO = 'https://www.tecnhogar.store/pay/47653c39-2e44-4b90-ab0f-b457df6a12a5';
+    const btnOfertaCompleto = document.getElementById('btn-oferta-completo');
+    const linkOfertaBasico = document.getElementById('link-oferta-basico');
+    const stickyBuy = document.getElementById('sticky-buy');
+    const ctaHero = document.getElementById('cta-hero');
+
+    [btnOfertaCompleto, stickyBuy, ctaHero].forEach((el) => {
+        if (!el) return;
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            redirectToCheckout(CHECKOUT_COMPLETO);
+        });
+    });
+
+    // Secondary path keeps the existing ladder: it opens the 14,90 offer first.
+    if (linkOfertaBasico) {
+        linkOfertaBasico.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (btnComprarBasico) { btnComprarBasico.click(); return; }
+            redirectToCheckout('https://www.tecnhogar.store/pay/2d2aa3ba-92d2-4790-9388-85bf5e42badb');
+        });
+    }
+
     // Redirect to Complete Plan directly
     if (btnComprarCompleto) {
         btnComprarCompleto.addEventListener('click', () => {
