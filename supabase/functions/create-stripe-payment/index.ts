@@ -50,6 +50,8 @@ serve(async (req) => {
     // ── UPDATE existing PaymentIntent (order bump toggled) ──
     if (body.update_intent && body.payment_intent_id && body.transaction_id) {
       const { payment_intent_id, transaction_id, payment_link_id, order_bump_accepted } = body;
+      const updEmail = typeof body.customer_email === "string" ? body.customer_email.trim() : "";
+      const updName = typeof body.customer_name === "string" ? body.customer_name.trim() : "";
 
       // Fetch authoritative prices from database
       const { data: linkData, error: linkErr } = await supabaseAdmin
@@ -84,15 +86,24 @@ serve(async (req) => {
         amount: stripeAmount,
       });
 
-      // Update transaction record
+      // Update transaction record. The email is persisted here (not only at
+      // payment time) so a cart abandoned mid-checkout still carries the REAL
+      // address and can be reached by the recovery sequence. Never overwrite a
+      // real email with the temporary "@checkout.cashpay.co" placeholder.
+      const txUpdate: Record<string, unknown> = {
+        amount: serverTotal,
+        order_bump_accepted: order_bump_accepted || false,
+        order_bump_amount: bumpAmount,
+        bumps_accepted: bumpsAccepted,
+      };
+      if (updEmail.includes("@") && !updEmail.includes("@checkout.cashpay.co")) {
+        txUpdate.customer_email = updEmail;
+        if (updName) txUpdate.customer_name = updName;
+      }
+
       await supabaseAdmin
         .from("transactions")
-        .update({
-          amount: serverTotal,
-          order_bump_accepted: order_bump_accepted || false,
-          order_bump_amount: bumpAmount,
-          bumps_accepted: bumpsAccepted,
-        })
+        .update(txUpdate)
         .eq("id", transaction_id);
 
       return new Response(

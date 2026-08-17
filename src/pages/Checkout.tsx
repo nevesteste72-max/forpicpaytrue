@@ -605,6 +605,39 @@ export default function Checkout() {
     updateIntent();
   }, [bumpsAccepted, stripePaymentIntentId]);
 
+  // Persist the REAL email as soon as it is typed (debounced), so carts that are
+  // abandoned before payment still leave a real email and become recoverable.
+  // Without this the transaction keeps the temp "@checkout.cashpay.co" placeholder.
+  useEffect(() => {
+    if (!isStripe || !stripePaymentIntentId || !stripeTransactionId || !link) return;
+    const e = email.trim();
+    if (!e || !e.includes("@") || e.includes("@checkout.cashpay.co")) return;
+    const handle = setTimeout(() => {
+      fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-stripe-payment`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            apikey: `${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            update_intent: true,
+            payment_intent_id: stripePaymentIntentId,
+            transaction_id: stripeTransactionId,
+            payment_link_id: link.id,
+            customer_email: e,
+            customer_name: customerName || "",
+            order_bump_accepted: bumpAccepted,
+            bumps_accepted: bumpsAccepted,
+          }),
+        }
+      ).catch((err) => console.error("Failed to persist email early:", err));
+    }, 800);
+    return () => clearTimeout(handle);
+  }, [email, customerName, isStripe, stripePaymentIntentId, stripeTransactionId, link?.id]);
+
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
     if (paymentStatus === "success") {
