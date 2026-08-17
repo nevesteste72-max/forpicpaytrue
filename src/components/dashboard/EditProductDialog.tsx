@@ -127,7 +127,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setProductDescription(product.product_description || "");
       setAmount(String(product.amount));
       setCheckoutLanguage(product.checkout_language || "pt");
-      setStripePaymentMethods(product.stripe_payment_methods?.length ? product.stripe_payment_methods : ["card"]);
+      setStripePaymentMethods(product.stripe_payment_methods?.length ? product.stripe_payment_methods : ["card", "apple_pay", "google_pay"]);
       setCheckoutAccentColor(product.checkout_accent_color || "#16a34a");
       setOrderBumpName(product.order_bump_name || "");
       setOrderBumpDescription((product as any).order_bump_description || "");

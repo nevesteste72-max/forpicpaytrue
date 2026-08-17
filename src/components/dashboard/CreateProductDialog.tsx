@@ -101,7 +101,7 @@ export function CreateProductDialog({
   const [redirectUrl, setRedirectUrl] = useState("");
   const [currency, setCurrency] = useState("MZN");
   const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
-  const [stripePaymentMethods, setStripePaymentMethods] = useState<string[]>(["card"]);
+  const [stripePaymentMethods, setStripePaymentMethods] = useState<string[]>(["card", "apple_pay", "google_pay"]);
   const [facebookPixelId, setFacebookPixelId] = useState("");
   const [facebookToken, setFacebookToken] = useState("");
   const [checkoutBannerFile, setCheckoutBannerFile] = useState<File | null>(null);
