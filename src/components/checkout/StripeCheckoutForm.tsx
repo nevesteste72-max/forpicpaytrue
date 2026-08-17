@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ShieldCheck, Mail, User, Phone, Lock, Clock, RotateCcw } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
+import { suggestEmail } from "@/lib/emailSuggest";
 
 interface TrackingParams {
   src?: string | null;
@@ -131,6 +132,8 @@ export function StripeCheckoutForm({
     setCustomerEmail(val);
     onCustomerEmailChange?.(val);
   };
+  // Shown, never applied silently: a wrong auto-correction mails a stranger.
+  const emailSuggestion = suggestEmail(customerEmail);
   const handlePhoneChange = (val: string) => {
     setCustomerPhone(val);
     onCustomerPhoneChange?.(val);
@@ -314,6 +317,17 @@ export function StripeCheckoutForm({
               required
               className="h-12 rounded-xl border-border text-sm"
             />
+            {emailSuggestion && (
+              <button
+                type="button"
+                onClick={() => handleEmailChange(emailSuggestion)}
+                className="mt-1.5 text-xs text-left text-muted-foreground hover:text-foreground"
+              >
+                {t("Quis dizer ", "Did you mean ", "¿Quisiste decir ")}
+                <span className="font-semibold underline">{emailSuggestion}</span>
+                {t("?", "?", "?")}
+              </button>
+            )}
           </div>
 
           {/* Phone with prefix selector */}

@@ -36,6 +36,7 @@ import { CheckoutTimer } from "@/components/checkout/CheckoutTimer";
 import cashpayIcon from "@/assets/cashpay-icon.png";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import emolaLogo from "@/assets/emola-logo.png";
+import { suggestEmail } from "@/lib/emailSuggest";
 
 let stripePromise: Promise<Stripe | null> | null = null;
 let stripePromiseKey: string | null = null;
@@ -178,6 +179,7 @@ const labels = {
     namePlaceholder: "Seu nome completo",
     email: "Email para recebimento",
     emailPlaceholder: "exemplo@email.com",
+    emailSuggest: "Quis dizer",
     phone: "Número de Telefone",
     phoneMpesa: "Número M-Pesa",
     phoneEmola: "Número eMola",
@@ -220,6 +222,7 @@ const labels = {
     namePlaceholder: "Your full name",
     email: "Email for receipt",
     emailPlaceholder: "example@email.com",
+    emailSuggest: "Did you mean",
     phone: "Phone Number",
     phoneMpesa: "M-Pesa Number",
     phoneEmola: "eMola Number",
@@ -262,6 +265,7 @@ const labels = {
     namePlaceholder: "Tu nombre completo",
     email: "Email para recibo",
     emailPlaceholder: "ejemplo@email.com",
+    emailSuggest: "¿Quisiste decir",
     phone: "Número de Teléfono",
     phoneMpesa: "Número M-Pesa",
     phoneEmola: "Número eMola",
@@ -604,6 +608,9 @@ export default function Checkout() {
 
     updateIntent();
   }, [bumpsAccepted, stripePaymentIntentId]);
+
+  // Shown, never applied silently: a wrong auto-correction mails a stranger.
+  const emailSuggestion = suggestEmail(email);
 
   // Persist the REAL email as soon as it is typed (debounced), so carts that are
   // abandoned before payment still leave a real email and become recoverable.
@@ -1349,6 +1356,16 @@ export default function Checkout() {
                     className="pl-10 h-11 rounded-lg border-border focus:border-primary text-sm"
                   />
                 </div>
+                {emailSuggestion && (
+                  <button
+                    type="button"
+                    onClick={() => setEmail(emailSuggestion)}
+                    className="mt-1.5 text-xs text-left text-muted-foreground hover:text-foreground"
+                  >
+                    {t.emailSuggest}{" "}
+                    <span className="font-semibold underline">{emailSuggestion}</span>?
+                  </button>
+                )}
               </div>
 
               {/* Phone */}
