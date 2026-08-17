@@ -47,11 +47,9 @@ serve(async (req) => {
 
     const body = await req.json();
 
-    // ── UPDATE existing PaymentIntent (order bump toggled) ──
+    // ── UPDATE existing PaymentIntent (order bump toggled / real email typed) ──
     if (body.update_intent && body.payment_intent_id && body.transaction_id) {
       const { payment_intent_id, transaction_id, payment_link_id, order_bump_accepted } = body;
-      const updEmail = typeof body.customer_email === "string" ? body.customer_email.trim() : "";
-      const updName = typeof body.customer_name === "string" ? body.customer_name.trim() : "";
 
       // Fetch authoritative prices from database
       const { data: linkData, error: linkErr } = await supabaseAdmin
@@ -81,33 +79,63 @@ serve(async (req) => {
 
       console.log("Updating PaymentIntent:", payment_intent_id, "amount:", serverTotal, "currency:", chargeCurrency);
 
-      // Update Stripe PaymentIntent amount (in settlement currency)
-      await stripe.paymentIntents.update(payment_intent_id, {
-        amount: stripeAmount,
-      });
+      // ── Capture the real customer email as soon as it is typed ──
+      // The PaymentIntent is created on page load with a temp placeholder email,
+      // so without this the row stays unreachable (no way to email a recovery).
+      //
+      // DELIBERATELY NOT attaching a Stripe Customer here: combined with the
+      // card setup_future_usage:"off_session" set at creation, attaching a
+      // customer pre-confirmation makes Stripe save the card, which can trigger
+      // extra SCA/3DS in the EU and cost conversion. stripe-webhook-confirm
+      // already creates and attaches the customer after payment — leave it there.
+      const incomingEmail: string | undefined = body.customer_email;
+      const incomingName: string | undefined = body.customer_name;
+      const hasRealEmail =
+        typeof incomingEmail === "string" &&
+        incomingEmail.includes("@") &&
+        !incomingEmail.includes("@checkout.cashpay.co");
 
-      // Update transaction record. The email is persisted here (not only at
-      // payment time) so a cart abandoned mid-checkout still carries the REAL
-      // address and can be reached by the recovery sequence. Never overwrite a
-      // real email with the temporary "@checkout.cashpay.co" placeholder.
-      const txUpdate: Record<string, unknown> = {
-        amount: serverTotal,
-        order_bump_accepted: order_bump_accepted || false,
-        order_bump_amount: bumpAmount,
-        bumps_accepted: bumpsAccepted,
-      };
-      if (updEmail.includes("@") && !updEmail.includes("@checkout.cashpay.co")) {
-        txUpdate.customer_email = updEmail;
-        if (updName) txUpdate.customer_name = updName;
+      // Stripe first, so the DB amount can never drift ahead of what Stripe
+      // will actually charge. If this throws (PI already confirmed / in flight)
+      // we still persist the email, but NOT the amount.
+      let stripeUpdateOk = true;
+      try {
+        const piUpdate: Record<string, unknown> = { amount: stripeAmount };
+        if (hasRealEmail) {
+          piUpdate.metadata = {
+            transaction_id,
+            payment_link_id,
+            customer_email: incomingEmail,
+            customer_name: incomingName || "",
+          };
+        }
+        await stripe.paymentIntents.update(payment_intent_id, piUpdate as Stripe.PaymentIntentUpdateParams);
+      } catch (piErr) {
+        stripeUpdateOk = false;
+        console.error("PaymentIntent update failed, keeping DB amount as-is:", piErr);
       }
 
-      await supabaseAdmin
-        .from("transactions")
-        .update(txUpdate)
-        .eq("id", transaction_id);
+      const txUpdate: Record<string, unknown> = {};
+      if (stripeUpdateOk) {
+        txUpdate.amount = serverTotal;
+        txUpdate.order_bump_accepted = order_bump_accepted || false;
+        txUpdate.order_bump_amount = bumpAmount;
+        txUpdate.bumps_accepted = bumpsAccepted;
+      }
+      if (hasRealEmail) {
+        txUpdate.customer_email = incomingEmail;
+        if (incomingName) txUpdate.customer_name = incomingName;
+      }
+
+      if (Object.keys(txUpdate).length > 0) {
+        await supabaseAdmin
+          .from("transactions")
+          .update(txUpdate)
+          .eq("id", transaction_id);
+      }
 
       return new Response(
-        JSON.stringify({ success: true, amount: serverTotal }),
+        JSON.stringify({ success: stripeUpdateOk, amount: serverTotal }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
