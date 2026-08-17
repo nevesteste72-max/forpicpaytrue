@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ShieldCheck, Mail, User, Phone, Lock, Clock, RotateCcw } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, User, Phone, Lock } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
 import { suggestEmail } from "@/lib/emailSuggest";
 
@@ -441,32 +441,13 @@ export function StripeCheckoutForm({
         )}
       </Button>
 
-      {/* Rodapé de confiança */}
-      <div className="pt-1 space-y-3">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center gap-1 text-center">
-            <Lock className="w-4 h-4 text-muted-foreground" />
-            <span className="text-[10px] leading-tight text-muted-foreground">{t("Pagamento encriptado", "Encrypted payment", "Pago encriptado")}</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <Clock className="w-4 h-4 text-muted-foreground" />
-            <span className="text-[10px] leading-tight text-muted-foreground">{t("Acesso imediato", "Instant access", "Acceso inmediato")}</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <RotateCcw className="w-4 h-4 text-muted-foreground" />
-            <span className="text-[10px] leading-tight text-muted-foreground">{t("Reembolso 7 dias", "7-day refund", "Reembolso 7 días")}</span>
-          </div>
-        </div>
-        <p className="text-center text-[10px] text-muted-foreground flex items-center justify-center gap-1">
-          <ShieldCheck className="w-3 h-3" />
-          {t("Compra 100% segura · processada pela Stripe", "100% secure checkout · processed by Stripe", "Compra 100% segura · procesada por Stripe")}
-        </p>
-        <div className="flex items-center justify-center gap-1.5 opacity-70 flex-wrap">
-          {["Visa", "Mastercard", "MB WAY", "Multibanco"].map((m) => (
-            <span key={m} className="text-[9px] font-semibold tracking-wide text-muted-foreground border border-border rounded px-1.5 py-0.5">{m}</span>
-          ))}
-        </div>
-      </div>
+      {/* Uma linha de confiança: o nome da Stripe é o que transfere credibilidade.
+          Tudo o resto que aqui estava repetia a garantia acima do botão, o
+          seletor de métodos no topo, ou a si próprio. */}
+      <p className="pt-1 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
+        <Lock className="w-3 h-3" />
+        {t("Pagamento seguro processado pela Stripe", "Secure payment processed by Stripe", "Pago seguro procesado por Stripe")}
+      </p>
     </form>
   );
 }
