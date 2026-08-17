@@ -289,17 +289,6 @@ serve(async (req) => {
       settings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY") || null;
     if (!stripeKey) console.warn("[RECOVERY] no Stripe key - Multibanco vouchers cannot be detected");
 
-    // Dry probe: ?debug_pi=<payment_intent> reports what the voucher lookup sees
-    // and sends nothing. Used to verify detection without mailing a customer.
-    const debugPi = new URL(req.url).searchParams.get("debug_pi");
-    if (debugPi) {
-      const v = await multibancoVoucher(debugPi, stripeKey);
-      return new Response(
-        JSON.stringify({ probe: debugPi, has_stripe_key: !!stripeKey, voucher: v }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
     const now = Date.now();
     const oneHourAgo = new Date(now - HOUR).toISOString();
     const fiveDaysAgo = new Date(now - 5 * 24 * HOUR).toISOString();
