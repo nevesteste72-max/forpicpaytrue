@@ -39,6 +39,8 @@ type Row = {
   recovery_stage: number | null;
   recovery_email_sent_at: string | null;
   payment_link_id: string | null;
+  stripe_payment_intent_id: string | null;
+  amount: number | string | null;
 };
 
 type Offer = "aves" | "bovinos";
@@ -184,6 +186,87 @@ function buildText(o: OfferCfg, stage: number, n: string, url: string): string {
   ].join("\n");
 }
 
+
+type Voucher = { entity: string; reference: string; expiresAt: number };
+
+/**
+ * A Multibanco voucher means the person did NOT abandon — they chose to pay at
+ * an ATM/homebanking and have an open reference with a deadline. Mailing them
+ * "you left something behind" invites either giving up or paying twice, so they
+ * get a reminder of their own reference instead.
+ */
+async function multibancoVoucher(
+  paymentIntentId: string | null,
+  stripeKey: string | null
+): Promise<Voucher | null> {
+  if (!paymentIntentId || !stripeKey) return null;
+  try {
+    const resp = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
+      headers: { Authorization: `Bearer ${stripeKey}` },
+    });
+    if (!resp.ok) return null;
+    const pi = await resp.json();
+    if (pi.status !== "requires_action") return null;
+    const d = pi.next_action?.multibanco_display_details;
+    if (!d?.reference) return null;
+    // An expired voucher is no longer a reason to hold back the normal sequence.
+    if (d.expires_at && d.expires_at * 1000 < Date.now()) return null;
+    return {
+      entity: String(d.entity || ""),
+      reference: String(d.reference),
+      expiresAt: Number(d.expires_at || 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function euro(v: number | string | null): string {
+  const n = typeof v === "string" ? parseFloat(v) : (v ?? 0);
+  return `${(n || 0).toFixed(2).replace(".", ",")} EUR`;
+}
+
+function voucherDeadline(expiresAt: number): string {
+  if (!expiresAt) return "";
+  return new Date(expiresAt * 1000).toLocaleDateString("pt-PT", {
+    day: "2-digit",
+    month: "long",
+    timeZone: "Europe/Lisbon",
+  });
+}
+
+function buildVoucherSubject(o: OfferCfg, n: string): string {
+  return `${n}, a tua referencia Multibanco esta ativa ${o.emoji}`;
+}
+
+function buildVoucherHtml(o: OfferCfg, n: string, v: Voucher, amount: string, url: string): string {
+  const prazo = voucherDeadline(v.expiresAt);
+  const ate = prazo ? ` ate <strong>${prazo}</strong>` : "";
+  const inner = `<tr><td style='padding:34px 30px 8px 30px;'><p style='margin:0 0 6px 0;color:#e08a1e;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;'>Falta so pagar</p><h1 style='margin:0 0 14px 0;color:#1c2a1e;font-size:26px;line-height:1.25;font-weight:800;'>Ola ${n}, a tua referencia esta a tua espera</h1><p style='margin:0 0 16px 0;color:#4a4a42;font-size:16px;line-height:1.6;'>Escolheste pagar o <strong>${o.product}</strong> por Multibanco. A referencia esta ativa e podes paga-la no multibanco ou no homebanking${ate}.</p></td></tr><tr><td style='padding:8px 30px;'><table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background-color:#eef4ea;border-left:4px solid #2e7d32;border-radius:8px;'><tr><td style='padding:22px;'><p style='margin:0 0 8px 0;color:#6b6b60;font-size:13px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;'>Entidade</p><p style='margin:0 0 16px 0;color:#1b5e20;font-size:26px;font-weight:800;letter-spacing:2px;'>${v.entity}</p><p style='margin:0 0 8px 0;color:#6b6b60;font-size:13px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;'>Referencia</p><p style='margin:0 0 16px 0;color:#1b5e20;font-size:26px;font-weight:800;letter-spacing:2px;'>${v.reference}</p><p style='margin:0 0 8px 0;color:#6b6b60;font-size:13px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;'>Valor</p><p style='margin:0;color:#1b5e20;font-size:26px;font-weight:800;'>${amount}</p></td></tr></table><p style='margin:16px 2px 0 2px;color:#4a4a42;font-size:15px;line-height:1.6;'>Assim que o pagamento entrar, recebes o guia completo neste mesmo email, automaticamente.</p></td></tr>${reassuranceBlock(o)}<tr><td style='padding:20px 30px 30px 30px;'><p style='margin:0;color:#6b6b60;font-size:14px;line-height:1.6;'>Preferes pagar por MB Way ou cartao e receber ja? <a href='${url}' style='color:#2e7d32;font-weight:700;'>Podes faze-lo aqui.</a> Se pagares por ai, ignora a referencia acima — nao pagues as duas.</p></td></tr>`;
+  return shell(o, inner);
+}
+
+function buildVoucherText(o: OfferCfg, n: string, v: Voucher, amount: string, url: string): string {
+  const prazo = voucherDeadline(v.expiresAt);
+  const ate = prazo ? ` ate ${prazo}` : "";
+  return [
+    `Ola ${n},`,
+    "",
+    `Escolheste pagar o ${o.product} por Multibanco e a tua referencia esta ativa${ate}:`,
+    "",
+    `Entidade: ${v.entity}`,
+    `Referencia: ${v.reference}`,
+    `Valor: ${amount}`,
+    "",
+    "Assim que o pagamento entrar, recebes o guia neste email, automaticamente.",
+    "",
+    `Preferes pagar por MB Way ou cartao e receber ja? ${url}`,
+    "Se pagares por ai, ignora a referencia acima - nao pagues as duas.",
+    "",
+    o.brand,
+  ].join("\n");
+}
+
 serve(async (req) => {
   if (req.headers.get("x-cron-key") !== CRON_KEY) {
     return new Response("Unauthorized", { status: 401 });
@@ -198,13 +281,32 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     const resend = new Resend(RESEND_API_KEY);
 
+    // Used only to tell "waiting on a Multibanco reference" apart from "gone".
+    const { data: settings } = await supabase
+      .from("app_settings").select("stripe_secret_key").eq("id", 1).maybeSingle();
+    // The column is empty in this project; the live key lives in the env var.
+    const stripeKey: string | null =
+      settings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY") || null;
+    if (!stripeKey) console.warn("[RECOVERY] no Stripe key - Multibanco vouchers cannot be detected");
+
+    // Dry probe: ?debug_pi=<payment_intent> reports what the voucher lookup sees
+    // and sends nothing. Used to verify detection without mailing a customer.
+    const debugPi = new URL(req.url).searchParams.get("debug_pi");
+    if (debugPi) {
+      const v = await multibancoVoucher(debugPi, stripeKey);
+      return new Response(
+        JSON.stringify({ probe: debugPi, has_stripe_key: !!stripeKey, voucher: v }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const now = Date.now();
     const oneHourAgo = new Date(now - HOUR).toISOString();
     const fiveDaysAgo = new Date(now - 5 * 24 * HOUR).toISOString();
 
     const { data: rawCandidates, error: candErr } = await supabase
       .from("transactions")
-      .select("id, customer_email, customer_name, created_at, recovery_stage, recovery_email_sent_at, payment_link_id")
+      .select("id, customer_email, customer_name, created_at, recovery_stage, recovery_email_sent_at, payment_link_id, stripe_payment_intent_id, amount")
       .in("status", STATUSES)
       .eq("currency", "EUR")
       .lt("recovery_stage", 3)
@@ -257,6 +359,44 @@ serve(async (req) => {
 
       const stageDone = row.recovery_stage ?? 0;
       const ageMs = now - new Date(row.created_at).getTime();
+
+      const voucher = await multibancoVoucher(row.stripe_payment_intent_id, stripeKey);
+      if (voucher) {
+        // Remind them of their own reference once, then stay quiet while it is
+        // valid. If it expires unpaid, the normal sequence resumes from stage 2.
+        if (stageDone > 0) continue;
+        const offerV = offerFor(linkNames.get(row.payment_link_id || "") || "");
+        const oV = OFFERS[offerV];
+        const urlV = row.payment_link_id ? `${PAY_BASE}${row.payment_link_id}` : "https://www.tecnhogar.store/aves/";
+        const nV = firstName(row.customer_name, email);
+        const tag = `${offerV}/multibanco`;
+        try {
+          const respV = await resend.emails.send({
+            from: oV.from,
+            reply_to: "noreply@tecnhogar.store",
+            to: [email],
+            subject: buildVoucherSubject(oV, nV),
+            html: buildVoucherHtml(oV, nV, voucher, euro(row.amount), urlV),
+            text: buildVoucherText(oV, nV, voucher, euro(row.amount), urlV),
+            headers: {
+              "List-Unsubscribe": "<mailto:noreply@tecnhogar.store?subject=unsubscribe>",
+              "X-Entity-Ref-ID": `${row.id}-mb`,
+            },
+          });
+          if (respV.error) {
+            results.push({ email, stage: 1, offer: tag, ok: false, error: respV.error.message });
+            continue;
+          }
+          await supabase
+            .from("transactions")
+            .update({ recovery_stage: 1, recovery_email_sent_at: new Date().toISOString() })
+            .eq("id", row.id);
+          results.push({ email, stage: 1, offer: tag, ok: true, id: respV.data?.id });
+        } catch (e) {
+          results.push({ email, stage: 1, offer: tag, ok: false, error: e instanceof Error ? e.message : String(e) });
+        }
+        continue;
+      }
       const sinceLast = row.recovery_email_sent_at ? now - new Date(row.recovery_email_sent_at).getTime() : Infinity;
 
       let stage = 0;
