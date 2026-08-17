@@ -611,7 +611,11 @@ export default function Checkout() {
   useEffect(() => {
     if (!isStripe || !stripePaymentIntentId || !stripeTransactionId || !link) return;
     const e = email.trim();
-    if (!e || !e.includes("@") || e.includes("@checkout.cashpay.co")) return;
+    // Only persist addresses that look complete (with a real TLD). A looser check
+    // would store half-typed emails from people who pause mid-typing, and those
+    // bounce when the recovery sequence writes to them.
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(e)) return;
+    if (e.toLowerCase().includes("@checkout.cashpay.co")) return;
     const handle = setTimeout(() => {
       fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-stripe-payment`,

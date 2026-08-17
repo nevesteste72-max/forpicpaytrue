@@ -24,6 +24,7 @@ const SKIP_EMAILS = new Set([
   "iva@gmail.com",
   "ivoferggghhtrrdtyccufuufcu@gmail.com",
   "nevesteste72@gmail.com",
+  "julio@gmail.com",
 ]);
 
 const HOUR = 60 * 60 * 1000;
@@ -247,6 +248,9 @@ serve(async (req) => {
       const email = (row.customer_email || "").trim();
       if (!email || !email.includes("@")) continue;
       if (lower.includes("@checkout.cashpay.co")) continue;
+      // Second line of defence: never mail a malformed address (bounces hurt the
+      // sending domain, which is shared with the purchase emails).
+      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(lower)) continue;
       if (lower.includes("ivanilson")) continue;
       if (SKIP_EMAILS.has(lower)) continue;
       if (buyerSet.has(lower)) continue;
