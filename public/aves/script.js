@@ -81,11 +81,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const stickyBuy = document.getElementById('sticky-buy');
     const ctaHero = document.getElementById('cta-hero');
 
-    [btnOfertaCompleto, stickyBuy, ctaHero].forEach((el) => {
+    // So o botao DENTRO do cartao de oferta compra num toque - quem o toca ja
+    // viu preco, bonus e garantia. O CTA do heroi e a barra fixa voltam a levar
+    // ao cartao: mandar trafego frio direto para o checkout deu 0 vendas em 18
+    // checkouts, contra 16,9% antes.
+    if (btnOfertaCompleto) {
+        btnOfertaCompleto.addEventListener('click', (e) => {
+            e.preventDefault();
+            redirectToCheckout(CHECKOUT_COMPLETO);
+        });
+    }
+    [stickyBuy, ctaHero].forEach((el) => {
         if (!el) return;
         el.addEventListener('click', (e) => {
             e.preventDefault();
-            redirectToCheckout(CHECKOUT_COMPLETO);
+            const alvo = document.getElementById('oferta');
+            if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 
