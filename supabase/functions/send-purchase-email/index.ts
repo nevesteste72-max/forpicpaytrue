@@ -284,7 +284,7 @@ serve(async (req) => {
 
     const emailResponse = await resend.emails.send({
       from: "OrderConfirm <noreply@tecnhogar.store>",
-      reply_to: "noreply@tecnhogar.store",
+      reply_to: "ivanilsonjsousa@gmail.com",
       to: [customer_email],
       subject,
       html,

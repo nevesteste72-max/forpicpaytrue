@@ -362,7 +362,7 @@ serve(async (req) => {
         try {
           const respV = await resend.emails.send({
             from: oV.from,
-            reply_to: "noreply@tecnhogar.store",
+            reply_to: "ivanilsonjsousa@gmail.com",
             to: [email],
             subject: buildVoucherSubject(oV, nV),
             html: buildVoucherHtml(oV, nV, voucher, euro(row.amount), urlV),
@@ -401,7 +401,7 @@ serve(async (req) => {
       try {
         const resp = await resend.emails.send({
           from: o.from,
-          reply_to: "noreply@tecnhogar.store",
+          reply_to: "ivanilsonjsousa@gmail.com",
           to: [email],
           subject: buildSubject(o, stage, n),
           html: buildHtml(o, stage, n, url),

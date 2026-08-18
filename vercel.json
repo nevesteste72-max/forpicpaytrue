@@ -14,6 +14,8 @@
     { "source": "/aves/", "destination": "/aves/index.html" },
     { "source": "/soulagement", "destination": "/soulagement/index.html" },
     { "source": "/soulagement/", "destination": "/soulagement/index.html" },
+    { "source": "/recuperar", "destination": "/recuperar/index.html" },
+    { "source": "/recuperar/", "destination": "/recuperar/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

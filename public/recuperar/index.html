@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Recuperar o meu material | Saúde das Aves</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#f4f1ea;font-family:'Plus Jakarta Sans',-apple-system,Segoe UI,sans-serif;color:#33372e;
+         min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;line-height:1.6}
+    .card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(27,60,32,.10);max-width:480px;width:100%;overflow:hidden}
+    .top{background:#1b5e20;color:#fff;padding:22px 26px}
+    .top h1{font-family:'Outfit',sans-serif;font-size:1.28rem;font-weight:800;line-height:1.3}
+    .top p{font-size:.88rem;color:#a5d6a7;margin-top:5px}
+    .body{padding:26px}
+    label{display:block;font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;color:#4a4a42}
+    input{width:100%;padding:13px 15px;border:1px solid #dcd8cd;border-radius:10px;font-size:1rem;font-family:inherit;background:#fff}
+    input:focus{outline:none;border-color:#1b7a34;box-shadow:0 0 0 3px rgba(27,122,52,.12)}
+    button{width:100%;margin-top:16px;padding:15px;border:0;border-radius:10px;background:#1b7a34;color:#fff;
+           font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;cursor:pointer}
+    button:hover:not(:disabled){background:#166129}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .hint{font-size:.84rem;color:#8a8a7e;margin-top:14px}
+    .msg{margin-top:18px;padding:15px;border-radius:10px;font-size:.92rem;display:none}
+    .msg.ok{display:block;background:#eef4ea;border-left:4px solid #2e7d32;color:#1b5e20}
+    .msg.erro{display:block;background:#fdecea;border-left:4px solid #c62828;color:#8e1c15}
+    .foot{border-top:1px solid #ecebe4;padding:16px 26px;font-size:.8rem;color:#9a9a8c;background:#fbfaf7}
+    .foot a{color:#2e7d32;font-weight:600}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="top">
+      <h1>🐔 Recuperar o meu material</h1>
+      <p>Já compraste e não encontras o email? Reenviamos-te os links.</p>
+    </div>
+
+    <div class="body">
+      <form id="form">
+        <label for="email">O email que usaste na compra</label>
+        <input type="email" id="email" name="email" placeholder="exemplo@email.com" required autocomplete="email" inputmode="email">
+        <button type="submit" id="btn">REENVIAR O MEU MATERIAL</button>
+      </form>
+
+      <div class="msg" id="msg"></div>
+
+      <p class="hint">
+        Chega em menos de um minuto. <strong>Vê também a pasta de spam</strong> — é onde estes emails costumam parar.
+      </p>
+    </div>
+
+    <div class="foot">
+      Se usaste outro email na compra, tenta com esse. Continuas sem receber?
+      Responde ao email da compra ou escreve para <a href="mailto:ivanilsonjsousa@gmail.com">ivanilsonjsousa@gmail.com</a> — respondemos a todos.
+    </div>
+  </main>
+
+  <script>
+    const ENDPOINT = "https://gbtlzwzmbgkcdkdnnbxg.supabase.co/functions/v1/reenviar-materiais";
+    const form = document.getElementById('form');
+    const btn = document.getElementById('btn');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      btn.disabled = true;
+      btn.textContent = 'A REENVIAR…';
+      msg.className = 'msg';
+
+      try {
+        const r = await fetch(ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const d = await r.json();
+        msg.textContent = d.message || 'Pedido processado.';
+        msg.className = 'msg ' + (d.success ? 'ok' : 'erro');
+        if (d.success) form.reset();
+      } catch (_) {
+        msg.textContent = 'Não foi possível contactar o servidor. Tenta outra vez daqui a pouco.';
+        msg.className = 'msg erro';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'REENVIAR O MEU MATERIAL';
+      }
+    });
+  </script>
+</body>
+</html>
