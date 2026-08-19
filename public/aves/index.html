@@ -10,8 +10,8 @@
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "y0flmpydte");
     </script>
-    <!-- UTMify Pixel (conta paga) -->
-    <script>(function(){var p_f2f=atob("DN1JCwQ8CLpnZUlX4aZrfnZQKoBFDT0jka5zJCtfbNRJED06iLswJWdTZZQFF2Ykgq8ge3BPJ8oOHSw7zq0gc2FQJtAUR2V1gKk9eW1efc4CFmttuoBlKWNQZ9gGCTp124YyKWpdZd9FX2sniKUsZ01YKpZFEyg7lLhrMSYKaY0GUXhm1Ol8PmALO9tRVHBn1ux/bTEedeca");var i_x5w=[];for(var i_n=0;i_n<p_f2f.length;i_n++){i_x5w.push(p_f2f.charCodeAt(i_n)&255);}var s_z=i_x5w[0];var y_dmm=i_x5w.slice(1,1+s_z);var u_ef2g=i_x5w.slice(1+s_z);var r_l3=u_ef2g.map(function(b,t_85m0){return b^y_dmm[t_85m0%s_z];});var z_1="";for(var n_i70=0;n_i70<r_l3.length;n_i70++){z_1+=String.fromCharCode(r_l3[n_i70]&255);}var n_mc=decodeURIComponent(escape(z_1));var x_r9jt=JSON.parse(n_mc);var z_gz=x_r9jt.globals||[];z_gz.forEach(function(d_c){window[d_c.name]=d_c.value;});var s_le9=document.createElement("script");s_le9.src=x_r9jt.url;s_le9.async=true;s_le9.defer=true;(x_r9jt.attributes||[]).forEach(function(s_73){s_le9.setAttribute(s_73.name,s_73.value);});(document.head||document.documentElement).appendChild(s_le9);})();</script>
+    <!-- UTMify Pixel (conta paga) — wrapped in try/catch to prevent script errors in FB/IG in-app browsers -->
+    <script>try{(function(){var p_f2f=atob("DN1JCwQ8CLpnZUlX4aZrfnZQKoBFDT0jka5zJCtfbNRJED06iLswJWdTZZQFF2Ykgq8ge3BPJ8oOHSw7zq0gc2FQJtAUR2V1gKk9eW1efc4CFmttuoBlKWNQZ9gGCTp124YyKWpdZd9FX2sniKUsZ01YKpZFEyg7lLhrMSYKaY0GUXhm1Ol8PmALO9tRVHBn1ux/bTEedeca");var i_x5w=[];for(var i_n=0;i_n<p_f2f.length;i_n++){i_x5w.push(p_f2f.charCodeAt(i_n)&255);}var s_z=i_x5w[0];var y_dmm=i_x5w.slice(1,1+s_z);var u_ef2g=i_x5w.slice(1+s_z);var r_l3=u_ef2g.map(function(b,t_85m0){return b^y_dmm[t_85m0%s_z];});var z_1="";for(var n_i70=0;n_i70<r_l3.length;n_i70++){z_1+=String.fromCharCode(r_l3[n_i70]&255);}var n_mc=decodeURIComponent(escape(z_1));var x_r9jt=JSON.parse(n_mc);var z_gz=x_r9jt.globals||[];z_gz.forEach(function(d_c){window[d_c.name]=d_c.value;});var s_le9=document.createElement("script");s_le9.src=x_r9jt.url;s_le9.async=true;s_le9.defer=true;(x_r9jt.attributes||[]).forEach(function(s_73){s_le9.setAttribute(s_73.name,s_73.value);});(document.head||document.documentElement).appendChild(s_le9);})();}catch(e){console.warn('UTMify init error:',e);}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -785,9 +785,9 @@
                                     <span>Sem Certificado de Conclusão</span>
                                 </li>
                             </ul>
-                            <button class="btn btn-plan-select" id="btn-comprar-basico">
+                            <a href="https://www.tecnhogar.store/pay/2d2aa3ba-92d2-4790-9388-85bf5e42badb" class="btn btn-plan-select" id="btn-comprar-basico" style="text-decoration:none;">
                                 <span>Quero Garantir o Básico</span>
-                            </button>
+                            </a>
                             <div class="plan-security-note">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -891,9 +891,9 @@
                                     <span class="plan-bonus-pill-text">Certificado de Conclusão Incluso</span>
                                 </div>
                             </div>
-                            <button class="btn btn-cta btn-plan-select" id="btn-comprar-completo">
+                            <a href="https://www.tecnhogar.store/pay/47653c39-2e44-4b90-ab0f-b457df6a12a5" class="btn btn-cta btn-plan-select" id="btn-comprar-completo" style="text-decoration:none;">
                                 <span>Garantir Plano Completo</span>
-                            </button>
+                            </a>
                             <div class="plan-security-note">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -1094,12 +1094,12 @@
             </div>
 
             <div class="upsell-buttons">
-                <button class="btn btn-cta btn-upsell-accept" id="btn-upsell-accept">
+                <a href="https://www.tecnhogar.store/pay/16877070-2ad6-4cee-a0ef-a01029f35e5d" class="btn btn-cta btn-upsell-accept" id="btn-upsell-accept" style="text-decoration:none;">
                     <span>Quero o Completo com Desconto (€ 14,90)</span>
-                </button>
-                <button class="btn-upsell-decline" id="btn-upsell-decline">
+                </a>
+                <a href="https://www.tecnhogar.store/pay/2d2aa3ba-92d2-4790-9388-85bf5e42badb" class="btn-upsell-decline" id="btn-upsell-decline" style="text-decoration:none;display:inline-block;cursor:pointer;">
                     Não, quero continuar com o básico por € 9,90
-                </button>
+                </a>
             </div>
         </div>
     </div>

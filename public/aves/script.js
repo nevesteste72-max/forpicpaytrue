@@ -45,57 +45,86 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Helper function to safely get item from localStorage
+    function safeGetStorage(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch(e) {
+            return null;
+        }
+    }
+
+    // Helper function to safely set item in localStorage
+    function safeSetStorage(key, value) {
+        try {
+            localStorage.setItem(key, value);
+        } catch(e) {}
+    }
+
     // Helper function to append UTM parameters to checkout URLs
     function getCheckoutUrlWithUtms(baseUrl) {
-        let queryString = window.location.search;
-        
-        // Fallback to localStorage if no parameters in URL
-        if (!queryString || !queryString.includes('utm_')) {
-            const utms = [];
-            const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
-            keys.forEach(key => {
-                const val = localStorage.getItem(key) || localStorage.getItem(`utmify_${key}`);
-                if (val) {
-                    utms.push(`${key}=${encodeURIComponent(val)}`);
+        try {
+            let queryString = window.location.search;
+            
+            // Fallback to localStorage if no parameters in URL
+            if (!queryString || !queryString.includes('utm_')) {
+                const utms = [];
+                const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
+                keys.forEach(key => {
+                    const val = safeGetStorage(key) || safeGetStorage(`utmify_${key}`);
+                    if (val) {
+                        utms.push(`${key}=${encodeURIComponent(val)}`);
+                    }
+                });
+                if (utms.length > 0) {
+                    queryString = '?' + utms.join('&');
                 }
-            });
-            if (utms.length > 0) {
-                queryString = '?' + utms.join('&');
             }
+            
+            if (!queryString) return baseUrl;
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            const cleanParams = queryString.startsWith('?') ? queryString.substring(1) : queryString;
+            return `${baseUrl}${separator}${cleanParams}`;
+        } catch(err) {
+            return baseUrl;
         }
-        
-        if (!queryString) return baseUrl;
-        const separator = baseUrl.includes('?') ? '&' : '?';
-        const cleanParams = queryString.startsWith('?') ? queryString.substring(1) : queryString;
-        return `${baseUrl}${separator}${cleanParams}`;
     }
 
     function redirectToCheckout(url) {
-        window.location.href = getCheckoutUrlWithUtms(url);
+        try {
+            window.location.href = getCheckoutUrlWithUtms(url);
+        } catch(e) {
+            window.location.href = url;
+        }
     }
 
     // Redirect to Complete Plan directly
     if (btnComprarCompleto) {
-        btnComprarCompleto.addEventListener('click', () => {
+        btnComprarCompleto.addEventListener('click', (e) => {
+            e.preventDefault();
             redirectToCheckout('https://www.tecnhogar.store/pay/47653c39-2e44-4b90-ab0f-b457df6a12a5');
         });
     }
 
     // Modal Action: Close
     const closeUpsell = () => {
-        upsellModal.classList.remove('open');
+        if (upsellModal) {
+            upsellModal.classList.remove('open');
+        }
         document.body.style.overflow = ''; // Restore background scrolling
     };
 
     if (btnCloseUpsell) btnCloseUpsell.addEventListener('click', closeUpsell);
-    if (btnUpsellDecline) btnUpsellDecline.addEventListener('click', () => {
+    if (btnUpsellDecline) btnUpsellDecline.addEventListener('click', (e) => {
+        e.preventDefault();
         closeUpsell();
         redirectToCheckout('https://www.tecnhogar.store/pay/2d2aa3ba-92d2-4790-9388-85bf5e42badb');
     });
 
     // Modal Action: Accept Upsell
     if (btnUpsellAccept) {
-        btnUpsellAccept.addEventListener('click', () => {
+        btnUpsellAccept.addEventListener('click', (e) => {
+            e.preventDefault();
             closeUpsell();
             redirectToCheckout('https://www.tecnhogar.store/pay/16877070-2ad6-4cee-a0ef-a01029f35e5d');
         });
@@ -113,13 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
        ========================================================================== */
     const lightboxModal = document.getElementById('lightbox-modal');
     const btnCloseLightbox = document.getElementById('btn-close-lightbox');
-    
-    const lightboxCaseId = document.getElementById('lightbox-case-id');
-    const lightboxCaseTitle = document.getElementById('lightbox-case-title');
-    const lightboxCaseDesc = document.getElementById('lightbox-case-desc');
-    const lightboxSimBg = document.getElementById('lightbox-case-sim-bg');
-    const lightboxPointer = document.getElementById('lightbox-case-pointer');
-    const lightboxCallout = document.getElementById('lightbox-case-callout');
 
     // Global function to be called from inline onclick events
     window.openLightbox = (imgUrl) => {
@@ -127,12 +149,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fullImg) {
             fullImg.src = imgUrl;
         }
-        lightboxModal.classList.add('open');
+        if (lightboxModal) {
+            lightboxModal.classList.add('open');
+        }
         document.body.style.overflow = 'hidden';
     };
 
     const closeLightbox = () => {
-        lightboxModal.classList.remove('open');
+        if (lightboxModal) {
+            lightboxModal.classList.remove('open');
+        }
         document.body.style.overflow = '';
     };
 
@@ -167,47 +193,49 @@ document.addEventListener('DOMContentLoaded', () => {
     if ((hoursVal && minutesVal && secondsVal) || (sHoursVal && sMinutesVal && sSecondsVal)) {
         const timerDurationSeconds = (76 * 60) + 2; // 1h 16m 02s = 4562s
         
-        let deadline = localStorage.getItem('pricing_countdown_deadline');
+        let deadline = safeGetStorage('pricing_countdown_deadline');
         
         // If deadline is not set or is corrupted, set a new one
         if (!deadline || isNaN(parseInt(deadline))) {
             const newDeadline = new Date().getTime() + (timerDurationSeconds * 1000);
-            localStorage.setItem('pricing_countdown_deadline', newDeadline.toString());
+            safeSetStorage('pricing_countdown_deadline', newDeadline.toString());
             deadline = newDeadline;
         } else {
             deadline = parseInt(deadline);
         }
 
         function updateTimer() {
-            const now = new Date().getTime();
-            let remaining = deadline - now;
+            try {
+                const now = new Date().getTime();
+                let remaining = deadline - now;
 
-            // Reset deadline if it has expired
-            if (remaining <= 0) {
-                const newDeadline = now + (timerDurationSeconds * 1000);
-                localStorage.setItem('pricing_countdown_deadline', newDeadline.toString());
-                deadline = newDeadline;
-                remaining = timerDurationSeconds * 1000;
-            }
+                // Reset deadline if it has expired
+                if (remaining <= 0) {
+                    const newDeadline = now + (timerDurationSeconds * 1000);
+                    safeSetStorage('pricing_countdown_deadline', newDeadline.toString());
+                    deadline = newDeadline;
+                    remaining = timerDurationSeconds * 1000;
+                }
 
-            const totalSeconds = Math.floor(remaining / 1000);
-            const hrs = Math.floor(totalSeconds / 3600);
-            const mins = Math.floor((totalSeconds % 3600) / 60);
-            const secs = totalSeconds % 60;
+                const totalSeconds = Math.floor(remaining / 1000);
+                const hrs = Math.floor(totalSeconds / 3600);
+                const mins = Math.floor((totalSeconds % 3600) / 60);
+                const secs = totalSeconds % 60;
 
-            const padHrs = hrs.toString().padStart(2, '0');
-            const padMins = mins.toString().padStart(2, '0');
-            const padSecs = secs.toString().padStart(2, '0');
+                const padHrs = hrs.toString().padStart(2, '0');
+                const padMins = mins.toString().padStart(2, '0');
+                const padSecs = secs.toString().padStart(2, '0');
 
-            // Update main timer
-            if (hoursVal) hoursVal.innerText = padHrs;
-            if (minutesVal) minutesVal.innerText = padMins;
-            if (secondsVal) secondsVal.innerText = padSecs;
+                // Update main timer
+                if (hoursVal) hoursVal.innerText = padHrs;
+                if (minutesVal) minutesVal.innerText = padMins;
+                if (secondsVal) secondsVal.innerText = padSecs;
 
-            // Update sticky scarcity timer
-            if (sHoursVal) sHoursVal.innerText = padHrs;
-            if (sMinutesVal) sMinutesVal.innerText = padMins;
-            if (sSecondsVal) sSecondsVal.innerText = padSecs;
+                // Update sticky scarcity timer
+                if (sHoursVal) sHoursVal.innerText = padHrs;
+                if (sMinutesVal) sMinutesVal.innerText = padMins;
+                if (sSecondsVal) sSecondsVal.innerText = padSecs;
+            } catch(e) {}
         }
 
         // Run immediately once

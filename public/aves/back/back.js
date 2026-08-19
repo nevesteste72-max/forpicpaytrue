@@ -1,44 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    function safeGet(key) {
+        try { return localStorage.getItem(key); } catch(e) { return null; }
+    }
+    function safeSet(key, val) {
+        try { localStorage.setItem(key, val); } catch(e) {}
+    }
+
     /* ==========================================================================
        UTMIFY — STORE UTM PARAMETERS FROM URL INTO localStorage
        ========================================================================== */
     (function storeUtms() {
-        const params = new URLSearchParams(window.location.search);
-        const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
-        keys.forEach(key => {
-            const val = params.get(key);
-            if (val) {
-                localStorage.setItem(key, val);
-                localStorage.setItem(`utmify_${key}`, val);
-            }
-        });
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
+            keys.forEach(key => {
+                const val = params.get(key);
+                if (val) {
+                    safeSet(key, val);
+                    safeSet(`utmify_${key}`, val);
+                }
+            });
+        } catch(e) {}
     })();
 
     /* ==========================================================================
        UTM PASSTHROUGH HELPER
        ========================================================================== */
     function getCheckoutUrlWithUtms(baseUrl) {
-        let queryString = window.location.search;
+        try {
+            let queryString = window.location.search;
 
-        if (!queryString || !queryString.includes('utm_')) {
-            const utms = [];
-            const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
-            keys.forEach(key => {
-                const val = localStorage.getItem(key) || localStorage.getItem(`utmify_${key}`);
-                if (val) {
-                    utms.push(`${key}=${encodeURIComponent(val)}`);
+            if (!queryString || !queryString.includes('utm_')) {
+                const utms = [];
+                const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck'];
+                keys.forEach(key => {
+                    const val = safeGet(key) || safeGet(`utmify_${key}`);
+                    if (val) {
+                        utms.push(`${key}=${encodeURIComponent(val)}`);
+                    }
+                });
+                if (utms.length > 0) {
+                    queryString = '?' + utms.join('&');
                 }
-            });
-            if (utms.length > 0) {
-                queryString = '?' + utms.join('&');
             }
-        }
 
-        if (!queryString) return baseUrl;
-        const separator = baseUrl.includes('?') ? '&' : '?';
-        const cleanParams = queryString.startsWith('?') ? queryString.substring(1) : queryString;
-        return `${baseUrl}${separator}${cleanParams}`;
+            if (!queryString) return baseUrl;
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            const cleanParams = queryString.startsWith('?') ? queryString.substring(1) : queryString;
+            return `${baseUrl}${separator}${cleanParams}`;
+        } catch(e) {
+            return baseUrl;
+        }
     }
 
     /* ==========================================================================
@@ -48,15 +61,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const CHECKOUT_COMPLETO = 'https://www.tecnhogar.store/pay/16877070-2ad6-4cee-a0ef-a01029f35e5d';
 
     function redirectToCheckout(baseUrl, planName, price) {
-        // Meta Pixel — Initiate Checkout Event
-        if (typeof fbq !== 'undefined') {
-            fbq('track', 'InitiateCheckout', {
-                value: price,
-                currency: 'BRL',
-                content_name: planName,
-                content_category: 'Back Offer'
-            });
-        }
+        try {
+            // Meta Pixel — Initiate Checkout Event
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'InitiateCheckout', {
+                    value: price,
+                    currency: 'EUR',
+                    content_name: planName,
+                    content_category: 'Back Offer'
+                });
+            }
+        } catch(e) {}
 
         const finalUrl = getCheckoutUrlWithUtms(baseUrl);
         window.location.href = finalUrl;
@@ -69,13 +84,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCompleto = document.getElementById('btn-back-completo');
 
     if (btnBasico) {
-        btnBasico.addEventListener('click', () => {
+        btnBasico.addEventListener('click', (e) => {
+            e.preventDefault();
             redirectToCheckout(CHECKOUT_BASICO, 'Plano Básico', 7.90);
         });
     }
 
     if (btnCompleto) {
-        btnCompleto.addEventListener('click', () => {
+        btnCompleto.addEventListener('click', (e) => {
+            e.preventDefault();
             redirectToCheckout(CHECKOUT_COMPLETO, 'Plano Completo', 14.90);
         });
     }
@@ -102,10 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const DEADLINE_KEY = 'back_offer_deadline';
 
-    let deadline = localStorage.getItem(DEADLINE_KEY);
+    let deadline = safeGet(DEADLINE_KEY);
     if (!deadline || isNaN(parseInt(deadline))) {
         const newDeadline = new Date().getTime() + (timerDurationSeconds * 1000);
-        localStorage.setItem(DEADLINE_KEY, newDeadline.toString());
+        safeSet(DEADLINE_KEY, newDeadline.toString());
         deadline = newDeadline;
     } else {
         deadline = parseInt(deadline);
@@ -121,32 +138,34 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function updateTimer() {
-        const now = new Date().getTime();
-        let remaining = deadline - now;
+        try {
+            const now = new Date().getTime();
+            let remaining = deadline - now;
 
-        if (remaining <= 0) {
-            // Reset on expiry
-            const newDeadline = now + (timerDurationSeconds * 1000);
-            localStorage.setItem(DEADLINE_KEY, newDeadline.toString());
-            deadline = newDeadline;
-            remaining = timerDurationSeconds * 1000;
-        }
+            if (remaining <= 0) {
+                // Reset on expiry
+                const newDeadline = now + (timerDurationSeconds * 1000);
+                safeSet(DEADLINE_KEY, newDeadline.toString());
+                deadline = newDeadline;
+                remaining = timerDurationSeconds * 1000;
+            }
 
-        const totalSecs = Math.floor(remaining / 1000);
-        const hrs = Math.floor(totalSecs / 3600);
-        const mins = Math.floor((totalSecs % 3600) / 60);
-        const secs = totalSecs % 60;
+            const totalSecs = Math.floor(remaining / 1000);
+            const hrs = Math.floor(totalSecs / 3600);
+            const mins = Math.floor((totalSecs % 3600) / 60);
+            const secs = totalSecs % 60;
 
-        const pH = hrs.toString().padStart(2, '0');
-        const pM = mins.toString().padStart(2, '0');
-        const pS = secs.toString().padStart(2, '0');
+            const pH = hrs.toString().padStart(2, '0');
+            const pM = mins.toString().padStart(2, '0');
+            const pS = secs.toString().padStart(2, '0');
 
-        if (timerEls.sH) timerEls.sH.innerText = pH;
-        if (timerEls.sM) timerEls.sM.innerText = pM;
-        if (timerEls.sS) timerEls.sS.innerText = pS;
-        if (timerEls.mH) timerEls.mH.innerText = pH;
-        if (timerEls.mM) timerEls.mM.innerText = pM;
-        if (timerEls.mS) timerEls.mS.innerText = pS;
+            if (timerEls.sH) timerEls.sH.innerText = pH;
+            if (timerEls.sM) timerEls.sM.innerText = pM;
+            if (timerEls.sS) timerEls.sS.innerText = pS;
+            if (timerEls.mH) timerEls.mH.innerText = pH;
+            if (timerEls.mM) timerEls.mM.innerText = pM;
+            if (timerEls.mS) timerEls.mS.innerText = pS;
+        } catch(e) {}
     }
 
     updateTimer();
@@ -155,14 +174,16 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ==========================================================================
        META PIXEL — PAGE VIEW (fired once on load)
        ========================================================================== */
-    if (typeof fbq !== 'undefined') {
-        fbq('track', 'ViewContent', {
-            content_name: 'Back Offer Page',
-            content_category: 'Back',
-            value: 7.90,
-            currency: 'BRL'
-        });
-    }
+    try {
+        if (typeof fbq !== 'undefined') {
+            fbq('track', 'ViewContent', {
+                content_name: 'Back Offer Page',
+                content_category: 'Back',
+                value: 7.90,
+                currency: 'EUR'
+            });
+        }
+    } catch(e) {}
 
     /* ==========================================================================
        PROTEÇÕES E SEGURANÇA DA PÁGINA (ANTI-CLONAGEM / ANTI-CÓPIA)
