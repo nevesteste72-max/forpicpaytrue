@@ -145,7 +145,7 @@ export default function ThankYouPage() {
   const maxDateStr = maxDelivery.toLocaleDateString('en-ZA', dateOptions);
 
   // Link de rastreio definitivo
-  const trackingUrl = txId ? `/rastreio/${txId}` : `/rastreio/57300a28-4553-4bb4-9586-06941387717d`;
+  const trackingUrl = txId ? `/rastreio/${txId}?lang=en` : `/rastreio/57300a28-4553-4bb4-9586-06941387717d?lang=en`;
 
   // ==========================================
   // 📦 RENDERIZAÇÃO PARA PRODUTOS FÍSICOS (PMH DIGITAL / COOKWARE)
