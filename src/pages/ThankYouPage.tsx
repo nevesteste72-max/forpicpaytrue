@@ -177,18 +177,6 @@ export default function ThankYouPage() {
 
             <div className="p-5 sm:p-8 space-y-5">
 
-              {/* 🎯 BOTÃO PRINCIPAL DE RASTREIO (DESTAQUE MÁXIMO) */}
-              <div className="pt-1">
-                <a
-                  href={trackingUrl}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-base flex items-center justify-center gap-3 transition-all shadow-lg shadow-blue-500/30 active:scale-[0.98] border border-blue-400/30"
-                >
-                  <Truck className="w-6 h-6 animate-bounce" />
-                  <span>TRACK YOUR ORDER NOW</span>
-                  <ExternalLink className="w-4 h-4 ml-1" />
-                </a>
-              </div>
-
               {/* Linha do Tempo Visual de 4 Etapas */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 space-y-3.5">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
