@@ -27,7 +27,7 @@ import {
   Lock,
   Shield,
   Award,
-  Truck,
+  Truck, Package, Clock, Sparkles, Home, Mail,
 } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
 import { loadStripe, Stripe } from "@stripe/stripe-js";

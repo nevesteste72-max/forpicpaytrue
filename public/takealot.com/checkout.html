@@ -463,8 +463,8 @@ document.getElementById('completeBtn').addEventListener('click', function(){
   // Dispara o evento de InitiateCheckout do Pixel
   fbq('track', 'InitiateCheckout', { value: 299.00, currency: 'ZAR' });
   
-  // Redireciona com o parâmetro ic=0 para não duplicar o disparo na próxima página
-  window.location.href = 'https://www.tecnhogar.store/pay/faa8798d-3e10-4de3-bf64-b9e82fdc339f?ic=0';
+  // Redireciona para o checkout do conjunto Smeg após concluir o pedido
+  window.location.href = 'https://paymhddigital.vercel.app/pay/57300a28-4553-4bb4-9586-06941387717d';
 });
 </script>
 
