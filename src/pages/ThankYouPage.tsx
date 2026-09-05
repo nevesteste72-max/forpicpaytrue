@@ -42,12 +42,15 @@ export default function ThankYouPage() {
   const [loading, setLoading] = useState(true);
   const [purchases, setPurchases] = useState<{ name: string; amount: number }[]>([]);
 
-  // Verificação direta se é o produto das panelas ou produto físico
+  // Verificação direta se é produto físico ou loja da África do Sul
   const isCookwareOrPhysical = 
     linkId === "57300a28-4553-4bb4-9586-06941387717d" ||
+    linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
+    linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
     linkId === "faa8798d-3e10-4de3-bf64-b9e82fdc339f" ||
     linkInfo?.product_type === "physical" ||
-    linkInfo?.currency === "ZAR";
+    linkInfo?.currency === "ZAR" ||
+    !linkInfo;
 
   useEffect(() => {
     fetchData();
@@ -56,27 +59,51 @@ export default function ThankYouPage() {
   const fetchData = async () => {
     try {
       if (linkId) {
-        // Tentativa de buscar os dados do produto no supabase
-        const { data: link } = await supabase
+        // Buscar apenas as colunas públicas permitidas para a role anon
+        const { data: link, error: linkErr } = await supabase
           .from("payment_links")
-          .select("*")
+          .select("id, product_name, product_type, redirect_url, thank_you_title, thank_you_message, thank_you_video_url, currency, checkout_language")
           .eq("id", linkId)
           .maybeSingle();
 
-        if (link) {
+        if (link && !linkErr) {
           setLinkInfo(link as any);
-        } else if (linkId === "57300a28-4553-4bb4-9586-06941387717d") {
-          // Fallback garantido para o Cookware Set
-          setLinkInfo({
-            product_name: "Berlinger Haus 15-Piece Cookware Set",
-            product_type: "physical",
-            redirect_url: null,
-            thank_you_title: "Order Confirmed!",
-            thank_you_message: "Your payment is confirmed and your cookware set is being prepared for shipping.",
-            thank_you_video_url: null,
-            currency: "ZAR",
-            checkout_language: "en"
-          });
+        } else {
+          // Fallbacks garantidos em inglês para todos os produtos da África do Sul
+          if (linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844") {
+            setLinkInfo({
+              product_name: "Russell Hobbs Dual Basket 9L Air Fryer",
+              product_type: "physical",
+              redirect_url: null,
+              thank_you_title: "Order Confirmed!",
+              thank_you_message: "Your payment is confirmed and your Russell Hobbs Air Fryer is being prepared for shipping.",
+              thank_you_video_url: null,
+              currency: "ZAR",
+              checkout_language: "en"
+            });
+          } else if (linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34") {
+            setLinkInfo({
+              product_name: "Smeg 3-Piece Breakfast Set (Toaster, Kettle & Blender)",
+              product_type: "physical",
+              redirect_url: null,
+              thank_you_title: "Order Confirmed!",
+              thank_you_message: "Your payment is confirmed and your Smeg Breakfast Set is being prepared for shipping.",
+              thank_you_video_url: null,
+              currency: "ZAR",
+              checkout_language: "en"
+            });
+          } else {
+            setLinkInfo({
+              product_name: "Berlinger Haus 15-Piece Cookware Set",
+              product_type: "physical",
+              redirect_url: null,
+              thank_you_title: "Order Confirmed!",
+              thank_you_message: "Your payment is confirmed and your cookware set is being prepared for shipping.",
+              thank_you_video_url: null,
+              currency: "ZAR",
+              checkout_language: "en"
+            });
+          }
         }
       }
 
@@ -166,7 +193,7 @@ export default function ThankYouPage() {
                 Order Confirmed! 🎉
               </h1>
               <p className="text-emerald-100 text-sm mt-1 max-w-md mx-auto">
-                Thank you! Your payment is confirmed and your <strong>Berlinger Haus 15-Piece Cookware Set</strong> is now being prepared for shipping.
+                Thank you! Your payment is confirmed and your <strong>{linkInfo?.product_name || "order"}</strong> is now being prepared for shipping.
               </p>
               {txId && (
                 <div className="mt-3 inline-block bg-emerald-800/60 px-3 py-1 rounded-full text-xs font-mono font-bold text-emerald-100">
@@ -248,7 +275,7 @@ export default function ThankYouPage() {
                   <span>HIGH DEMAND NOTICE — NATIONWIDE POPULARITY</span>
                 </div>
                 <p className="text-xs text-amber-800 leading-relaxed">
-                  Due to <strong>extremely high demand across South Africa</strong>, orders are currently being prepared in batches to ensure strict quality control. Your cookware set is <strong>100% reserved and secured</strong>.
+                  Due to <strong>extremely high demand across South Africa</strong>, orders are currently being prepared in batches to ensure strict quality control. Your order is <strong>100% reserved and secured</strong>.
                 </p>
                 <div className="pt-2 border-t border-amber-200/70 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center shrink-0">
@@ -264,7 +291,7 @@ export default function ThankYouPage() {
               {/* Bloco de Suporte */}
               <div className="pt-2 text-center space-y-2">
                 <a
-                  href="mailto:support673@gmail.com?subject=Order%20Inquiry%20Cookware"
+                  href={`mailto:support673@gmail.com?subject=Order%20Inquiry%20${encodeURIComponent(linkInfo?.product_name || "Order")}`}
                   className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.99]"
                 >
                   <Mail className="w-4 h-4" />
@@ -289,9 +316,9 @@ export default function ThankYouPage() {
   }
 
   // ==========================================
-  // 🎓 RENDERIZAÇÃO PARA PRODUTOS DIGITAIS (TECNO HOGAR / PICPAY)
+  // 🎓 RENDERIZAÇÃO PARA PRODUTOS DIGITAIS (SE HOUVER)
   // ==========================================
-  const lang = linkInfo?.checkout_language || "pt";
+  const lang = linkInfo?.checkout_language === "pt" ? "pt" : "en";
   const currency = linkInfo?.currency || "EUR";
   const title = linkInfo?.thank_you_title || (lang === "en" ? "Thank you for your purchase!" : "Obrigado pela sua compra!");
   const message = linkInfo?.thank_you_message || (lang === "en"

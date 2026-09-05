@@ -410,7 +410,7 @@ export default function Checkout() {
     };
   }, [searchParams]);
 
-  const lang = (link?.checkout_language || "pt") as "pt" | "en" | "es";
+  const lang = (link?.checkout_language || "en") as "pt" | "en" | "es";
   const t = labels[lang];
   const isStripe = link?.currency !== "MZN";
   const isEmola = selectedMethod === "emola";
@@ -715,11 +715,19 @@ export default function Checkout() {
   useEffect(() => {
     if (paymentState === "success" && link?.redirect_url) {
       const timer = setTimeout(() => {
-        window.location.href = link.redirect_url!;
+        try {
+          const targetUrl = new URL(link.redirect_url!, window.location.origin);
+          if (internalTxId) {
+            targetUrl.searchParams.set("tx", internalTxId);
+          }
+          window.location.href = targetUrl.toString();
+        } catch {
+          window.location.href = link.redirect_url!;
+        }
       }, 1800);
       return () => clearTimeout(timer);
     }
-  }, [paymentState, link?.redirect_url]);
+  }, [paymentState, link?.redirect_url, internalTxId]);
 
   const fetchLink = async (attempt = 0) => {
     try {
