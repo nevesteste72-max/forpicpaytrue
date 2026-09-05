@@ -90,11 +90,11 @@ export function OrderBump({
             >
               {expanded ? (
                 <>
-                  Ver menos <ChevronUp className="w-3.5 h-3.5" />
+                  {locale?.startsWith("en") || currency === "ZAR" ? "Show less" : locale?.startsWith("es") ? "Ver menos" : "Ver menos"} <ChevronUp className="w-3.5 h-3.5" />
                 </>
               ) : (
                 <>
-                  Ver descrição completa <ChevronDown className="w-3.5 h-3.5" />
+                  {locale?.startsWith("en") || currency === "ZAR" ? "View full description" : locale?.startsWith("es") ? "Ver descripción completa" : "Ver descrição completa"} <ChevronDown className="w-3.5 h-3.5" />
                 </>
               )}
             </button>

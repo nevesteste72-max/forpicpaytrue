@@ -318,10 +318,12 @@ export default function Checkout() {
 
   const [link, setLink] = useState<PaymentLink | null>(null);
 
-  // Trustworthy tab title at the payment moment (root index.html defaults to "PicPay").
   useEffect(() => {
-    if (link?.product_name) document.title = `${link.product_name} — Pagamento seguro`;
-  }, [link?.product_name]);
+    if (link?.product_name) {
+      const isEn = link.checkout_language === "en" || link.currency === "ZAR";
+      document.title = `${link.product_name} — ${isEn ? "Secure Checkout" : "Pagamento seguro"}`;
+    }
+  }, [link?.product_name, link?.checkout_language, link?.currency]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
