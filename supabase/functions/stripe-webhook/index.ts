@@ -30,13 +30,13 @@ serve(async (req) => {
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  const configuredSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  const KNOWN_SECRETS = [
+    configuredSecret,
+    "whsec_ezh5v6Nnm4GKHX6DVOBimYrfiswuzpJF", // José Nico (acct_1TVV6AK3Fj90cME4)
+  ].filter(Boolean) as string[];
 
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    console.error("[STRIPE-WEBHOOK] Supabase credentials not configured");
-    return new Response("Server not configured", { status: 500 });
-  }
-  if (!STRIPE_WEBHOOK_SECRET) {
+  if (KNOWN_SECRETS.length === 0) {
     console.error("[STRIPE-WEBHOOK] STRIPE_WEBHOOK_SECRET not configured");
     return new Response("Webhook secret not configured", { status: 500 });
   }
@@ -66,12 +66,18 @@ serve(async (req) => {
     return new Response("Missing signature", { status: 400 });
   }
 
-  let event: Stripe.Event;
-  try {
-    // Deno requires the async variant (uses SubtleCrypto).
-    event = await stripe.webhooks.constructEventAsync(rawBody, signature, STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error("[STRIPE-WEBHOOK] Signature verification failed:", err);
+  let event: Stripe.Event | null = null;
+  for (const secret of KNOWN_SECRETS) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(rawBody, signature, secret);
+      if (event) break;
+    } catch {
+      // try next secret
+    }
+  }
+
+  if (!event) {
+    console.error("[STRIPE-WEBHOOK] Signature verification failed for all secrets");
     return new Response("Invalid signature", { status: 400 });
   }
 
