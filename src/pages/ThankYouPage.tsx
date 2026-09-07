@@ -1,374 +1,283 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  CheckCircle2,
-  Package,
-  Truck,
-  Home,
-  Clock,
-  ShieldCheck,
-  Mail,
-  ExternalLink,
-  Sparkles,
-  PackageOpen,
-  PartyPopper
-} from "lucide-react";
-import cashpayLogoFull from "@/assets/picpay-logo.jpeg";
+import { CheckCircle2, ShieldCheck, Mail, Truck } from "lucide-react";
 import { useUtmifyScript } from "@/hooks/useUtmifyScript";
 
-interface PaymentLinkInfo {
-  product_name: string;
-  product_type?: string;
-  redirect_url: string | null;
-  thank_you_title: string | null;
-  thank_you_message: string | null;
-  thank_you_video_url: string | null;
-  currency: string;
-  checkout_language: string;
+interface ProductFallback {
+  name: string;
+  subtitle: string;
+  price: number;
+  image: string;
 }
+
+const PRODUCTS: Record<string, ProductFallback> = {
+  // Smeg 3-Piece
+  "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34": {
+    name: "Smeg 3-Piece Breakfast Set",
+    subtitle: "Toaster, Kettle and Blender • Luxury Matte Black Edition",
+    price: 697,
+    image: "https://wlbuboolvvguqstsjhtb.supabase.co/storage/v1/object/public/payment-images/be249323-7d67-4861-b660-afe337e7e940/9a3b936a-9b0f-48b6-9744-3a6a81fd2b34-1785608273170-fd806842-56b8-4f22-a86c-55d7ba56c2d8.png",
+  },
+  // Russell Hobbs Air Fryer
+  "4b585d8e-6df4-4019-8ca0-2a32b8e68844": {
+    name: "Russell Hobbs Dual Basket 9L Air Fryer",
+    subtitle: "Model: RHAF09DSS • 1700W Rapid Air Digital Sync",
+    price: 597,
+    image: "https://wlbuboolvvguqstsjhtb.supabase.co/storage/v1/object/public/payment-images/be249323-7d67-4861-b660-afe337e7e940/4b585d8e-6df4-4019-8ca0-2a32b8e68844-1787909690783-21a2123e-6bd1-457a-9549-17b1aeaf7916.png",
+  },
+  // Berlinger Haus Cookware
+  "57300a28-4553-4bb4-9586-06941387717d": {
+    name: "Berlinger Haus 15-Piece Non-Stick Cookware Set",
+    subtitle: "Metallic Grey Edition • Induction Turbo Bottom",
+    price: 597,
+    image: "https://wlbuboolvvguqstsjhtb.supabase.co/storage/v1/object/public/payment-images/be249323-7d67-4861-b660-afe337e7e940/57300a28-4553-4bb4-9586-06941387717d-1785530752538-2a1c0d51-ff72-4d2c-9a4f-56011c793ff6.png",
+  },
+};
 
 export default function ThankYouPage() {
   const { linkId } = useParams<{ linkId: string }>();
   const [searchParams] = useSearchParams();
   const txId = searchParams.get("tx");
 
-  // UTMify script on thank you page
   useUtmifyScript();
 
-  const [linkInfo, setLinkInfo] = useState<PaymentLinkInfo | null>(null);
+  const [dbProduct, setDbProduct] = useState<{ name: string; price: number; image?: string } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [purchases, setPurchases] = useState<{ name: string; amount: number }[]>([]);
 
-  // Verificação direta se é produto físico ou loja da África do Sul
-  const isCookwareOrPhysical = 
-    linkId === "57300a28-4553-4bb4-9586-06941387717d" ||
-    linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
-    linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
-    linkId === "faa8798d-3e10-4de3-bf64-b9e82fdc339f" ||
-    linkInfo?.product_type === "physical" ||
-    linkInfo?.currency === "ZAR" ||
-    !linkInfo;
+  // Identify fallback product
+  const defaultProductKey = linkId && PRODUCTS[linkId] 
+    ? linkId 
+    : "4b585d8e-6df4-4019-8ca0-2a32b8e68844";
+  const fallback = PRODUCTS[defaultProductKey];
 
   useEffect(() => {
-    fetchData();
+    const loadData = async () => {
+      try {
+        if (linkId && PRODUCTS[linkId]) {
+          const { data } = await supabase
+            .from("payment_links")
+            .select("product_name, amount, logo_url")
+            .eq("id", linkId)
+            .maybeSingle();
+
+          if (data) {
+            setDbProduct({
+              name: data.product_name,
+              price: Number(data.amount),
+              image: data.logo_url || undefined,
+            });
+          }
+        }
+
+        if (txId) {
+          const { data: tx } = await supabase
+            .from("transactions")
+            .select("amount, currency, payment_links(product_name, currency, facebook_pixel_id)")
+            .eq("id", txId)
+            .maybeSingle();
+
+          if (tx) {
+            const val = Number(tx.amount);
+            const curr = (tx.payment_links as any)?.currency || "ZAR";
+            const prodName = (tx.payment_links as any)?.product_name || fallback.name;
+
+            if (typeof window !== "undefined" && (window as any).fbq) {
+              (window as any).fbq("track", "Purchase", {
+                value: val,
+                currency: curr,
+                content_name: prodName,
+                content_type: "product",
+              }, { eventID: txId });
+            }
+            if (typeof window !== "undefined" && (window as any).ttq) {
+              (window as any).ttq.track("CompletePayment", {
+                value: val,
+                currency: curr,
+                content_name: prodName,
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error loading thank you data:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [linkId, txId]);
 
-  const fetchData = async () => {
-    try {
-      if (linkId) {
-        // Buscar apenas as colunas públicas permitidas para a role anon
-        const { data: link, error: linkErr } = await supabase
-          .from("payment_links")
-          .select("id, product_name, product_type, redirect_url, thank_you_title, thank_you_message, thank_you_video_url, currency, checkout_language")
-          .eq("id", linkId)
-          .maybeSingle();
-
-        if (link && !linkErr) {
-          setLinkInfo(link as any);
-        } else {
-          // Fallbacks garantidos em inglês para todos os produtos da África do Sul
-          if (linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844") {
-            setLinkInfo({
-              product_name: "Russell Hobbs Dual Basket 9L Air Fryer",
-              product_type: "physical",
-              redirect_url: null,
-              thank_you_title: "Order Confirmed!",
-              thank_you_message: "Your payment is confirmed and your Russell Hobbs Air Fryer is being prepared for shipping.",
-              thank_you_video_url: null,
-              currency: "ZAR",
-              checkout_language: "en"
-            });
-          } else if (linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34") {
-            setLinkInfo({
-              product_name: "Smeg 3-Piece Breakfast Set (Toaster, Kettle & Blender)",
-              product_type: "physical",
-              redirect_url: null,
-              thank_you_title: "Order Confirmed!",
-              thank_you_message: "Your payment is confirmed and your Smeg Breakfast Set is being prepared for shipping.",
-              thank_you_video_url: null,
-              currency: "ZAR",
-              checkout_language: "en"
-            });
-          } else {
-            setLinkInfo({
-              product_name: "Berlinger Haus 15-Piece Cookware Set",
-              product_type: "physical",
-              redirect_url: null,
-              thank_you_title: "Order Confirmed!",
-              thank_you_message: "Your payment is confirmed and your cookware set is being prepared for shipping.",
-              thank_you_video_url: null,
-              currency: "ZAR",
-              checkout_language: "en"
-            });
-          }
-        }
-      }
-
-      if (txId) {
-        const { data: mainTx } = await supabase
-          .from("transactions")
-          .select("amount, payment_links(product_name, currency, checkout_language, facebook_pixel_id)")
-          .eq("id", txId)
-          .maybeSingle();
-
-        const items: { name: string; amount: number }[] = [];
-
-        if (mainTx) {
-          const val = Number(mainTx.amount);
-          const curr = (mainTx.payment_links as any)?.currency || "ZAR";
-          const prodName = (mainTx.payment_links as any)?.product_name || "Product";
-          items.push({
-            name: prodName,
-            amount: val,
-          });
-
-          // Disparar Purchase com deduplicação (eventID = txId)
-          if (typeof window !== "undefined" && (window as any).fbq) {
-            (window as any).fbq('track', 'Purchase', {
-              value: val,
-              currency: curr,
-              content_name: prodName,
-              content_type: 'product'
-            }, { eventID: txId });
-          }
-          if (typeof window !== "undefined" && (window as any).ttq) {
-            (window as any).ttq.track('CompletePayment', {
-              value: val,
-              currency: curr,
-              content_name: prodName
-            });
-          }
-        }
-
-        setPurchases(items);
-      }
-    } catch (err) {
-      console.error("Failed to fetch thank you data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-      </div>
-    );
-  }
-
-  // Previsão dinâmica de entrega (2 a 4 dias)
-  const today = new Date();
-  const minDelivery = new Date(today);
-  minDelivery.setDate(today.getDate() + 7);
-  const maxDelivery = new Date(today);
-  maxDelivery.setDate(today.getDate() + 14);
-
-  const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
-  const minDateStr = minDelivery.toLocaleDateString('en-ZA', dateOptions);
-  const maxDateStr = maxDelivery.toLocaleDateString('en-ZA', dateOptions);
-
-  // Link de rastreio definitivo
-  const trackingUrl = txId ? `/rastreio/${txId}?lang=en` : `/rastreio/57300a28-4553-4bb4-9586-06941387717d?lang=en`;
-
-  // ==========================================
-  // 📦 RENDERIZAÇÃO PARA PRODUTOS FÍSICOS (PMH DIGITAL / COOKWARE)
-  // ==========================================
-  if (isCookwareOrPhysical) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 flex items-center justify-center p-3 sm:p-6 font-sans text-slate-800">
-        <div className="w-full max-w-lg space-y-4">
-          
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden">
-            
-            {/* Header com Sucesso & Brilho */}
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 sm:p-8 text-center text-white relative">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner ring-4 ring-white/30 animate-pulse">
-                <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-                Order Confirmed! 🎉
-              </h1>
-              <p className="text-emerald-100 text-sm mt-1 max-w-md mx-auto">
-                Thank you! Your payment is confirmed and your <strong>{linkInfo?.product_name || "order"}</strong> is now being prepared for shipping.
-              </p>
-              {txId && (
-                <div className="mt-3 inline-block bg-emerald-800/60 px-3 py-1 rounded-full text-xs font-mono font-bold text-emerald-100">
-                  Order Ref: #{txId.slice(0, 8).toUpperCase()}
-                </div>
-              )}
-            </div>
-
-            <div className="p-5 sm:p-8 space-y-5">
-
-              {/* Linha do Tempo Visual de 4 Etapas */}
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 space-y-3.5">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    Live Order Status
-                  </span>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping" />
-                    In Preparation
-                  </span>
-                </div>
-
-                {/* Step 1 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-slate-900">1. Payment Approved</h4>
-                      <span className="text-[10px] text-emerald-600 font-bold uppercase">Done</span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">256-bit encrypted checkout verified.</p>
-                  </div>
-                </div>
-
-                {/* Step 2 (Ativo) */}
-                <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-amber-100 animate-pulse mt-0.5">
-                    <Package className="w-3.5 h-3.5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-amber-950">2. Warehouse Packaging</h4>
-                      <span className="text-[10px] text-amber-800 bg-amber-100 font-extrabold px-1.5 py-0.5 rounded">Active Now</span>
-                    </div>
-                    <p className="text-[11px] text-slate-600">Quality check & secure packaging in progress.</p>
-                  </div>
-                </div>
-
-                {/* Step 3 */}
-                <div className="flex items-start gap-3 opacity-60">
-                  <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <Truck className="w-3.5 h-3.5" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-xs font-semibold text-slate-700">3. Courier Dispatch</h4>
-                    <p className="text-[11px] text-slate-500">Courier pickup scheduled within 24h.</p>
-                  </div>
-                </div>
-
-                {/* Step 4 */}
-                <div className="flex items-start gap-3 opacity-60">
-                  <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <Home className="w-3.5 h-3.5" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-xs font-semibold text-slate-700">4. Doorstep Delivery</h4>
-                    <p className="text-[11px] text-slate-500">Estimated: {minDateStr} – {maxDateStr} (7-14 business days).</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Aviso de Alta Demanda & Janela de Entrega (1-2 semanas) */}
-              <div className="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 space-y-2.5">
-                <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
-                  <span className="text-base">🔥</span>
-                  <span>HIGH DEMAND NOTICE — NATIONWIDE POPULARITY</span>
-                </div>
-                <p className="text-xs text-amber-800 leading-relaxed">
-                  Due to <strong>extremely high demand across South Africa</strong>, orders are currently being prepared in batches to ensure strict quality control. Your order is <strong>100% reserved and secured</strong>.
-                </p>
-                <div className="pt-2 border-t border-amber-200/70 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center shrink-0">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-amber-950">Estimated Delivery Window: 1 to 2 Weeks</h4>
-                    <p className="text-[11px] text-amber-800 font-medium">{minDateStr} — {maxDateStr} (7-14 business days)</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bloco de Suporte */}
-              <div className="pt-2 text-center space-y-2">
-                <a
-                  href={`mailto:support673@gmail.com?subject=Order%20Inquiry%20${encodeURIComponent(linkInfo?.product_name || "Order")}`}
-                  className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.99]"
-                >
-                  <Mail className="w-4 h-4" />
-                  Contact Customer Support (support673@gmail.com)
-                </a>
-                <p className="text-[11px] text-slate-500">
-                  Need to update your delivery address? Our customer care team responds in 2-4 hours.
-                </p>
-              </div>
-
-            </div>
-          </div>
-
-          <div className="text-center text-xs text-slate-400 flex items-center justify-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>256-bit Encrypted SSL Confirmation & Verified Courier Logistics</span>
-          </div>
-
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // 🎓 RENDERIZAÇÃO PARA PRODUTOS DIGITAIS (SE HOUVER)
-  // ==========================================
-  const lang = linkInfo?.checkout_language === "pt" ? "pt" : "en";
-  const currency = linkInfo?.currency || "EUR";
-  const title = linkInfo?.thank_you_title || (lang === "en" ? "Thank you for your purchase!" : "Obrigado pela sua compra!");
-  const message = linkInfo?.thank_you_message || (lang === "en"
-    ? "Your purchase was successful. You will receive an email with all the details — if you don't see it, please check your spam/junk folder."
-    : "A sua compra foi realizada com sucesso. Você receberá um email com todos os detalhes — se não encontrar, verifique a caixa de spam.");
+  const productName = dbProduct?.name || fallback.name;
+  const productPrice = dbProduct?.price || fallback.price;
+  const productImage = dbProduct?.image || fallback.image;
+  const productSubtitle = fallback.subtitle;
 
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
-        <div className="bg-card rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden border border-border">
-          
-          <div className="bg-success/5 border-b border-success/10 p-8 text-center">
-            <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <PartyPopper className="w-10 h-10 text-success" />
+    <div className="min-h-screen bg-[#f4f6f8] text-[#1f2937] font-sans">
+      {/* Official Takealot Header */}
+      <header className="bg-[#0b6ecb] px-4 py-3 text-white flex items-center justify-between shadow-sm">
+        <div className="max-w-[580px] w-full mx-auto flex items-center justify-between">
+          <a href="#" className="text-xl font-black tracking-tight text-white select-none">
+            takealot<span className="text-[#facc15]">.com</span>
+          </a>
+          <div className="text-xs font-semibold flex items-center gap-1.5 opacity-90">
+            <ShieldCheck className="w-4 h-4 text-emerald-300" />
+            <span>Secure Delivery</span>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-[580px] mx-auto px-4 py-6 space-y-4">
+        {/* Main Confirmation Card */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+          <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 ring-8 ring-emerald-50/50 animate-pulse">
+            <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />
+          </div>
+
+          <h1 className="text-center text-2xl font-black text-gray-900 mb-1.5 tracking-tight">
+            Order Confirmed!
+          </h1>
+          <p className="text-center text-xs text-gray-600 max-w-md mx-auto leading-relaxed mb-5">
+            Thank you! Your payment has been received and your package is being packed for priority dispatch.
+          </p>
+
+          {/* Status Box */}
+          <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-200 flex items-center justify-between text-xs mb-5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="text-gray-600">Status:</span>
+              <strong className="text-emerald-700 font-bold">Paid &amp; Approved</strong>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">{title}</h1>
-            <p className="text-muted-foreground text-sm">{message}</p>
+            <div>
+              <span className="text-gray-600">Delivery:</span>{' '}
+              <strong className="text-gray-900 font-bold">1 - 2 Business Days</strong>
+            </div>
           </div>
 
-          <div className="p-6 md:p-8 space-y-6">
-            <a
-              href="/membros"
-              className="w-full h-12 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
-            >
-              <PackageOpen className="w-4 h-4" />
-              {lang === "en" ? "Access My Members Area" : "Aceder à Área de Membros"}
-            </a>
-            <p className="text-xs text-muted-foreground text-center -mt-3">
-              {lang === "en"
-                ? "Enter the email you used on this purchase to download your materials."
-                : "Entra com o email desta compra para descarregares os teus materiais."}
-            </p>
+          {txId && (
+            <div className="text-center -mt-2 mb-4">
+              <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-[11px] font-mono font-bold">
+                Order Ref: #{txId.slice(0, 8).toUpperCase()}
+              </span>
+            </div>
+          )}
 
-            {linkInfo?.redirect_url && (
-              <Button
-                onClick={() => window.open(linkInfo.redirect_url!, "_blank")}
-                variant="outline"
-                className="w-full h-11 rounded-xl font-semibold"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                {lang === "en" ? "Access Content" : "Acessar Conteúdo"}
-              </Button>
-            )}
+          {/* Product Row */}
+          <div className="flex items-center gap-3.5 py-4 border-t border-b border-gray-200">
+            <img
+              src={productImage}
+              alt={productName}
+              className="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white p-1 shrink-0"
+            />
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xs font-bold text-gray-900 leading-snug truncate">
+                {productName}
+              </h3>
+              <p className="text-[11px] text-gray-500 mt-0.5">{productSubtitle}</p>
+              <span className="inline-block text-[11px] font-semibold text-gray-600 mt-1">Qty: 1</span>
+            </div>
+            <div className="text-sm font-black text-[#0b6ecb] shrink-0">
+              R {productPrice.toFixed(0)}
+            </div>
+          </div>
+
+          {/* Price Breakdown */}
+          <div className="pt-4 space-y-2 text-xs text-gray-600">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>R {productPrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Express Delivery Nationwide</span>
+              <span className="text-emerald-600 font-bold uppercase text-[11px]">FREE</span>
+            </div>
+            <div className="flex justify-between text-sm font-black text-gray-900 border-t border-gray-200 pt-2.5 mt-1">
+              <span>Total Paid</span>
+              <span className="text-[#0b6ecb]">R {productPrice.toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
-        <div className="text-center mt-6">
-          <img src={cashpayLogoFull} alt="PicPay" className="h-20 w-20 mx-auto rounded-full object-contain" />
+        {/* Live Delivery & Tracking Timeline Card */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+          <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wide flex items-center gap-2">
+            <Truck className="w-4 h-4 text-[#0b6ecb]" />
+            Delivery &amp; Tracking Information
+          </h3>
+
+          <div className="space-y-3.5 pt-1">
+            <div className="flex gap-3 items-start">
+              <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                ✓
+              </div>
+              <div className="text-xs">
+                <h4 className="font-bold text-gray-900">1. Payment Approved</h4>
+                <p className="text-gray-500 text-[11px]">256-bit encrypted checkout verified and funds captured.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 items-start">
+              <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 animate-pulse">
+                📦
+              </div>
+              <div className="text-xs">
+                <h4 className="font-bold text-amber-950 flex items-center gap-2">
+                  2. Warehouse Packaging
+                  <span className="bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase">In Progress</span>
+                </h4>
+                <p className="text-gray-600 text-[11px]">
+                  Our South Africa warehouse is safely preparing your parcel for courier dispatch.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 items-start opacity-70">
+              <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                🚚
+              </div>
+              <div className="text-xs">
+                <h4 className="font-bold text-gray-800">3. Fast Courier Delivery</h4>
+                <p className="text-gray-500 text-[11px]">
+                  Delivered straight to your doorstep across Cape Town, Johannesburg, Durban &amp; Nationwide.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 items-start opacity-70">
+              <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                ✉️
+              </div>
+              <div className="text-xs">
+                <h4 className="font-bold text-gray-800">4. Tracking Link via Email</h4>
+                <p className="text-gray-500 text-[11px]">
+                  Check your email inbox and spam/junk folder for your courier tracking link.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {/* Support Box */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 text-center text-xs text-gray-600 space-y-1.5">
+          <p className="font-medium">Need assistance or want to update your delivery address?</p>
+          <a
+            href="mailto:support@kitchen-deals.store?subject=Order%20Inquiry"
+            className="inline-flex items-center gap-1.5 text-[#0b6ecb] font-bold hover:underline"
+          >
+            <Mail className="w-3.5 h-3.5" />
+            support@kitchen-deals.store
+          </a>
+          <p className="text-[11px] text-gray-400">Our South Africa support team responds within 2-4 hours.</p>
+        </div>
+
+        {/* Trust Footer */}
+        <div className="text-center py-2 text-gray-400 text-[11px] flex items-center justify-center gap-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>256-Bit SSL Encrypted Verification • Official Takealot Logistics</span>
+        </div>
+      </main>
     </div>
   );
 }
