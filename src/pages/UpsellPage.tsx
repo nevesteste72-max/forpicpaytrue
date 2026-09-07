@@ -485,23 +485,61 @@ export default function UpsellPage() {
                 <span className="text-xs text-gray-500">(1,842 verified reviews on Takealot)</span>
               </div>
 
-              {/* Product Image */}
-              {step.image_url && (
-                <div className="relative mb-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-center">
-                  <img
-                    src={step.image_url}
-                    alt={step.product_name}
-                    className="max-h-72 w-full object-contain rounded-lg"
-                    loading="eager"
-                  />
-                  <div className="absolute top-4 left-4 bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded shadow-sm">
-                    -{discountPercent}% OFF
+              {/* Product Image - Mobile-first uncropped showcase */}
+              {step.image_url && (() => {
+                const isAirFryer = step.product_name?.toLowerCase().includes("air fryer") || step.id === "11111111-1111-4111-8111-111111111111";
+                const galleryImages = isAirFryer
+                  ? ["/images/air_1.png", "/images/air_2.png", "/images/air_3.png"]
+                  : ["/images/p1.png"];
+                const activeImg = galleryImages[selectedImgIdx] || step.image_url;
+
+                return (
+                  <div className="mb-5">
+                    {/* Clean badge row ABOVE the product image - nothing overlaps the product */}
+                    <div className="flex items-center justify-between gap-2 mb-2.5">
+                      <span className="inline-flex items-center gap-1 bg-red-600 text-white text-[11px] font-black px-2.5 py-1 rounded-md shadow-xs">
+                        🔥 -{discountPercent}% OFF CLEARANCE
+                      </span>
+                      <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-md">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        In Stock • JHB Hub
+                      </span>
+                    </div>
+
+                    {/* Uncropped Product Display Container */}
+                    <div className="w-full bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 flex items-center justify-center shadow-xs">
+                      <img
+                        src={activeImg}
+                        alt={step.product_name}
+                        className="w-auto h-auto max-h-[300px] sm:max-h-[360px] max-w-full object-contain block mx-auto"
+                        style={{ maxHeight: "300px", width: "auto", maxWidth: "100%" }}
+                        loading="eager"
+                      />
+                    </div>
+
+                    {/* Interactive Angle Selectors for multi-angle view */}
+                    {galleryImages.length > 1 && (
+                      <div className="flex items-center justify-center gap-2 mt-3">
+                        {galleryImages.map((img, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setSelectedImgIdx(idx)}
+                            className={cn(
+                              "w-14 h-14 rounded-xl border-2 p-1 bg-white transition-all flex items-center justify-center cursor-pointer",
+                              selectedImgIdx === idx
+                                ? "border-[#0b72e7] shadow-xs ring-2 ring-[#0b72e7]/20"
+                                : "border-gray-200 opacity-60 hover:opacity-100"
+                            )}
+                          >
+                            <img src={img} alt="" className="max-h-full max-w-full object-contain" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-xs text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
-                    In Stock • JHB Hub
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Product Highlights */}
               <div className="bg-blue-50/60 rounded-xl p-4 mb-5 border border-blue-100">

@@ -166,11 +166,13 @@ export default function ThankYouPage() {
 
           {/* Product Row */}
           <div className="flex items-center gap-3.5 py-4 border-t border-b border-gray-200">
-            <img
-              src={productImage}
-              alt={productName}
-              className="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white p-1 shrink-0"
-            />
+            <div className="w-22 h-18 sm:w-26 sm:h-20 bg-white rounded-xl border border-gray-200 p-1 flex items-center justify-center shrink-0">
+              <img
+                src={productImage}
+                alt={productName}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-xs font-bold text-gray-900 leading-snug truncate">
                 {productName}

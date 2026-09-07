@@ -1148,11 +1148,13 @@ export default function Checkout() {
               <div className="bg-muted/40 rounded-2xl p-4 border border-border">
                 <div className="flex items-center gap-4">
                   {link.logo_url && (
-                    <img
-                      src={link.logo_url}
-                      alt={link.product_name}
-                      className="w-16 h-16 md:w-20 md:h-20 shrink-0 object-cover rounded-xl shadow-sm border border-border"
-                    />
+                    <div className="w-20 h-18 md:w-24 md:h-20 shrink-0 bg-white rounded-xl shadow-xs border border-border p-1 flex items-center justify-center">
+                      <img
+                        src={link.logo_url}
+                        alt={link.product_name}
+                        className="max-h-full max-w-full object-contain rounded-lg"
+                      />
+                    </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <h2 className="text-sm md:text-base font-semibold text-foreground leading-snug">{link.product_name}</h2>
