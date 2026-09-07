@@ -145,7 +145,7 @@ export default function UpsellPage() {
             product_name: "Russell Hobbs Dual Basket 9L Air Fryer - Metallic Grey",
             product_description: "South Africa's #1 Dual Basket 9L Air Fryer with Smart Sync Finish. Cook 2 separate meals simultaneously with 8 one-touch digital presets and rapid air vortex technology.",
             amount: 597,
-            image_url: "https://wlbuboolvvguqstsjhtb.supabase.co/storage/v1/object/public/payment-images/be249323-7d67-4861-b660-afe337e7e940/4b585d8e-6df4-4019-8ca0-2a32b8e68844-1787909690783-21a2123e-6bd1-457a-9549-17b1aeaf7916.png",
+            image_url: "/images/air_1.png",
             show_accept_button: true,
             show_decline_button: true,
             button_accept_text: "YES! ADD TO MY PACKAGE — R597 (1-CLICK BUY)",
@@ -156,8 +156,8 @@ export default function UpsellPage() {
             page_subheadline: "Special 1-Time Addition: Complete your modern kitchen setup with the 9L Dual Basket Air Fryer. Ships together in the same box with ZERO extra shipping fee!",
             accept_step_id: null,
             decline_step_id: null,
-            accept_redirect_url: "https://kitchen-deals-sa.vercel.app/thank-you-airfryer",
-            decline_redirect_url: "https://kitchen-deals-sa.vercel.app/thank-you-smeg",
+            accept_redirect_url: null,
+            decline_redirect_url: null,
             page_url: null,
           } as any);
           setCurrency("ZAR");
@@ -171,7 +171,7 @@ export default function UpsellPage() {
             product_name: "Smeg 3-Piece Breakfast Set — Toaster, Kettle & Blender (Black)",
             product_description: "Iconic Italian retro luxury design featuring 2-Slice Extra-Wide Slot Toaster, 1.7L Cordless Electric Kettle and 800W Multi-Speed Countertop Blender in stunning Matte Black finish.",
             amount: 697,
-            image_url: "https://wlbuboolvvguqstsjhtb.supabase.co/storage/v1/object/public/payment-images/be249323-7d67-4861-b660-afe337e7e940/9a3b936a-9b0f-48b6-9744-3a6a81fd2b34-1785608273170-fd806842-56b8-4f22-a86c-55d7ba56c2d8.png",
+            image_url: "/images/p1.png",
             show_accept_button: true,
             show_decline_button: true,
             button_accept_text: "YES! ADD TO MY PACKAGE — R697 (1-CLICK BUY)",
@@ -182,8 +182,8 @@ export default function UpsellPage() {
             page_subheadline: "Special 1-Time Addition: Complete your kitchen countertop with the Luxury Smeg 3-Piece Breakfast Collection. Ships together in the same box with ZERO extra shipping fee!",
             accept_step_id: null,
             decline_step_id: null,
-            accept_redirect_url: "https://kitchen-deals-sa.vercel.app/thank-you-smeg",
-            decline_redirect_url: "https://kitchen-deals-sa.vercel.app/thank-you-airfryer",
+            accept_redirect_url: null,
+            decline_redirect_url: null,
             page_url: null,
           } as any);
           setCurrency("ZAR");
@@ -241,15 +241,8 @@ export default function UpsellPage() {
   };
 
   const goToThankYou = () => {
-    if (stepId === "11111111-1111-4111-8111-111111111111" || linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34") {
-      window.location.href = `https://kitchen-deals-sa.vercel.app/thank-you-smeg${txId ? `?tx=${txId}` : ""}`;
-      return;
-    }
-    if (stepId === "22222222-2222-4222-8222-222222222222" || linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844") {
-      window.location.href = `https://kitchen-deals-sa.vercel.app/thank-you-airfryer${txId ? `?tx=${txId}` : ""}`;
-      return;
-    }
-    const path = buildInternalPath(`/thank-you/${linkId || "default"}`);
+    const targetLink = linkId || (stepId === "11111111-1111-4111-8111-111111111111" ? "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" : "4b585d8e-6df4-4019-8ca0-2a32b8e68844");
+    const path = buildInternalPath(`/thank-you/${targetLink}`);
     doRedirect(toFullUrl(path), false);
   };
 
