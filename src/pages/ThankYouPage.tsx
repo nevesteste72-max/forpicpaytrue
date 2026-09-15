@@ -73,18 +73,15 @@ export default function ThankYouPage() {
   const [loading, setLoading] = useState(true);
   const [txData, setTxData] = useState<any>(null);
 
-  // Fallback info
-  const defaultKey = linkId && PRODUCTS_MAP[linkId] ? linkId : "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34";
-  const fallbackProduct = PRODUCTS_MAP[defaultKey] || PRODUCTS_MAP["9a3b936a-9b0f-48b6-9744-3a6a81fd2b34"];
+  // Fallback info — only used for the small set of known physical-goods offers above.
+  // Any other product (including every digital offer) gets a generic, brand-free fallback
+  // so a DB hiccup never shows the wrong item's name/photo on someone else's thank-you page.
+  const genericFallback: ProductFallback = { name: "Your product", subtitle: "", price: 0, image: "" };
+  const fallbackProduct = (linkId && PRODUCTS_MAP[linkId]) || genericFallback;
 
-  const isCookwareOrPhysical = 
-    linkId === "57300a28-4553-4bb4-9586-06941387717d" ||
-    linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
-    linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
-    linkId === "faa8798d-3e10-4de3-bf64-b9e82fdc339f" ||
-    linkInfo?.product_type === "physical" ||
-    linkInfo?.currency === "ZAR" ||
-    !linkInfo;
+  const isCookwareOrPhysical =
+    (linkId ? Boolean(PRODUCTS_MAP[linkId]) : false) ||
+    linkInfo?.product_type === "physical";
 
   useEffect(() => {
     fetchData();
@@ -102,41 +99,19 @@ export default function ThankYouPage() {
         if (link && !linkErr) {
           setLinkInfo(link as any);
         } else {
-          // Fallback defaults
-          if (linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844") {
-            setLinkInfo({
-              product_name: "Russell Hobbs Dual Basket 9L Air Fryer",
-              product_type: "physical",
-              redirect_url: null,
-              thank_you_title: "Order Confirmed!",
-              thank_you_message: "Your payment is confirmed and your Russell Hobbs Air Fryer is being prepared for shipping.",
-              thank_you_video_url: null,
-              currency: "ZAR",
-              checkout_language: "en"
-            });
-          } else if (linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34") {
-            setLinkInfo({
-              product_name: "Smeg 3-Piece Breakfast Set (Toaster, Kettle & Blender)",
-              product_type: "physical",
-              redirect_url: null,
-              thank_you_title: "Order Confirmed!",
-              thank_you_message: "Your payment is confirmed and your Smeg Breakfast Set is being prepared for shipping.",
-              thank_you_video_url: null,
-              currency: "ZAR",
-              checkout_language: "en"
-            });
-          } else {
-            setLinkInfo({
-              product_name: "Berlinger Haus 15-Piece Cookware Set",
-              product_type: "physical",
-              redirect_url: null,
-              thank_you_title: "Order Confirmed!",
-              thank_you_message: "Your payment is confirmed and your cookware set is being prepared for shipping.",
-              thank_you_video_url: null,
-              currency: "ZAR",
-              checkout_language: "en"
-            });
-          }
+          // The real payment_links row could not be loaded (network hiccup, bad id, ...).
+          // Show a generic, product-agnostic confirmation instead of guessing a product —
+          // this thank-you page is shared by every offer, digital or physical.
+          setLinkInfo({
+            product_name: "Your product",
+            product_type: null,
+            redirect_url: null,
+            thank_you_title: "Order Confirmed!",
+            thank_you_message: "Your payment is confirmed. Check your email for access details.",
+            thank_you_video_url: null,
+            currency: "USD",
+            checkout_language: "en"
+          });
         }
       }
 
@@ -221,7 +196,11 @@ export default function ThankYouPage() {
                 Order Confirmed! 🎉
               </h1>
               <p className="text-emerald-100 text-sm mt-1 max-w-md mx-auto">
-                Thank you! Your payment is confirmed and your <strong>{currentProductName}</strong> is now being prepared for express delivery.
+                {isCookwareOrPhysical ? (
+                  <>Thank you! Your payment is confirmed and your <strong>{currentProductName}</strong> is now being prepared for express delivery.</>
+                ) : (
+                  <>Thank you! Your payment for <strong>{currentProductName}</strong> is confirmed.</>
+                )}
               </p>
               {txId && (
                 <div className="mt-3 inline-block bg-emerald-800/60 px-3 py-1 rounded-full text-xs font-mono font-bold text-emerald-100">
@@ -234,13 +213,15 @@ export default function ThankYouPage() {
 
               {/* Product Confirmation Card with 100% visible uncropped image */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center gap-4">
-                <div className="w-20 h-20 bg-white rounded-xl border border-slate-200 p-1.5 flex items-center justify-center shrink-0 shadow-xs">
-                  <img
-                    src={currentProductImage}
-                    alt={currentProductName}
-                    className="max-h-full max-w-full object-contain"
-                  />
-                </div>
+                {currentProductImage && (
+                  <div className="w-20 h-20 bg-white rounded-xl border border-slate-200 p-1.5 flex items-center justify-center shrink-0 shadow-xs">
+                    <img
+                      src={currentProductImage}
+                      alt={currentProductName}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-bold text-slate-900 leading-snug truncate">
                     {currentProductName}
@@ -250,7 +231,10 @@ export default function ThankYouPage() {
                   </p>
                   <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200/60 text-xs">
                     <span className="text-slate-500 font-medium">Total Paid:</span>
-                    <span className="font-extrabold text-emerald-700 text-sm">R {currentPrice.toFixed(2)}</span>
+                    <span className="font-extrabold text-emerald-700 text-sm">
+                      {linkInfo?.currency === "ZAR" ? "R " : linkInfo?.currency === "EUR" ? "€" : "$"}
+                      {currentPrice.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>

@@ -22,13 +22,37 @@ interface TrackingParams {
 }
 
 const PHONE_PREFIXES = [
+  // África do Sul / Moçambique (ZAR)
   { code: "+27", country: "🇿🇦 ZA", maxLen: 9 },
   { code: "+258", country: "🇲🇿 MZ", maxLen: 9 },
-  { code: "+1", country: "🇺🇸 US", maxLen: 10 },
-  { code: "+44", country: "🇬🇧 UK", maxLen: 10 },
+  // Lusófonos (EUR — aves / saúde bovina)
   { code: "+351", country: "🇵🇹 PT", maxLen: 9 },
   { code: "+55", country: "🇧🇷 BR", maxLen: 11 },
   { code: "+244", country: "🇦🇴 AO", maxLen: 9 },
+  { code: "+238", country: "🇨🇻 CV", maxLen: 8 },
+  { code: "+245", country: "🇬🇼 GW", maxLen: 8 },
+  { code: "+239", country: "🇸🇹 ST", maxLen: 8 },
+  // Hispanohablantes (USD — Reconquista Inversa)
+  { code: "+52", country: "🇲🇽 MX", maxLen: 10 },
+  { code: "+57", country: "🇨🇴 CO", maxLen: 10 },
+  { code: "+54", country: "🇦🇷 AR", maxLen: 11 },
+  { code: "+56", country: "🇨🇱 CL", maxLen: 9 },
+  { code: "+51", country: "🇵🇪 PE", maxLen: 9 },
+  { code: "+593", country: "🇪🇨 EC", maxLen: 9 },
+  { code: "+58", country: "🇻🇪 VE", maxLen: 10 },
+  { code: "+502", country: "🇬🇹 GT", maxLen: 8 },
+  { code: "+591", country: "🇧🇴 BO", maxLen: 8 },
+  { code: "+504", country: "🇭🇳 HN", maxLen: 8 },
+  { code: "+595", country: "🇵🇾 PY", maxLen: 9 },
+  { code: "+503", country: "🇸🇻 SV", maxLen: 8 },
+  { code: "+505", country: "🇳🇮 NI", maxLen: 8 },
+  { code: "+506", country: "🇨🇷 CR", maxLen: 8 },
+  { code: "+507", country: "🇵🇦 PA", maxLen: 8 },
+  { code: "+598", country: "🇺🇾 UY", maxLen: 9 },
+  { code: "+34", country: "🇪🇸 ES", maxLen: 9 },
+  // Outros / genéricos
+  { code: "+1", country: "🇺🇸 US", maxLen: 10 },
+  { code: "+44", country: "🇬🇧 UK", maxLen: 10 },
   { code: "+91", country: "🇮🇳 IN", maxLen: 10 },
   { code: "+234", country: "🇳🇬 NG", maxLen: 10 },
   { code: "+254", country: "🇰🇪 KE", maxLen: 9 },
@@ -38,7 +62,7 @@ const PHONE_PREFIXES = [
 const CURRENCY_TO_PREFIX: Record<string, string> = {
   ZAR: "+27",
   MZN: "+258",
-  USD: "+1",
+  USD: "+52",
   GBP: "+44",
   EUR: "+351",
   BRL: "+55",

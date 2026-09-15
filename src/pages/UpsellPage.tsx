@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
+import { cn } from "@/lib/utils";
+import { getStripePromise } from "@/lib/stripeClient";
 
 interface FlowStep {
   id: string;
@@ -42,7 +44,7 @@ interface FlowStep {
   page_subheadline: string | null;
 }
 
-type UpsellState = "offer" | "processing" | "success" | "failed";
+type UpsellState = "offer" | "processing" | "authenticating" | "success" | "failed";
 
 export default function UpsellPage() {
   const { stepId } = useParams<{ stepId: string }>();
@@ -83,6 +85,7 @@ export default function UpsellPage() {
   const [currency, setCurrency] = useState("ZAR");
   const [countdown, setCountdown] = useState(180); // 3 minutes urgency
   const [pixelId, setPixelId] = useState<string | null>(null);
+  const [selectedImgIdx, setSelectedImgIdx] = useState(0);
 
   // Facebook Pixel tracking
   const { trackPurchase } = useFacebookPixel(pixelId);
@@ -136,59 +139,6 @@ export default function UpsellPage() {
         .maybeSingle();
 
       if (error || !data) {
-        if (stepId === "11111111-1111-4111-8111-111111111111") {
-          setStep({
-            id: "11111111-1111-4111-8111-111111111111",
-            payment_link_id: "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
-            step_order: 1,
-            step_type: "upsell",
-            product_name: "Russell Hobbs Dual Basket 9L Air Fryer - Metallic Grey",
-            product_description: "South Africa's #1 Dual Basket 9L Air Fryer with Smart Sync Finish. Cook 2 separate meals simultaneously with 8 one-touch digital presets and rapid air vortex technology.",
-            amount: 597,
-            image_url: "/images/air_1.png",
-            show_accept_button: true,
-            show_decline_button: true,
-            button_accept_text: "YES! ADD TO MY PACKAGE — R597 (1-CLICK BUY)",
-            button_accept_color: "#0b72e7",
-            button_decline_text: "No thanks, dispatch only my original Smeg breakfast set",
-            button_decline_color: "#6b7280",
-            page_headline: "WAIT! Your order is being packed in our warehouse...",
-            page_subheadline: "Special 1-Time Addition: Complete your modern kitchen setup with the 9L Dual Basket Air Fryer. Ships together in the same box with ZERO extra shipping fee!",
-            accept_step_id: null,
-            decline_step_id: null,
-            accept_redirect_url: null,
-            decline_redirect_url: null,
-            page_url: null,
-          } as any);
-          setCurrency("ZAR");
-          return;
-        } else if (stepId === "22222222-2222-4222-8222-222222222222") {
-          setStep({
-            id: "22222222-2222-4222-8222-222222222222",
-            payment_link_id: "4b585d8e-6df4-4019-8ca0-2a32b8e68844",
-            step_order: 1,
-            step_type: "upsell",
-            product_name: "Smeg 3-Piece Breakfast Set — Toaster, Kettle & Blender (Black)",
-            product_description: "Iconic Italian retro luxury design featuring 2-Slice Extra-Wide Slot Toaster, 1.7L Cordless Electric Kettle and 800W Multi-Speed Countertop Blender in stunning Matte Black finish.",
-            amount: 697,
-            image_url: "/images/p1.png",
-            show_accept_button: true,
-            show_decline_button: true,
-            button_accept_text: "YES! ADD TO MY PACKAGE — R697 (1-CLICK BUY)",
-            button_accept_color: "#0b72e7",
-            button_decline_text: "No thanks, dispatch only my Air Fryer",
-            button_decline_color: "#6b7280",
-            page_headline: "WAIT! Your order is being packed in our warehouse...",
-            page_subheadline: "Special 1-Time Addition: Complete your kitchen countertop with the Luxury Smeg 3-Piece Breakfast Collection. Ships together in the same box with ZERO extra shipping fee!",
-            accept_step_id: null,
-            decline_step_id: null,
-            accept_redirect_url: null,
-            decline_redirect_url: null,
-            page_url: null,
-          } as any);
-          setCurrency("ZAR");
-          return;
-        }
         goToThankYou();
         return;
       }
@@ -241,7 +191,7 @@ export default function UpsellPage() {
   };
 
   const goToThankYou = () => {
-    const targetLink = linkId || (stepId === "11111111-1111-4111-8111-111111111111" ? "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" : "4b585d8e-6df4-4019-8ca0-2a32b8e68844");
+    const targetLink = linkId || step?.payment_link_id || "";
     const path = buildInternalPath(`/thank-you/${targetLink}`);
     doRedirect(toFullUrl(path), false);
   };
@@ -279,18 +229,18 @@ export default function UpsellPage() {
 
   const handleAccept = async () => {
     if (!step) return;
-    if (!txId) {
-      setState("processing");
-      setTimeout(() => {
-        setState("success");
-        setTimeout(() => {
-          if (stepId === "11111111-1111-4111-8111-111111111111") {
-            window.location.href = "https://kitchen-deals-sa.vercel.app/thank-you-airfryer";
-          } else {
-            window.location.href = "https://kitchen-deals-sa.vercel.app/thank-you-smeg";
-          }
-        }, 1200);
-      }, 800);
+    if (!txId || txId === "preview") {
+      // No saved card to charge off-session -> send to this product's own checkout page
+      const upsellLinkId = step.payment_link_id;
+      const qParams = new URLSearchParams();
+      const qName = searchParams.get("name");
+      const qEmail = searchParams.get("email");
+      const qPhone = searchParams.get("phone");
+      if (qName) qParams.set("name", qName);
+      if (qEmail) qParams.set("email", qEmail);
+      if (qPhone) qParams.set("phone", qPhone);
+      const queryStr = qParams.toString() ? `?${qParams.toString()}` : "";
+      window.location.href = buildInternalPath(`/pay/${upsellLinkId}${queryStr}`);
       return;
     }
     setState("processing");
@@ -313,7 +263,44 @@ export default function UpsellPage() {
         }
       );
 
-      const result = await response.json();
+      let result = await response.json();
+
+      // The bank wants the cardholder to approve (OTP / banking app). Run that
+      // challenge right here so the buyer never has to re-enter the card.
+      if (result.requires_action && result.client_secret) {
+        setState("authenticating");
+        const stripe = await getStripePromise();
+        if (!stripe) {
+          setErrorMessage("Could not start card authentication.");
+          setState("failed");
+          return;
+        }
+
+        const { error: actionError } = await stripe.handleNextAction({
+          clientSecret: result.client_secret,
+        });
+
+        if (actionError) {
+          setErrorMessage(actionError.message || "Card authentication was not completed.");
+          setState("failed");
+          return;
+        }
+
+        setState("processing");
+        const settleRes = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/one-click-upsell`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              apikey: `${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ settle_transaction_id: result.transaction_id }),
+          }
+        );
+        result = await settleRes.json();
+      }
 
       if (result.success) {
         trackPurchase(Number(step.amount), currency, result.transaction_id || undefined);
@@ -321,12 +308,8 @@ export default function UpsellPage() {
         setTimeout(() => {
           if (step.accept_redirect_url) {
             redirectTo(step.accept_step_id, step.accept_redirect_url);
-          } else if (stepId === "11111111-1111-4111-8111-111111111111") {
-            window.location.href = `https://kitchen-deals-sa.vercel.app/thank-you-airfryer${txId ? `?tx=${txId}` : ""}`;
-          } else if (stepId === "22222222-2222-4222-8222-222222222222") {
-            window.location.href = `https://kitchen-deals-sa.vercel.app/thank-you-smeg${txId ? `?tx=${txId}` : ""}`;
           } else {
-            redirectTo(step.accept_step_id, step.accept_redirect_url);
+            goToThankYou();
           }
         }, 1200);
       } else {
@@ -354,7 +337,7 @@ export default function UpsellPage() {
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center max-w-sm w-full">
           <Loader2 className="w-10 h-10 animate-spin text-[#0b72e7] mx-auto mb-4" />
           <p className="text-sm font-semibold text-gray-800">Securing your order confirmation...</p>
-          <p className="text-xs text-gray-500 mt-1">Connecting to Takealot dispatch center</p>
+          <p className="text-xs text-gray-500 mt-1">Connecting to express dispatch center</p>
         </div>
       </div>
     );
@@ -364,28 +347,32 @@ export default function UpsellPage() {
     return null;
   }
 
-  // Calculate comparative regular price for Takealot clearance display
-  const regularPrice = Number(step.amount) === 597 ? 2899 : 3499;
+  // Same product, same price, but paid on a normal checkout page. Used when
+  // the off-session 1-click charge is declined (typically 3DS/SCA) or tested.
+  const upsellCheckoutLink = "e1919191-1919-4919-8919-191919191919";
+  const payByCard = () => {
+    const qParams = new URLSearchParams();
+    const qName = searchParams.get("name");
+    const qEmail = searchParams.get("email");
+    const qPhone = searchParams.get("phone");
+    if (qName) qParams.set("name", qName);
+    if (qEmail) qParams.set("email", qEmail);
+    if (qPhone) qParams.set("phone", qPhone);
+    if (txId && txId !== "preview") qParams.set("parent_tx", txId);
+    const queryStr = qParams.toString() ? `?${qParams.toString()}` : "";
+    window.location.href = buildInternalPath(`/pay/${upsellCheckoutLink}${queryStr}`);
+  };
+
+  // Calculate comparative regular price for clearance display
+  // Takealot reference price is R 285 ZAR, our special sale price is R 99 ZAR (65% OFF)
+  const is99Upsell = Number(step.amount) === 99;
+  const regularPrice = is99Upsell ? 285 : Number(step.amount) === 597 ? 2899 : 3499;
   const savingsAmount = regularPrice - Number(step.amount);
   const discountPercent = Math.round((savingsAmount / regularPrice) * 100);
 
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-gray-900 font-sans pb-12">
-      {/* Header bar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[#0b72e7] font-black text-2xl tracking-tighter">takealot</span>
-            <span className="text-gray-400 font-medium text-lg leading-none">.com</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            <Lock className="w-3.5 h-3.5" />
-            <span>256-bit Secure</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-xl mx-auto px-4 pt-4">
+      <main className="max-w-xl mx-auto px-4 pt-4 md:pt-6">
         {/* Real-time Order Feedback Banner */}
         <section className="bg-white rounded-2xl border border-emerald-200 shadow-sm overflow-hidden mb-4">
           <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-white flex items-center justify-between">
@@ -450,7 +437,7 @@ export default function UpsellPage() {
         {/* Upsell Offer Container */}
         {state === "offer" && (
           <article className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-            {/* Takealot Deal Badge Header */}
+            {/* Deal Badge Header */}
             <div className="bg-[#0b72e7] text-white py-2 px-4 flex items-center justify-between text-xs font-bold uppercase tracking-wider">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -475,15 +462,18 @@ export default function UpsellPage() {
                   ))}
                 </div>
                 <span className="text-xs font-bold text-gray-700">4.8</span>
-                <span className="text-xs text-gray-500">(1,842 verified reviews on Takealot)</span>
+                <span className="text-xs text-gray-500">(1,842 verified customer reviews)</span>
               </div>
 
               {/* Product Image - Mobile-first uncropped showcase */}
               {step.image_url && (() => {
-                const isAirFryer = step.product_name?.toLowerCase().includes("air fryer") || step.id === "11111111-1111-4111-8111-111111111111";
-                const galleryImages = isAirFryer
-                  ? ["/images/air_1.png", "/images/air_2.png", "/images/air_3.png"]
-                  : ["/images/p1.png"];
+                const is19Pc = step.product_name?.toLowerCase().includes("19-piece") || step.image_url?.includes("upsell-19pc");
+                const isAirFryer = !is19Pc && step.product_name?.toLowerCase().includes("air fryer");
+                const galleryImages = is19Pc
+                  ? [step.image_url || "/assets/upsell-19pc.png"]
+                  : isAirFryer
+                    ? ["/images/air_1.png", "/images/air_2.png", "/images/air_3.png"]
+                    : [step.image_url || "/images/p1.png"];
                 const activeImg = galleryImages[selectedImgIdx] || step.image_url;
 
                 return (
@@ -491,7 +481,7 @@ export default function UpsellPage() {
                     {/* Clean badge row ABOVE the product image - nothing overlaps the product */}
                     <div className="flex items-center justify-between gap-2 mb-2.5">
                       <span className="inline-flex items-center gap-1 bg-red-600 text-white text-[11px] font-black px-2.5 py-1 rounded-md shadow-xs">
-                        🔥 -{discountPercent}% OFF CLEARANCE
+                        🔥 -{discountPercent}% OFF {is99Upsell ? "TAKEALOT PRICE" : "CLEARANCE"}
                       </span>
                       <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-md">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -563,7 +553,7 @@ export default function UpsellPage() {
               <div className="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
                 <div className="flex items-baseline justify-between mb-1">
                   <span className="text-xs text-gray-500 line-through">
-                    Standard List Price: R {regularPrice.toFixed(2)}
+                    {is99Upsell ? "Takealot List Price: R 285.00" : `Standard List Price: R ${regularPrice.toFixed(2)}`}
                   </span>
                   <span className="text-xs font-bold text-red-600">
                     You Save: R {savingsAmount.toFixed(2)}
@@ -572,7 +562,7 @@ export default function UpsellPage() {
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs font-bold text-gray-700 uppercase">Special Dispatch Price:</span>
                   <div className="text-right">
-                    <span className="text-3xl font-black text-[#0b72e7]">
+                    <span className="text-3xl font-black text-[#178a3b]">
                       R {Number(step.amount).toFixed(2)}
                     </span>
                   </div>
@@ -585,7 +575,7 @@ export default function UpsellPage() {
               {/* 1-Click Buy Action Button */}
               <button
                 onClick={handleAccept}
-                className="w-full h-14 bg-[#0b72e7] hover:bg-[#0961c5] active:scale-[0.99] text-white rounded-xl font-black text-base shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full h-14 bg-[#178a3b] hover:bg-[#147633] active:scale-[0.99] text-white rounded-xl font-black text-base shadow-lg shadow-green-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Zap className="w-5 h-5 fill-current" />
                 <span>YES! ADD TO MY PACKAGE — R {Number(step.amount).toFixed(0)}</span>
@@ -604,6 +594,20 @@ export default function UpsellPage() {
         )}
 
         {/* Processing State with Animated Feedback */}
+        {state === "authenticating" && (
+          <div className="bg-white rounded-2xl border border-blue-200 p-8 text-center shadow-md">
+            <Lock className="w-12 h-12 text-[#0b72e7] mx-auto mb-4" />
+            <h2 className="text-lg font-bold text-gray-900 mb-1">
+              Approve with your bank
+            </h2>
+            <p className="text-xs text-gray-600">
+              Your bank is asking you to confirm this addition. Approve the prompt
+              (SMS code or your banking app) to finish — no need to re-enter your card.
+            </p>
+            <p className="text-[11px] text-gray-400 mt-3">Please do not close this page.</p>
+          </div>
+        )}
+
         {state === "processing" && (
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-md">
             <Loader2 className="w-12 h-12 text-[#0b72e7] mx-auto mb-4 animate-spin" />
@@ -647,12 +651,20 @@ export default function UpsellPage() {
               Could Not Add Item
             </h2>
             <p className="text-xs text-gray-600 mb-4">{errorMessage}</p>
+            <p className="text-[11px] text-gray-500 mb-4">
+              Your bank asked for extra confirmation, so the saved card could not be
+              charged automatically. You can still add it by entering your card below —
+              same price, same delivery.
+            </p>
             <div className="flex flex-col gap-2">
-              <Button onClick={() => setState("offer")} className="bg-[#0b72e7] text-white hover:bg-[#0961c5] rounded-xl text-xs py-5 font-bold">
+              <Button onClick={payByCard} className="bg-[#178a3b] text-white hover:bg-[#147633] rounded-xl text-sm py-5 font-bold">
+                Add it — pay by card (R {Number(step.amount).toFixed(0)})
+              </Button>
+              <Button variant="outline" onClick={() => setState("offer")} className="rounded-xl text-xs py-4 font-semibold">
                 Try 1-Click Again
               </Button>
               <Button variant="ghost" onClick={handleDecline} className="text-xs text-gray-500 hover:text-gray-700">
-                Continue to My Order Confirmation
+                No thanks, continue to my order confirmation
               </Button>
             </div>
           </div>
@@ -668,11 +680,11 @@ export default function UpsellPage() {
             <span>•</span>
             <span className="flex items-center gap-1 font-semibold text-gray-500">
               <ShieldCheck className="w-3.5 h-3.5 text-gray-600" />
-              Takealot Guarantee
+              Quality Guarantee
             </span>
           </div>
           <p className="text-[11px] text-gray-400">
-            © 2026 Takealot Online (Pty) Ltd • Combined Express Warehouse Dispatch
+            © 2026 Combined Express Warehouse Dispatch • All Rights Reserved
           </p>
         </footer>
       </main>

@@ -37,6 +37,78 @@ serve(async (req) => {
 
     const body = await req.json();
 
+    // Fires the post-purchase side effects exactly once. Shared by the instant-success
+    // path and the settle-after-3DS path so neither one duplicates email/UTMify/CAPI.
+    async function fireUpsellSideEffects(params: {
+      newTxId: string;
+      paymentIntentId: string;
+      parentTx: { customer_email: string; customer_name: string | null; customer_phone: string | null };
+      upsell: { product_name: string; facebook_pixel_id: string | null; facebook_token: string | null };
+      upsellPaymentLinkId: string;
+      amount: number;
+      currency: string;
+      trackingParams?: unknown;
+    }) {
+      const { newTxId, paymentIntentId, parentTx, upsell, upsellPaymentLinkId, amount, currency, trackingParams } = params;
+      await supabaseAdmin.from("transactions").update({ status: "successful", stripe_payment_intent_id: paymentIntentId }).eq("id", newTxId);
+
+      const base = `${SUPABASE_URL}/functions/v1`;
+      const auth = { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json" };
+      try { await fetch(`${base}/send-purchase-email`, { method: "POST", headers: auth, body: JSON.stringify({ customer_email: parentTx.customer_email, customer_name: parentTx.customer_name || "", product_name: upsell.product_name, amount, currency: currency.toUpperCase(), transaction_id: newTxId }) }); } catch (_) { /* ignore */ }
+      try { await fetch(`${base}/utmify-notify`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTxId, product_name: `Upsell: ${upsell.product_name}`, product_id: upsellPaymentLinkId, customer_name: parentTx.customer_name || "", customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "", amount, currency: currency.toUpperCase(), order_bump_accepted: false, order_bump_amount: 0, payment_method: "stripe", status: "successful", created_at: new Date().toISOString(), approved_at: new Date().toISOString(), tracking_params: trackingParams || undefined }) }); } catch (_) { /* ignore */ }
+      try { if (upsell.facebook_pixel_id && upsell.facebook_token) await fetch(`${base}/facebook-conversion`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTxId, pixel_id: upsell.facebook_pixel_id, access_token: upsell.facebook_token, event_name: "Purchase", value: amount, currency: currency.toUpperCase(), customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "" }) }); } catch (_) { /* ignore */ }
+    }
+
+    // ── SETTLE after the buyer completed a 3DS/SCA challenge in the browser ──
+    // The bank required cardholder confirmation (OTP / banking app) before the
+    // off-session charge above could complete. The client ran stripe.handleNextAction
+    // with the client_secret we returned, then calls back here to finalize — the
+    // buyer never has to re-enter the card.
+    if (body.settle_transaction_id) {
+      const { settle_transaction_id } = body;
+
+      const { data: pendingTx, error: pendingErr } = await supabaseAdmin
+        .from("transactions")
+        .select("id, status, stripe_payment_intent_id, payment_link_id, customer_email, customer_name, customer_phone, amount, currency, parent_transaction_id")
+        .eq("id", settle_transaction_id)
+        .single();
+      if (pendingErr || !pendingTx) return reply({ success: false, error: "Transaction not found", requires_fallback: true }, 404);
+
+      if (pendingTx.status === "successful") return reply({ success: true, transaction_id: pendingTx.id, already_purchased: true }, 200);
+      if (!pendingTx.stripe_payment_intent_id) return reply({ success: false, error: "No payment intent on this transaction", requires_fallback: true }, 400);
+
+      let pi;
+      try {
+        pi = await stripe.paymentIntents.retrieve(pendingTx.stripe_payment_intent_id);
+      } catch (e) {
+        return reply({ success: false, error: "Failed to verify payment with Stripe", requires_fallback: true, detail: String((e as Error)?.message || e) }, 502);
+      }
+
+      if (pi.status !== "succeeded") {
+        await supabaseAdmin.from("transactions").update({ status: pi.status === "requires_payment_method" ? "failed" : "pending" }).eq("id", pendingTx.id);
+        return reply({ success: false, error: "Card authentication was not completed", requires_fallback: true, status: pi.status }, 402);
+      }
+
+      const { data: upsell } = await supabaseAdmin
+        .from("payment_links")
+        .select("product_name, facebook_pixel_id, facebook_token")
+        .eq("id", pendingTx.payment_link_id)
+        .single();
+
+      await fireUpsellSideEffects({
+        newTxId: pendingTx.id,
+        paymentIntentId: pi.id,
+        parentTx: { customer_email: pendingTx.customer_email, customer_name: pendingTx.customer_name, customer_phone: pendingTx.customer_phone },
+        upsell: { product_name: upsell?.product_name || "", facebook_pixel_id: upsell?.facebook_pixel_id || null, facebook_token: upsell?.facebook_token || null },
+        upsellPaymentLinkId: pendingTx.payment_link_id,
+        amount: Number(pendingTx.amount),
+        currency: pendingTx.currency || "USD",
+        trackingParams: body.tracking_params,
+      });
+
+      return reply({ success: true, transaction_id: pendingTx.id }, 200);
+    }
+
     // ── ONE-CLICK by explicit upsell product (delivers THAT product's content) ──
     if (body.upsell_payment_link_id && body.parent_transaction_id) {
       const { parent_transaction_id, upsell_payment_link_id, tracking_params } = body;
@@ -109,19 +181,33 @@ serve(async (req) => {
       }
 
       if (paymentIntent.status === "succeeded") {
-        await supabaseAdmin.from("transactions").update({ status: "successful", stripe_payment_intent_id: paymentIntent.id }).eq("id", newTx.id);
-
-        const base = `${SUPABASE_URL}/functions/v1`;
-        const auth = { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json" };
-        try { await fetch(`${base}/send-purchase-email`, { method: "POST", headers: auth, body: JSON.stringify({ customer_email: parentTx.customer_email, customer_name: parentTx.customer_name || "", product_name: upsell.product_name, amount: Number(upsell.amount), currency: currency.toUpperCase(), transaction_id: newTx.id }) }); } catch (_) { /* ignore */ }
-        try { await fetch(`${base}/utmify-notify`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTx.id, product_name: `Upsell: ${upsell.product_name}`, product_id: upsell_payment_link_id, customer_name: parentTx.customer_name || "", customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "", amount: Number(upsell.amount), currency: currency.toUpperCase(), order_bump_accepted: false, order_bump_amount: 0, payment_method: "stripe", status: "successful", created_at: new Date().toISOString(), approved_at: new Date().toISOString(), tracking_params: tracking_params || undefined }) }); } catch (_) { /* ignore */ }
-        try { if (upsell.facebook_pixel_id && upsell.facebook_token) await fetch(`${base}/facebook-conversion`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTx.id, pixel_id: upsell.facebook_pixel_id, access_token: upsell.facebook_token, event_name: "Purchase", value: Number(upsell.amount), currency: currency.toUpperCase(), customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "" }) }); } catch (_) { /* ignore */ }
-
+        await fireUpsellSideEffects({
+          newTxId: newTx.id,
+          paymentIntentId: paymentIntent.id,
+          parentTx,
+          upsell,
+          upsellPaymentLinkId: upsell_payment_link_id,
+          amount: Number(upsell.amount),
+          currency,
+          trackingParams: tracking_params,
+        });
         return reply({ success: true, transaction_id: newTx.id }, 200);
       }
 
-      await supabaseAdmin.from("transactions").update({ status: "failed" }).eq("id", newTx.id);
-      return reply({ success: false, error: "requires_action", requires_fallback: true, status: paymentIntent.status }, 402);
+      // The bank wants the cardholder to confirm (OTP / banking app / 3DS challenge).
+      // Keep the transaction pending and hand the client what it needs to run that
+      // challenge inline (stripe.handleNextAction), then call back with
+      // settle_transaction_id — the buyer never has to re-enter the card.
+      if (paymentIntent.status === "requires_action") {
+        await supabaseAdmin.from("transactions").update({ stripe_payment_intent_id: paymentIntent.id }).eq("id", newTx.id);
+        return reply(
+          { success: false, requires_action: true, client_secret: paymentIntent.client_secret, transaction_id: newTx.id },
+          200
+        );
+      }
+
+      await supabaseAdmin.from("transactions").update({ status: "failed", stripe_payment_intent_id: paymentIntent.id }).eq("id", newTx.id);
+      return reply({ success: false, error: "card_declined", requires_fallback: true, status: paymentIntent.status }, 402);
     }
 
     // ── LEGACY: flow_step based one-click (kept for backward compatibility) ──

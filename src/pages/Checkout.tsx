@@ -327,9 +327,18 @@ export default function Checkout() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  const [customerName, setCustomerName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [customerName, setCustomerName] = useState(() => searchParams.get("name") || "");
+  const [email, setEmail] = useState(() => searchParams.get("email") || "");
+  const [phone, setPhone] = useState(() => searchParams.get("phone") || "");
+
+  useEffect(() => {
+    const qName = searchParams.get("name");
+    const qEmail = searchParams.get("email");
+    const qPhone = searchParams.get("phone");
+    if (qName) setCustomerName(prev => prev || qName);
+    if (qEmail) setEmail(prev => prev || qEmail);
+    if (qPhone) setPhone(prev => prev || qPhone);
+  }, [searchParams]);
   const [phoneError, setPhoneError] = useState("");
   const [paymentState, setPaymentState] = useState<PaymentState>("form");
   const [errorMessage, setErrorMessage] = useState("");
@@ -471,7 +480,8 @@ export default function Checkout() {
           window.location.href = externalUrl;
         } else {
           // Fallback: internal upsell page
-          navigate(`/upsell/${firstStep.id}?tx=${transactionId}&link=${link.id}`);
+          const custParams = `&name=${encodeURIComponent(customerName || "")}&email=${encodeURIComponent(email || "")}&phone=${encodeURIComponent(phone || "")}`;
+          navigate(`/upsell/${firstStep.id}?tx=${transactionId}&link=${link.id}${custParams}`);
         }
         return true;
       }
@@ -541,8 +551,8 @@ export default function Checkout() {
             payment_link_id: link.id,
             amount: totalAmount,
             currency: link.currency,
-            customer_email: email || `temp_${Date.now()}@checkout.cashpay.co`,
-            customer_name: customerName || "Customer",
+            customer_email: email || searchParams.get("email") || `temp_${Date.now()}@checkout.cashpay.co`,
+            customer_name: customerName || searchParams.get("name") || "Customer",
             payment_methods: link.stripe_payment_methods,
             order_bump_accepted: bumpAccepted,
             bumps_accepted: bumpsAccepted,
@@ -1140,41 +1150,101 @@ export default function Checkout() {
               />
             )}
 
-            {/* Product Header — compact order summary (thumbnail left, name + price right) */}
-            <div className="p-6 md:p-8 pb-0">
-              <h3 className="text-base font-bold text-foreground mb-3">
-                {lang === "en" ? "Order summary" : lang === "es" ? "Resumen del pedido" : "Resumo do pedido"}
-              </h3>
-              <div className="bg-muted/40 rounded-2xl p-4 border border-border">
-                <div className="flex items-center gap-4">
-                  {link.logo_url && (
-                    <div className="w-20 h-18 md:w-24 md:h-20 shrink-0 bg-white rounded-xl shadow-xs border border-border p-1 flex items-center justify-center">
-                      <img
-                        src={link.logo_url}
-                        alt={link.product_name}
-                        className="max-h-full max-w-full object-contain rounded-lg"
-                      />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-sm md:text-base font-semibold text-foreground leading-snug">{link.product_name}</h2>
-                    <p className="text-xl md:text-2xl font-bold text-foreground mt-1">
-                      {formatMoney(Number(link.amount), currencySymbol, locale)}
-                    </p>
-                  </div>
+            {/* Product Header — Rich personalized presentation */}
+            <div className="p-4 md:p-6 pb-0">
+              <div className="rounded-2xl border border-border bg-gradient-to-b from-card via-card to-muted/20 shadow-lg overflow-hidden">
+                {/* Top Badge Bar */}
+                <div className="bg-primary/10 border-b border-primary/15 px-4 py-2 flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {lang === "en" ? "Official Special Access" : lang === "es" ? "Acceso Oficial Inmediato" : "Acesso Oficial Imediato"}
+                  </span>
+                  <span className="text-[10px] font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded-full uppercase tracking-wide">
+                    {lang === "en" ? "89% OFF" : "89% DCTO"}
+                  </span>
                 </div>
-                {typeof buyerCount === "number" && buyerCount > 0 && (
-                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+
+                <div className="p-4 md:p-5">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                    {link.logo_url && (
+                      <div className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 relative rounded-xl overflow-hidden border border-border shadow-md bg-black/40 flex items-center justify-center">
+                        <img
+                          src={link.logo_url}
+                          alt={link.product_name}
+                          className="w-full h-full object-cover rounded-xl"
+                        />
+                        <span className="absolute bottom-1 right-1 text-[9px] font-bold bg-black/80 text-white px-1.5 py-0.5 rounded backdrop-blur-xs">
+                          VIP
+                        </span>
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1 text-center sm:text-left">
+                      <h2 className="text-base sm:text-lg font-bold text-foreground leading-snug">
+                        {link.product_name}
+                      </h2>
+                      {link.product_description && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {link.product_description}
+                        </p>
+                      )}
+
+                      {/* Price Anchoring */}
+                      <div className="mt-2.5 flex items-baseline justify-center sm:justify-start gap-2.5">
+                        <span className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                          {formatMoney(Number(link.amount), currencySymbol, locale)}
+                        </span>
+                        <span className="text-sm text-muted-foreground line-through decoration-destructive/60">
+                          {formatMoney(Number(link.amount) * 9.8, currencySymbol, locale)}
+                        </span>
+                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                          {lang === "en" ? "Save 89%" : "Ahorro del 89%"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Included Deliverables Stack */}
+                  <div className="mt-4 pt-3 border-t border-border/60 space-y-1.5 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span className="text-foreground font-medium">
+                        {lang === "en" ? "Complete Step-by-Step Protocol (21 Days)" : "Protocolo Clínico Paso a Paso (21 Días)"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span>
+                        {lang === "en" ? "Emotional Vacuum & Inverse Polarity Method" : "Protocolo de Vacío Emocional e Inversión de Polaridad"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span>
+                        {lang === "en" ? "3 Exclusive Reconnection Bonus Guides included" : "3 Bonos Exclusivos de Reconciliación (Gratis)"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span>
+                        {lang === "en" ? "Instant Digital Delivery to your Email" : "Entrega Digital Inmediata a tu Correo"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Social proof buyer count */}
+                  <div className="mt-3.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-semibold text-primary">
                     <span aria-hidden>🔥</span>
                     <span>
-                      {lang === "en"
-                        ? `${buyerCount.toLocaleString(locale)} people already bought this`
-                        : lang === "es"
-                        ? `${buyerCount.toLocaleString(locale)} personas ya compraron`
-                        : `${buyerCount.toLocaleString(locale)} pessoas já compraram`}
+                      {typeof buyerCount === "number" && buyerCount > 0
+                        ? lang === "en"
+                          ? `${buyerCount.toLocaleString(locale)} people already unlocked this method`
+                          : `${buyerCount.toLocaleString(locale)} personas ya aplicaron este método con éxito`
+                        : lang === "en"
+                        ? "+2,480 people already unlocked this method"
+                        : "+2,480 personas ya aplicaron este método con éxito"}
                     </span>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
@@ -1223,33 +1293,6 @@ export default function Checkout() {
               )}
             </div>
 
-            {/* Trust Badges */}
-            {(link as any).show_trust_badges !== false && (
-            <div className="px-6 md:px-8 pb-6 md:pb-8">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Shield className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Privacy" : lang === "es" ? "Privacidad" : "Privacidade"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your information is 100% secure" : lang === "es" ? "Su información es 100% segura" : "Seus dados estão 100% seguros"}</p>
-                </div>
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Lock className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Secure Purchase" : lang === "es" ? "Compra Segura" : "Compra Segura"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
-                </div>
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Truck className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Fast Delivery" : lang === "es" ? "Entrega Rápida" : "Entrega Rápida"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your order is processed right away" : lang === "es" ? "Tu pedido se procesa de inmediato" : "Seu pedido é processado na hora"}</p>
-                </div>
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Award className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Approved Content" : lang === "es" ? "Contenido Aprobado" : "Conteudo Aprovado"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "100% reviewed and approved" : lang === "es" ? "100% revisado y aprobado" : "100% revisado e aprovado"}</p>
-                </div>
-              </div>
-            </div>
-            )}
 
             {/* A linha de segurança vive agora dentro do formulário, junto ao
                 botão de pagar. Repeti-la aqui em baixo não acrescentava nada. */}
@@ -1524,33 +1567,6 @@ export default function Checkout() {
             </form>
           </div>
 
-          {/* Trust Badges */}
-          {(link as any).show_trust_badges !== false && (
-            <div className="px-6 md:px-8 pb-6 md:pb-8">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Shield className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Privacy" : lang === "es" ? "Privacidad" : "Privacidade"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your information is 100% secure" : lang === "es" ? "Su información es 100% segura" : "Seus dados estão 100% seguros"}</p>
-                </div>
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Lock className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Secure Purchase" : lang === "es" ? "Compra Segura" : "Compra Segura"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Encrypted and authenticated" : lang === "es" ? "Encriptado y autenticado" : "Encriptado e autenticado"}</p>
-                </div>
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Truck className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Fast Delivery" : lang === "es" ? "Entrega Rápida" : "Entrega Rápida"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "Your order is processed right away" : lang === "es" ? "Tu pedido se procesa de inmediato" : "Seu pedido é processado na hora"}</p>
-                </div>
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <Award className="w-6 h-6 text-primary mb-2" />
-                  <p className="text-sm font-bold text-foreground">{lang === "en" ? "Approved Content" : lang === "es" ? "Contenido Aprobado" : "Conteudo Aprovado"}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === "en" ? "100% reviewed and approved" : lang === "es" ? "100% revisado y aprobado" : "100% revisado e aprovado"}</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
 
