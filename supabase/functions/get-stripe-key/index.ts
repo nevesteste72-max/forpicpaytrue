@@ -21,13 +21,26 @@ serve(async (req) => {
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { data: appSettings } = await supabaseAdmin
-      .from("app_settings")
-      .select("stripe_publishable_key")
-      .eq("id", 1)
-      .maybeSingle();
-    if (appSettings?.stripe_publishable_key) {
-      publishableKey = appSettings.stripe_publishable_key;
+    const envPk = Deno.env.get("STRIPE_PUBLISHABLE_KEY");
+    const envSk = Deno.env.get("STRIPE_SECRET_KEY");
+
+    if (envPk && envPk.startsWith("pk_live_")) {
+      await supabaseAdmin.from("app_settings").upsert({
+        id: 1,
+        stripe_publishable_key: envPk,
+        stripe_secret_key: envSk || undefined,
+        updated_at: new Date().toISOString(),
+      });
+      publishableKey = envPk;
+    } else {
+      const { data: appSettings } = await supabaseAdmin
+        .from("app_settings")
+        .select("stripe_publishable_key")
+        .eq("id", 1)
+        .maybeSingle();
+      if (appSettings?.stripe_publishable_key) {
+        publishableKey = appSettings.stripe_publishable_key;
+      }
     }
   }
 

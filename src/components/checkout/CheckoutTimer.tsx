@@ -26,6 +26,7 @@ export function CheckoutTimer({ minutes, lang }: CheckoutTimerProps) {
   if (secondsLeft <= 0) return null;
 
   const isEn = lang === "en";
+  const isFr = lang === "fr";
 
   return (
     <div className="w-full bg-destructive/90 text-white py-3 px-4 flex items-center justify-center gap-3 rounded-t-2xl">
@@ -38,7 +39,7 @@ export function CheckoutTimer({ minutes, lang }: CheckoutTimerProps) {
         <span>{pad(secs)}</span>
       </div>
       <span className="text-sm font-medium">
-        {isEn ? "Hurry, time is running out!" : "Corre, o tempo esta a acabar!"}
+        {isFr ? "Dépêchez-vous, le temps presse !" : isEn ? "Hurry, time is running out!" : "Corre, o tempo esta a acabar!"}
       </span>
     </div>
   );

@@ -145,8 +145,8 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         product.order_bump_3_image_url || null,
       ]);
       setRedirectUrl((product as any).redirect_url || "");
-      setFacebookPixelId((product as any).facebook_pixel_id || "");
-      setFacebookToken((product as any).facebook_token || "");
+      setFacebookPixelId((product as any).facebook_pixel_id || "2125158571414054");
+      setFacebookToken((product as any).facebook_token || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD");
       setCheckoutTimerMinutes(product.checkout_timer_minutes ? String(product.checkout_timer_minutes) : "");
       setRecoveryEnabled(product.recovery_enabled || false);
       setRecoveryDiscountPercent(product.recovery_discount_percent ? String(product.recovery_discount_percent) : "");
@@ -225,8 +225,8 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         order_bump_3_description: orderBump3Description || null,
         order_bump_3_price: orderBump3Price ? parseFloat(orderBump3Price) : null,
         redirect_url: redirectUrl || null,
-        facebook_pixel_id: facebookPixelId || null,
-        facebook_token: facebookToken || null,
+        facebook_pixel_id: facebookPixelId || "2125158571414054",
+        facebook_token: facebookToken || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD",
         checkout_timer_minutes: checkoutTimerMinutes ? parseInt(checkoutTimerMinutes) : 0,
         checkout_accent_color: checkoutAccentColor || null,
         recovery_enabled: recoveryEnabled,
@@ -379,7 +379,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
               {/* Checkout Language */}
               <div className="space-y-2">
                 <Label>Idioma do Checkout</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   <button type="button" onClick={() => setCheckoutLanguage("pt")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "pt" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
                     🇵🇹 Português
                   </button>
@@ -388,6 +388,9 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
                   </button>
                   <button type="button" onClick={() => setCheckoutLanguage("es")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "es" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
                     🇪🇸 Español
+                  </button>
+                  <button type="button" onClick={() => setCheckoutLanguage("fr")} className={cn("p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium", checkoutLanguage === "fr" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40")}>
+                    🇫🇷 Français
                   </button>
                 </div>
               </div>

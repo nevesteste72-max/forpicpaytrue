@@ -22,7 +22,7 @@ interface PurchaseEmailRequest {
   lang?: string | null;
 }
 
-type Lang = "pt" | "en" | "es";
+type Lang = "pt" | "en" | "es" | "fr";
 
 const i18n = {
   pt: {
@@ -103,6 +103,32 @@ const i18n = {
     textTx: "ID de Transacción",
     locale: "es-ES",
   },
+  fr: {
+    subjectDigital: (p: string, a: string) => `Paiement confirmé : ${p} - ${a}`,
+    subjectPhysical: (p: string, a: string) => `Commande confirmée : ${p} - ${a}`,
+    heading: "Paiement Confirmé !",
+    thanksDigital: (n: string) => `Merci, ${n} — votre paiement a bien été reçu et votre commande est confirmée.`,
+    thanksPhysical: (n: string) => `Merci, ${n} — votre paiement a bien été reçu et votre commande sera expédiée bientôt.`,
+    amountPaid: "Montant Payé",
+    confirmedOn: (d: string) => `Confirmé le ${d}`,
+    orderSummary: "Résumé de la Commande",
+    totalPaid: "Total Payé",
+    physicalNotice: "📦 Votre commande est confirmée et en cours de préparation pour l'expédition. Nous vous tiendrons informé(e) de son avancement.",
+    accessProduct: "Accéder à Mon Produit",
+    trackOrder: "Suivre Ma Commande",
+    txId: (id: string) => `ID de Transaction : ${id}`,
+    footer: "Powered by OrderConfirm",
+    textConfirmed: "Paiement Confirmé !",
+    textHi: (n: string) => `Bonjour ${n},`,
+    textAmount: "Montant Payé",
+    textConfirmedOn: "Confirmé le",
+    textSummary: "Résumé de la Commande :",
+    textShipping: "Votre commande est en cours de préparation pour l'expédition. Nous vous tiendrons informé(e).",
+    textAccess: (u: string) => `Accédez à votre produit : ${u}`,
+    textTrack: (u: string) => `Suivez votre commande : ${u}`,
+    textTx: "ID de Transaction",
+    locale: "fr-FR",
+  },
 } as const;
 
 serve(async (req) => {
@@ -139,7 +165,7 @@ serve(async (req) => {
       );
     }
 
-    const lang: Lang = langInput && (langInput === "en" || langInput === "es" || langInput === "pt") ? langInput : "pt";
+    const lang: Lang = langInput && (langInput === "en" || langInput === "es" || langInput === "pt" || langInput === "fr") ? langInput : "pt";
     const t = i18n[lang];
 
     const isPhysical = product_type === "physical";

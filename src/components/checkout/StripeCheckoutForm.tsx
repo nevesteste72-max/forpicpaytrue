@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PaymentElement,
   useStripe,
@@ -25,6 +25,10 @@ const PHONE_PREFIXES = [
   // África do Sul / Moçambique (ZAR)
   { code: "+27", country: "🇿🇦 ZA", maxLen: 9 },
   { code: "+258", country: "🇲🇿 MZ", maxLen: 9 },
+  // França / Bélgica / Suíça (EUR — funil francês)
+  { code: "+33", country: "🇫🇷 FR", maxLen: 9 },
+  { code: "+32", country: "🇧🇪 BE", maxLen: 9 },
+  { code: "+41", country: "🇨🇭 CH", maxLen: 9 },
   // Lusófonos (EUR — aves / saúde bovina)
   { code: "+351", country: "🇵🇹 PT", maxLen: 9 },
   { code: "+55", country: "🇧🇷 BR", maxLen: 11 },
@@ -63,6 +67,7 @@ const CURRENCY_TO_PREFIX: Record<string, string> = {
   ZAR: "+27",
   MZN: "+258",
   USD: "+52",
+  MXN: "+52",
   GBP: "+44",
   EUR: "+351",
   BRL: "+55",
@@ -92,6 +97,8 @@ interface StripeCheckoutFormProps {
   trackingParams?: TrackingParams;
   hideCustomerFields?: boolean;
   stripePaymentMethods?: string[];
+  localCurrency?: { code: string; amount: number; symbol: string } | null;
+  showTrustBadges?: boolean;
 }
 
 export function StripeCheckoutForm({
@@ -114,20 +121,23 @@ export function StripeCheckoutForm({
   trackingParams,
   hideCustomerFields,
   stripePaymentMethods,
+  localCurrency,
+  showTrustBadges = true,
 }: StripeCheckoutFormProps) {
   const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
-  const walletOrNever = (method: string) => (enabledMethods.includes(method) ? "auto" : "never") as "auto" | "never";
-  // Display methods in the product's configured order, mapped to Stripe's canonical
-  // ids ("mbway" -> "mb_way"). MB Way (instant) is forced ABOVE Multibanco (slow
-  // reference) by listing multibanco last. Wallets (apple/google pay) are handled
-  // separately via `wallets`. Extra ids not offered by the account are ignored by Stripe.
+  // Display methods in optimal conversion order. Wallets (Apple Pay / Google Pay)
+  // are handled separately via `wallets: { applePay: 'auto', googlePay: 'auto' }`.
   const toStripeId = (m: string) => (m === "mbway" ? "mb_way" : m);
   const paymentMethodOrder = Array.from(
     new Set([
-      ...enabledMethods
-        .filter((m) => m !== "apple_pay" && m !== "google_pay")
-        .map(toStripeId),
+      "card",
+      "bizum",
+      "oxxo",
+      "mb_way",
       "multibanco",
+      "klarna",
+      "paypal",
+      ...enabledMethods.map(toStripeId),
     ])
   );
   const stripe = useStripe();
@@ -136,8 +146,16 @@ export function StripeCheckoutForm({
   const [customerName, setCustomerName] = useState(initialName || "");
   const [customerEmail, setCustomerEmail] = useState(initialEmail || "");
   const [customerPhone, setCustomerPhone] = useState(initialPhone || "");
-  const defaultPrefix = externalPrefix || CURRENCY_TO_PREFIX[currency?.toUpperCase()] || "+27";
+  const defaultPrefix = externalPrefix || (lang === "fr" ? "+33" : CURRENCY_TO_PREFIX[currency?.toUpperCase()]) || "+27";
   const [phonePrefix, setPhonePrefix] = useState(defaultPrefix);
+
+  useEffect(() => {
+    if (externalPrefix) {
+      setPhonePrefix(externalPrefix);
+    } else if (currency && CURRENCY_TO_PREFIX[currency.toUpperCase()]) {
+      setPhonePrefix(CURRENCY_TO_PREFIX[currency.toUpperCase()]);
+    }
+  }, [externalPrefix, currency]);
 
   const currentPrefix = PHONE_PREFIXES.find(p => p.code === phonePrefix) || PHONE_PREFIXES[0];
   const phonePlaceholder = currentPrefix.code === "+27" ? "82 123 4567" : currentPrefix.code === "+258" ? "84 123 4567" : "123 456 7890";
@@ -145,8 +163,9 @@ export function StripeCheckoutForm({
 
   const isEn = lang === "en";
   const isEs = lang === "es";
+  const isFr = lang === "fr";
 
-  const t = (pt: string, en: string, es: string) => isEs ? es : isEn ? en : pt;
+  const t = (pt: string, en: string, es: string, fr?: string) => isFr ? (fr ?? en) : isEs ? es : isEn ? en : pt;
 
   const handleNameChange = (val: string) => {
     setCustomerName(val);
@@ -172,18 +191,18 @@ export function StripeCheckoutForm({
     if (!stripe || !elements) return;
 
     if (!customerName.trim()) {
-      onError(t("Introduza o seu nome", "Please enter your name", "Ingrese su nombre"));
+      onError(t("Introduza o seu nome", "Please enter your name", "Ingrese su nombre", "Veuillez entrer votre nom"));
       return;
     }
 
     if (!customerEmail || !customerEmail.includes("@")) {
-      onError(t("Introduza um email válido", "Please enter a valid email", "Ingrese un email válido"));
+      onError(t("Introduza um email válido", "Please enter a valid email", "Ingrese un email válido", "Veuillez entrer un email valide"));
       return;
     }
 
     // Telefone obrigatório: métodos como MB Way exigem um número válido, senão o pagamento falha.
     if (!customerPhone || customerPhone.replace(/\D/g, "").length < 6) {
-      onError(t("Introduza um número de telefone válido", "Please enter a valid phone number", "Ingrese un número de teléfono válido"));
+      onError(t("Introduza um número de telefone válido", "Please enter a valid phone number", "Ingrese un número de teléfono válido", "Veuillez entrer un numéro de téléphone valide"));
       return;
     }
 
@@ -259,7 +278,7 @@ export function StripeCheckoutForm({
         } catch (notifyErr) {
           console.error("Failed to notify failed payment:", notifyErr);
         }
-        onError(error.message || t("Pagamento falhou", "Payment failed", "Pago fallido"));
+        onError(error.message || t("Pagamento falhou", "Payment failed", "Pago fallido", "Le paiement a échoué"));
         return;
       }
 
@@ -296,14 +315,14 @@ export function StripeCheckoutForm({
         if (status === "succeeded") {
           onSuccess();
         } else if (status === "processing") {
-          onError(t("Pagamento em processamento. Será notificado.", "Payment is processing. You will be notified.", "Pago en procesamiento. Será notificado."));
+          onError(t("Pagamento em processamento. Será notificado.", "Payment is processing. You will be notified.", "Pago en procesamiento. Será notificado.", "Paiement en cours de traitement. Vous serez notifié(e)."));
         } else {
-          onError(t("Pagamento falhou", "Payment failed", "Pago fallido"));
+          onError(t("Pagamento falhou", "Payment failed", "Pago fallido", "Le paiement a échoué"));
         }
       }
     } catch (err) {
       console.error("Stripe error:", err);
-      onError(t("Ocorreu um erro", "An error occurred", "Ocurrió un error"));
+      onError(t("Ocorreu um erro", "An error occurred", "Ocurrió un error", "Une erreur est survenue"));
     } finally {
       setProcessing(false);
     }
@@ -316,7 +335,7 @@ export function StripeCheckoutForm({
           {/* Name */}
           <div>
             <Label className="block text-sm font-semibold text-foreground mb-1.5">
-              {t("Nome Completo", "Full Name", "Nombre Completo")}
+              {t("Nome Completo", "Full Name", "Nombre Completo", "Nom Complet")}
             </Label>
             <Input
               type="text"
@@ -331,7 +350,7 @@ export function StripeCheckoutForm({
           {/* Email */}
           <div>
             <Label className="block text-sm font-semibold text-foreground mb-1.5">
-              {t("Email", "Email Address", "Correo Electrónico")}
+              {t("Email", "Email Address", "Correo Electrónico", "Adresse Email")}
             </Label>
             <Input
               type="email"
@@ -347,9 +366,9 @@ export function StripeCheckoutForm({
                 onClick={() => handleEmailChange(emailSuggestion)}
                 className="mt-1.5 text-xs text-left text-muted-foreground hover:text-foreground"
               >
-                {t("Quis dizer ", "Did you mean ", "¿Quisiste decir ")}
+                {t("Quis dizer ", "Did you mean ", "¿Quisiste decir ", "Vouliez-vous dire ")}
                 <span className="font-semibold underline">{emailSuggestion}</span>
-                {t("?", "?", "?")}
+                {t("?", "?", "?", "?")}
               </button>
             )}
           </div>
@@ -357,7 +376,7 @@ export function StripeCheckoutForm({
           {/* Phone with prefix selector */}
           <div>
             <Label className="block text-sm font-semibold text-foreground mb-1.5">
-              {t("Número de Telefone", "Phone Number", "Número de Teléfono")}
+              {t("Número de Telefone", "Phone Number", "Número de Teléfono", "Numéro de Téléphone")}
             </Label>
             <div className="relative flex">
               <select
@@ -395,16 +414,31 @@ export function StripeCheckoutForm({
       {/* Stripe PaymentElement */}
       <div className="pt-2">
         <Label className="block text-sm font-semibold text-foreground mb-3">
-          {t("Forma de pagamento", "Payment method", "Método de pago")}
+          {t("Forma de pagamento", "Payment method", "Método de pago", "Moyen de paiement")}
         </Label>
         <PaymentElement
           options={{
-            layout: "accordion",
-            business: {
-              name: "PicPay",
+            layout: {
+              type: "accordion",
+              defaultCollapsed: false,
+              radios: "always",
+              spacedAccordionItems: false,
+              visibleAccordionItemsCount: 3,
             },
-            wallets: { applePay: walletOrNever("apple_pay"), googlePay: walletOrNever("google_pay"), link: walletOrNever("link") },
-            paymentMethodOrder,
+            business: {
+              name: "Reconquista Inversa",
+            },
+            wallets: { applePay: "never", googlePay: "never", link: "never" },
+            paymentMethodOrder: [
+              "card",
+              "mb_way",
+              "bizum",
+              "oxxo",
+              "amazon_pay",
+              "klarna",
+              "paypal",
+              "multibanco",
+            ],
             // We already collect name/email/phone above and pass them in confirmParams,
             // so don't re-ask those. Address stays "auto" so methods that require it
             // (Klarna, PayPal, SEPA) can still collect it when selected.
@@ -428,25 +462,35 @@ export function StripeCheckoutForm({
         <div className="flex justify-between text-lg font-bold text-foreground">
           <span>Total</span>
           <span>
-            {formatMoney(totalAmount, currency, isEn ? "en-US" : "pt-PT")}
+            {formatMoney(totalAmount, currency, isFr ? "fr-FR" : isEs ? "es-ES" : isEn ? "en-US" : "pt-PT")}
           </span>
         </div>
+        {localCurrency && localCurrency.code !== currency && (
+          <div className="flex justify-between items-center text-xs text-muted-foreground bg-muted/60 px-3 py-2 rounded-xl border border-border/60">
+            <span>{isFr ? "Approx. dans votre devise :" : isEs ? "Aproximado en tu moneda:" : isEn ? "Approx. in your local currency:" : "Aprox. na tua moeda:"}</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              ≈ {(totalAmount * localCurrency.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {localCurrency.code}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Garantia — reduz o medo mesmo antes de pagar */}
-      <div className="flex items-center gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] p-3">
-        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" />
+      {showTrustBadges && (
+        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] p-3">
+          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground leading-tight">
+              {t("Garantia de 7 dias — risco zero", "7-day guarantee — zero risk", "Garantía de 7 días — riesgo cero", "Garantie 30 jours — risque zéro")}
+            </p>
+            <p className="text-xs text-muted-foreground leading-tight mt-0.5">
+              {t("Se não gostares, devolvemos 100% do teu dinheiro.", "Not happy? We refund 100%, no questions.", "Si no te gusta, te devolvemos el 100%.", "Pas satisfait(e) ? Nous vous remboursons à 100%, sans question.")}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground leading-tight">
-            {t("Garantia de 7 dias — risco zero", "7-day guarantee — zero risk", "Garantía de 7 días — riesgo cero")}
-          </p>
-          <p className="text-xs text-muted-foreground leading-tight mt-0.5">
-            {t("Se não gostares, devolvemos 100% do teu dinheiro.", "Not happy? We refund 100%, no questions.", "Si no te gusta, te devolvemos el 100%.")}
-          </p>
-        </div>
-      </div>
+      )}
 
       <Button
         type="submit"
@@ -458,8 +502,8 @@ export function StripeCheckoutForm({
         ) : (
           <>
             {(() => {
-              const amt = formatMoney(totalAmount, currency, isEn ? "en-US" : "pt-PT");
-              return isEn ? `Pay Now - ${amt}` : isEs ? `Pagar Ahora - ${amt}` : `Pagar Agora - ${amt}`;
+              const amt = formatMoney(totalAmount, currency, isFr ? "fr-FR" : isEn ? "en-US" : "pt-PT");
+              return isFr ? `Payer Maintenant - ${amt}` : isEn ? `Pay Now - ${amt}` : isEs ? `Pagar Ahora - ${amt}` : `Pagar Agora - ${amt}`;
             })()}
           </>
         )}
@@ -468,10 +512,12 @@ export function StripeCheckoutForm({
       {/* Uma linha de confiança: o nome da Stripe é o que transfere credibilidade.
           Tudo o resto que aqui estava repetia a garantia acima do botão, o
           seletor de métodos no topo, ou a si próprio. */}
-      <p className="pt-1 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
-        <Lock className="w-3 h-3" />
-        {t("Pagamento seguro processado pela Stripe", "Secure payment processed by Stripe", "Pago seguro procesado por Stripe")}
-      </p>
+      {showTrustBadges && (
+        <p className="pt-1 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
+          <Lock className="w-3 h-3" />
+          {t("Pagamento seguro processado pela Stripe", "Secure payment processed by Stripe", "Pago seguro procesado por Stripe", "Paiement sécurisé traité par Stripe")}
+        </p>
+      )}
     </form>
   );
 }

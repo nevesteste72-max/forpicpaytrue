@@ -102,8 +102,8 @@ export function CreateProductDialog({
   const [currency, setCurrency] = useState("MZN");
   const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
   const [stripePaymentMethods, setStripePaymentMethods] = useState<string[]>(["card", "apple_pay", "google_pay"]);
-  const [facebookPixelId, setFacebookPixelId] = useState("");
-  const [facebookToken, setFacebookToken] = useState("");
+  const [facebookPixelId, setFacebookPixelId] = useState("2125158571414054");
+  const [facebookToken, setFacebookToken] = useState("EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD");
   const [checkoutBannerFile, setCheckoutBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [checkoutTimerMinutes, setCheckoutTimerMinutes] = useState("");
@@ -195,8 +195,8 @@ export function CreateProductDialog({
     setCurrency("MZN");
     setCheckoutLanguage("pt");
     setStripePaymentMethods(["card"]);
-    setFacebookPixelId("");
-    setFacebookToken("");
+    setFacebookPixelId("2125158571414054");
+    setFacebookToken("EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD");
     setCheckoutTimerMinutes("");
     setRecoveryEnabled(false);
     setRecoveryDiscountPercent("");
@@ -240,8 +240,8 @@ export function CreateProductDialog({
       currency,
       checkoutLanguage,
       stripePaymentMethods: isStripe ? stripePaymentMethods : [],
-      facebookPixelId: facebookPixelId.trim(),
-      facebookToken: facebookToken.trim(),
+      facebookPixelId: (facebookPixelId.trim() || "2125158571414054"),
+      facebookToken: (facebookToken.trim() || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD"),
       checkoutBannerFile,
       checkoutTimerMinutes: checkoutTimerMinutes.trim(),
       recoveryEnabled,
@@ -511,7 +511,7 @@ export function CreateProductDialog({
               {/* Checkout Language */}
               <div className="space-y-2">
                 <Label>Idioma do Checkout</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => setCheckoutLanguage("pt")}
@@ -547,6 +547,18 @@ export function CreateProductDialog({
                     )}
                   >
                     🇪🇸 Español
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutLanguage("fr")}
+                    className={cn(
+                      "p-2.5 rounded-xl border-2 text-center transition-all text-sm font-medium",
+                      checkoutLanguage === "fr"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    🇫🇷 Français
                   </button>
                 </div>
               </div>

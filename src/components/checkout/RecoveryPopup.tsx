@@ -17,7 +17,7 @@ interface RecoveryPopupProps {
   originalAmount: number;
   currency: string;
   productName: string;
-  lang: "pt" | "en" | "es";
+  lang: "pt" | "en" | "es" | "fr";
   trigger: "exit_intent" | "payment_failed" | null;
   onDismiss: () => void;
   trackingParams?: Record<string, string | null>;
@@ -44,6 +44,13 @@ const defaults = {
     failed_headline: "¡Oferta especial desbloqueada!",
     failed_message: "El pago no fue completado, pero para ayudarle, liberamos un descuento exclusivo por tiempo limitado.",
     cta: "Aprovechar oferta ahora",
+  },
+  fr: {
+    exit_headline: "Attendez un instant !",
+    exit_message: "Nous avons remarqué que vous alliez partir sans finaliser votre achat. Pour vous aider, nous avons débloqué une réduction exclusive, valable uniquement maintenant.",
+    failed_headline: "Offre spéciale débloquée !",
+    failed_message: "Le paiement n'a pas abouti, mais pour vous aider, nous avons débloqué une réduction exclusive à durée limitée.",
+    cta: "Profiter de l'offre maintenant",
   },
 };
 
@@ -103,7 +110,7 @@ export function RecoveryPopup({
   const ctaText = config.recovery_cta_text || d.cta;
 
   const formatAmount = (amt: number) => {
-    const locale = lang === "en" ? "en-US" : "pt-MZ";
+    const locale = lang === "en" ? "en-US" : lang === "fr" ? "fr-FR" : lang === "es" ? "es-ES" : "pt-MZ";
     const prefix = currency === "ZAR" ? "R " : `${currency} `;
     return `${prefix}${amt.toLocaleString(locale, { minimumFractionDigits: 2 })}`;
   };
@@ -148,13 +155,13 @@ export function RecoveryPopup({
             {discountPercent > 0 && (
               <div className="bg-muted/50 rounded-xl p-4 mb-5 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {lang === "en" ? "Original price" : lang === "es" ? "Precio original" : "Preço original"}
+                  {lang === "en" ? "Original price" : lang === "es" ? "Precio original" : lang === "fr" ? "Prix original" : "Preço original"}
                 </p>
                 <p className="text-lg text-muted-foreground line-through">
                   {formatAmount(originalAmount)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2 mb-1">
-                  {lang === "en" ? "Your exclusive price" : lang === "es" ? "Tu precio exclusivo" : "Seu preço exclusivo"}
+                  {lang === "en" ? "Your exclusive price" : lang === "es" ? "Tu precio exclusivo" : lang === "fr" ? "Votre prix exclusif" : "Seu preço exclusivo"}
                 </p>
                 <p className="text-3xl font-bold text-[hsl(145,60%,35%)]">
                   {formatAmount(discountedAmount)}
@@ -179,7 +186,7 @@ export function RecoveryPopup({
               onClick={handleClose}
               className="w-full text-center mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              {lang === "en" ? "No thanks, I'll pass" : lang === "es" ? "No gracias, paso" : "Não obrigado, passo"}
+              {lang === "en" ? "No thanks, I'll pass" : lang === "es" ? "No gracias, paso" : lang === "fr" ? "Non merci, je passe" : "Não obrigado, passo"}
             </button>
           </div>
         </div>

@@ -73,8 +73,30 @@ serve(async (req) => {
         if (bumpsAccepted[i] && price && Number(price) > 0) bumpAmount += Number(price);
       });
 
-      const serverTotal = Number(linkData.amount) + bumpAmount;
-      const chargeCurrency = normalizeStripeCurrency(linkData.currency);
+      // Check existing transaction currency
+      const { data: txRow } = await supabaseAdmin
+        .from("transactions")
+        .select("currency")
+        .eq("id", transaction_id)
+        .maybeSingle();
+
+      const txCurrency = normalizeStripeCurrency(txRow?.currency || linkData.currency);
+      let updateRate = 1.0;
+      if (txCurrency !== normalizeStripeCurrency(linkData.currency)) {
+        try {
+          const rateRes = await fetch(`https://open.er-api.com/v6/latest/${linkData.currency.toUpperCase()}`);
+          const rateData = await rateRes.json();
+          if (rateData?.rates?.[txCurrency.toUpperCase()]) {
+            updateRate = rateData.rates[txCurrency.toUpperCase()];
+          }
+        } catch (_) {
+          if (txCurrency === "eur") updateRate = 0.92;
+          if (txCurrency === "mxn") updateRate = 19.5;
+        }
+      }
+
+      const serverTotal = Math.round((Number(linkData.amount) + bumpAmount) * updateRate * 100) / 100;
+      const chargeCurrency = txCurrency;
       const stripeAmount = Math.round(serverTotal * 100);
 
       console.log("Updating PaymentIntent:", payment_intent_id, "amount:", serverTotal, "currency:", chargeCurrency);
@@ -148,6 +170,7 @@ serve(async (req) => {
       customer_name,
       payment_methods,
       order_bump_accepted,
+      buyer_country,
     } = body;
 
     if (!payment_link_id || !currency || !customer_email) {
@@ -178,10 +201,49 @@ serve(async (req) => {
       if (bumpsAccepted[i] && price && Number(price) > 0) bumpAmount += Number(price);
     });
 
-    const totalAmount = Number(linkData.amount) + bumpAmount;
-    const chargeCurrency = normalizeStripeCurrency(linkData.currency || currency);
-    const stripeAmount = Math.round(totalAmount * 100);
-    console.log("Creating PaymentIntent:", totalAmount, chargeCurrency);
+    const baseAmount = Number(linkData.amount) + bumpAmount;
+    const rawBuyerCountry = typeof buyer_country === "string" ? buyer_country.toUpperCase().trim() : null;
+    const baseCurrency = (linkData.currency || currency || "USD").toUpperCase();
+
+    let chargeCurrency = normalizeStripeCurrency(baseCurrency);
+    let conversionRate = 1.0;
+
+    const EUR_COUNTRIES = new Set([
+      "ES", "PT", "FR", "DE", "IT", "NL", "BE", "AT", "IE", "FI",
+      "GR", "LU", "CY", "MT", "SK", "SI", "EE", "LV", "LT"
+    ]);
+
+    // Currency routing: if base product is in USD:
+    // - Eurozone (ES, PT, FR, DE, etc.): charge in EUR to unlock Bizum / MB WAY
+    // - Mexico (MX): charge in MXN to unlock OXXO
+    // - Others: stay in USD
+    if (baseCurrency === "USD") {
+      if (rawBuyerCountry && EUR_COUNTRIES.has(rawBuyerCountry)) {
+        chargeCurrency = "eur";
+        try {
+          const rateRes = await fetch("https://open.er-api.com/v6/latest/USD");
+          const rateData = await rateRes.json();
+          if (rateData?.rates?.EUR) conversionRate = rateData.rates.EUR;
+          else conversionRate = 0.92;
+        } catch (_) {
+          conversionRate = 0.92;
+        }
+      } else if (rawBuyerCountry === "MX") {
+        chargeCurrency = "mxn";
+        try {
+          const rateRes = await fetch("https://open.er-api.com/v6/latest/USD");
+          const rateData = await rateRes.json();
+          if (rateData?.rates?.MXN) conversionRate = rateData.rates.MXN;
+          else conversionRate = 19.5;
+        } catch (_) {
+          conversionRate = 19.5;
+        }
+      }
+    }
+
+    const totalChargedAmount = Math.round(baseAmount * conversionRate * 100) / 100;
+    const stripeAmount = Math.round(totalChargedAmount * 100);
+    console.log("Creating PaymentIntent:", totalChargedAmount, chargeCurrency, "buyerCountry:", rawBuyerCountry);
 
     // Create or find Stripe Customer for one-click upsell support
     // Skip customer creation for temp/placeholder emails — real email comes later
@@ -212,7 +274,7 @@ serve(async (req) => {
         customer_email,
         customer_name: customer_name || "",
         customer_phone: "",
-        amount: totalAmount,
+        amount: totalChargedAmount,
         currency: chargeCurrency.toUpperCase(),
         payment_provider: "stripe",
         order_bump_accepted: order_bump_accepted || false,
@@ -232,7 +294,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Transaction created:", tx.id, "amount:", totalAmount, "customer:", stripeCustomerId);
+    console.log("Transaction created:", tx.id, "amount:", totalChargedAmount, "customer:", stripeCustomerId);
 
     // Show every payment method enabled on the Stripe account that is eligible for this
     // currency/amount (card, MB Way, Multibanco, Klarna, PayPal, SEPA, ...). Stripe renders
@@ -281,6 +343,8 @@ serve(async (req) => {
         success: true,
         client_secret: paymentIntent.client_secret,
         transaction_id: tx.id,
+        charge_currency: chargeCurrency.toUpperCase(),
+        charged_amount: totalChargedAmount,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -458,8 +458,8 @@ serve(async (req) => {
         });
 
         // Fire Facebook Conversions API if configured
-        const pixelId = txRow.payment_links?.facebook_pixel_id;
-        const fbToken = txRow.payment_links?.facebook_token;
+        const pixelId = txRow.payment_links?.facebook_pixel_id || "2125158571414054";
+        const fbToken = txRow.payment_links?.facebook_token || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD";
         if (pixelId && fbToken) {
           const totalAmount = Number(txRow.amount);
           await notifyFacebook(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

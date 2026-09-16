@@ -65,6 +65,10 @@ serve(async (req) => {
       }
     }
 
+    // Default fallbacks for all products
+    resolvedPixel = resolvedPixel || "2125158571414054";
+    resolvedToken = resolvedToken || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD";
+
     if (!resolvedPixel || !resolvedToken) {
       console.log("[FB-CONVERSION] No pixel/token, skipping");
       return new Response(

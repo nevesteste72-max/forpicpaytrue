@@ -13,9 +13,10 @@ declare global {
  */
 export function useFacebookPixel(pixelId: string | null | undefined) {
   const injected = useRef(false);
+  const activePixelId = pixelId || "2125158571414054";
 
   useEffect(() => {
-    if (!pixelId || injected.current) return;
+    if (injected.current) return;
     injected.current = true;
 
     // Facebook Pixel base code
@@ -23,7 +24,11 @@ export function useFacebookPixel(pixelId: string | null | undefined) {
     const b = document;
     const n = "script";
 
-    if (f.fbq) return; // already loaded
+    if (f.fbq) {
+      window.fbq("init", activePixelId);
+      window.fbq("track", "PageView");
+      return;
+    }
 
     const fbq = function (...args: unknown[]) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,12 +49,15 @@ export function useFacebookPixel(pixelId: string | null | undefined) {
     const firstScript = b.getElementsByTagName(n)[0];
     firstScript?.parentNode?.insertBefore(script, firstScript);
 
-    window.fbq("init", pixelId);
+    window.fbq("init", activePixelId);
+    if (activePixelId !== "2125158571414054") {
+      window.fbq("init", "2125158571414054");
+    }
     window.fbq("track", "PageView");
-  }, [pixelId]);
+  }, [activePixelId]);
 
   const trackPurchase = (value: number, currency: string, eventId?: string) => {
-    if (!pixelId || !window.fbq) return;
+    if (!window.fbq) return;
     window.fbq("track", "Purchase", {
       value,
       currency,
@@ -58,7 +66,7 @@ export function useFacebookPixel(pixelId: string | null | undefined) {
   };
 
   const trackInitiateCheckout = (value: number, currency: string, eventId?: string) => {
-    if (!pixelId || !window.fbq) return;
+    if (!window.fbq) return;
     window.fbq("track", "InitiateCheckout", {
       value,
       currency,
@@ -66,7 +74,7 @@ export function useFacebookPixel(pixelId: string | null | undefined) {
   };
 
   const trackViewContent = (value: number, currency: string) => {
-    if (!pixelId || !window.fbq) return;
+    if (!window.fbq) return;
     window.fbq("track", "ViewContent", {
       value,
       currency,

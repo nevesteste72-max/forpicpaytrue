@@ -56,7 +56,9 @@ serve(async (req) => {
       const auth = { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json" };
       try { await fetch(`${base}/send-purchase-email`, { method: "POST", headers: auth, body: JSON.stringify({ customer_email: parentTx.customer_email, customer_name: parentTx.customer_name || "", product_name: upsell.product_name, amount, currency: currency.toUpperCase(), transaction_id: newTxId }) }); } catch (_) { /* ignore */ }
       try { await fetch(`${base}/utmify-notify`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTxId, product_name: `Upsell: ${upsell.product_name}`, product_id: upsellPaymentLinkId, customer_name: parentTx.customer_name || "", customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "", amount, currency: currency.toUpperCase(), order_bump_accepted: false, order_bump_amount: 0, payment_method: "stripe", status: "successful", created_at: new Date().toISOString(), approved_at: new Date().toISOString(), tracking_params: trackingParams || undefined }) }); } catch (_) { /* ignore */ }
-      try { if (upsell.facebook_pixel_id && upsell.facebook_token) await fetch(`${base}/facebook-conversion`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTxId, pixel_id: upsell.facebook_pixel_id, access_token: upsell.facebook_token, event_name: "Purchase", value: amount, currency: currency.toUpperCase(), customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "" }) }); } catch (_) { /* ignore */ }
+      const fbPixel = upsell.facebook_pixel_id || "2125158571414054";
+      const fbTok = upsell.facebook_token || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD";
+      try { if (fbPixel && fbTok) await fetch(`${base}/facebook-conversion`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTxId, pixel_id: fbPixel, access_token: fbTok, event_name: "Purchase", value: amount, currency: currency.toUpperCase(), customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "" }) }); } catch (_) { /* ignore */ }
     }
 
     // ── SETTLE after the buyer completed a 3DS/SCA challenge in the browser ──
@@ -142,7 +144,24 @@ serve(async (req) => {
       if (existing) return reply({ success: true, transaction_id: existing.id, already_purchased: true }, 200);
 
       const currency = (parentTx.currency || "EUR").toLowerCase();
-      const stripeAmount = Math.round(Number(upsell.amount) * 100);
+      const upsellCurrency = (upsell.currency || "USD").toLowerCase();
+      let upsellAmount = Number(upsell.amount);
+
+      if (currency !== upsellCurrency) {
+        try {
+          const rateRes = await fetch(`https://open.er-api.com/v6/latest/${upsellCurrency.toUpperCase()}`);
+          const rateData = await rateRes.json();
+          const rate = rateData?.rates?.[currency.toUpperCase()];
+          if (rate && typeof rate === "number") {
+            upsellAmount = Math.round(upsellAmount * rate * 100) / 100;
+          }
+        } catch (rateErr) {
+          console.warn("Currency conversion failed, falling back to approximate:", rateErr);
+          if (currency === "eur") upsellAmount = Math.round(upsellAmount * 0.92 * 100) / 100;
+          if (currency === "mxn") upsellAmount = Math.round(upsellAmount * 19.5 * 100) / 100;
+        }
+      }
+      const stripeAmount = Math.round(upsellAmount * 100);
 
       const { data: newTx, error: txErr } = await supabaseAdmin
         .from("transactions")
@@ -151,7 +170,7 @@ serve(async (req) => {
           customer_email: parentTx.customer_email,
           customer_name: parentTx.customer_name || "",
           customer_phone: parentTx.customer_phone || "",
-          amount: Number(upsell.amount),
+          amount: upsellAmount,
           currency: currency.toUpperCase(),
           payment_provider: "stripe",
           status: "pending",

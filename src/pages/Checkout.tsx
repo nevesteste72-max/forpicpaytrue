@@ -174,6 +174,49 @@ type SelectedMethod = "mpesa" | "emola" | null;
 
 // i18n labels
 const labels = {
+  fr: {
+    name: "Nom",
+    namePlaceholder: "Votre nom complet",
+    email: "Email pour la réception",
+    emailPlaceholder: "exemple@email.com",
+    emailSuggest: "Vouliez-vous dire",
+    phone: "Numéro de Téléphone",
+    phoneMpesa: "Numéro M-Pesa",
+    phoneEmola: "Numéro eMola",
+    paymentMethod: "Moyen de paiement",
+    total: "Total",
+    payMpesa: "Payer avec M-Pesa",
+    payEmola: "Payer avec eMola",
+    securePayment: "Paiement traité en toute sécurité via l'API M-Pesa",
+    securePaymentEmola: "Paiement traité en toute sécurité via l'API eMola",
+    emolaSoon: "Bientôt disponible",
+    processing: "Envoi à M-Pesa...",
+    processingEmola: "Envoi à eMola...",
+    processingDesc: "Veuillez patienter pendant que nous lançons le paiement",
+    confirmPhone: "Confirmez sur votre téléphone",
+    confirmPhoneDesc: "Entrez votre code PIN M-Pesa sur votre téléphone pour finaliser le paiement",
+    confirmPhoneDescEmola: "Entrez votre code PIN eMola sur votre téléphone pour finaliser le paiement",
+    totalValue: "Montant total",
+    waiting: "En attente de confirmation...",
+    cancel: "Annuler",
+    paymentReceived: "Paiement Reçu !",
+    receiptSent: "Nous avons envoyé le reçu à votre email.",
+    receiptSentSpamNotice: "Vous ne l'avez pas reçu ? Vérifiez votre dossier Spam ou l'onglet Promotions de votre boîte mail.",
+    accessContent: "Accéder au Contenu",
+    paymentFailed: "Échec du Paiement",
+    tryAgain: "Réessayer",
+    notFound: "Lien introuvable",
+    notFoundDesc: "Ce lien de paiement n'existe pas ou a été désactivé.",
+    invalidEmail: "Email invalide",
+    invalidEmailDesc: "Veuillez saisir un email valide",
+    phoneRequired: "Le numéro de téléphone est obligatoire",
+    phoneInvalid: "Numéro invalide. Utilisez le format : 84XXXXXXX ou 85XXXXXXX",
+    phoneInvalidEmola: "Numéro invalide. Utilisez le format : 86XXXXXXX ou 87XXXXXXX",
+    paymentDeclined: "Le paiement a été refusé ou annulé.",
+    connectionError: "Erreur de connexion. Veuillez réessayer.",
+    stripeProcessing: "Traitement du paiement...",
+    selectMethod: "Sélectionnez un moyen de paiement",
+  },
   pt: {
     name: "Nome",
     namePlaceholder: "Seu nome completo",
@@ -305,6 +348,33 @@ const labels = {
   },
 };
 
+const COUNTRY_CODE_TO_PREFIX: Record<string, string> = {
+  MX: "+52",
+  ES: "+34",
+  PT: "+351",
+  CO: "+57",
+  AR: "+54",
+  CL: "+56",
+  PE: "+51",
+  EC: "+593",
+  VE: "+58",
+  GT: "+502",
+  BO: "+591",
+  HN: "+504",
+  PY: "+595",
+  SV: "+503",
+  NI: "+505",
+  CR: "+506",
+  PA: "+507",
+  UY: "+598",
+  BR: "+55",
+  US: "+1",
+  GB: "+44",
+  MZ: "+258",
+  AO: "+244",
+  ZA: "+27",
+};
+
 export default function Checkout() {
   const { linkId } = useParams<{ linkId: string }>();
   const [searchParams] = useSearchParams();
@@ -421,35 +491,63 @@ export default function Checkout() {
     };
   }, [searchParams]);
 
-  const lang = (link?.checkout_language || "en") as "pt" | "en" | "es";
+  const lang = (link?.checkout_language || "en") as "pt" | "en" | "es" | "fr";
   const t = labels[lang];
   const isStripe = link?.currency !== "MZN";
   const isEmola = selectedMethod === "emola";
   const currencySymbol = link?.currency || "MZN";
-  const locale = lang === "en" ? "en-US" : "pt-MZ";
+  const locale = lang === "en" ? "en-US" : lang === "fr" ? "fr-FR" : lang === "es" ? "es-ES" : "pt-MZ";
 
   // Local currency conversion for USD products
   const [localCurrency, setLocalCurrency] = useState<{ code: string; amount: number; symbol: string } | null>(null);
+  // Buyer's country (ISO2), used server-side to decide whether to charge in a
+  // local currency (e.g. MXN + OXXO for Mexico, EUR + Bizum for Spain).
+  const [buyerCountry, setBuyerCountry] = useState<string | null>(null);
+  const [stripeChargeCurrency, setStripeChargeCurrency] = useState<string | null>(null);
+  const [stripeChargeAmount, setStripeChargeAmount] = useState<number | null>(null);
+  // Gates PaymentIntent creation until geolocation resolves (or times out), so
+  // we never create the intent in USD and then have to switch currency later.
+  const [geoChecked, setGeoChecked] = useState(false);
 
   useEffect(() => {
-    if (link?.currency !== "USD" || !link) return;
+    if (!link) return;
+    if (link.currency !== "USD") {
+      setGeoChecked(true);
+      return;
+    }
+    let cancelled = false;
     const detectAndConvert = async () => {
       try {
-        const res = await fetch("https://ipapi.co/json/");
+        const res = await Promise.race([
+          fetch("https://ipapi.co/json/"),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error("geo timeout")), 3000)),
+        ]);
         const geo = await res.json();
+        if (cancelled) return;
+        if (geo.country_code) {
+          setBuyerCountry(geo.country_code);
+          const detectedPrefix = COUNTRY_CODE_TO_PREFIX[geo.country_code.toUpperCase()];
+          if (detectedPrefix) {
+            setPhonePrefix((prev) => prev || detectedPrefix);
+          }
+        }
         const userCurrency = geo.currency || null;
         if (!userCurrency || userCurrency === "USD") return;
         const rateRes = await fetch(`https://open.er-api.com/v6/latest/USD`);
         const rateData = await rateRes.json();
+        if (cancelled) return;
         const rate = rateData.rates?.[userCurrency];
         if (rate) {
           setLocalCurrency({ code: userCurrency, amount: rate, symbol: userCurrency });
         }
       } catch (err) {
         console.error("Currency conversion error:", err);
+      } finally {
+        if (!cancelled) setGeoChecked(true);
       }
     };
     detectAndConvert();
+    return () => { cancelled = true; };
   }, [link?.currency, link?.id]);
 
   // Facebook Pixel
@@ -526,12 +624,14 @@ export default function Checkout() {
     init();
   }, [isStripe, link?.id]);
 
-  // Auto-create PaymentIntent on page load for Stripe
+  // Auto-create PaymentIntent on page load for Stripe. Waits for geolocation
+  // (geoChecked) on USD products so the intent is created with the right
+  // currency from the start, instead of in USD and switched later.
   useEffect(() => {
-    if (isStripe && link && !clientSecret && !stripeLoading && stripeInstance) {
+    if (isStripe && link && !clientSecret && !stripeLoading && stripeInstance && geoChecked) {
       createStripePaymentIntent();
     }
-  }, [isStripe, link?.id, stripeInstance]);
+  }, [isStripe, link?.id, stripeInstance, geoChecked]);
 
   // Create PaymentIntent
   const createStripePaymentIntent = async () => {
@@ -557,6 +657,7 @@ export default function Checkout() {
             order_bump_accepted: bumpAccepted,
             bumps_accepted: bumpsAccepted,
             order_bump_amount: bumpAmount,
+            buyer_country: buyerCountry || undefined,
           }),
         }
       );
@@ -564,6 +665,8 @@ export default function Checkout() {
       if (result.success && result.client_secret) {
         setClientSecret(result.client_secret);
         setStripeTransactionId(result.transaction_id);
+        if (result.charge_currency) setStripeChargeCurrency(result.charge_currency);
+        if (result.charged_amount) setStripeChargeAmount(result.charged_amount);
         const piId = result.client_secret.split("_secret_")[0];
         setStripePaymentIntentId(piId);
         // Persist so we can fire the browser Purchase when a redirect method
@@ -922,7 +1025,7 @@ export default function Checkout() {
           borderRadius: "12px",
         },
       },
-      locale: (lang === "pt" ? "pt-BR" : "en") as "pt-BR" | "en",
+      locale: (lang === "es" ? "es" : lang === "fr" ? "fr" : lang === "pt" ? "pt-BR" : "en") as any,
     };
   }, [clientSecret, lang]);
 
@@ -1157,10 +1260,10 @@ export default function Checkout() {
                 <div className="bg-primary/10 border-b border-primary/15 px-4 py-2 flex items-center justify-between">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
-                    {lang === "en" ? "Official Special Access" : lang === "es" ? "Acceso Oficial Inmediato" : "Acesso Oficial Imediato"}
+                    {lang === "en" ? "Official Special Access" : lang === "es" ? "Acceso Oficial Inmediato" : lang === "fr" ? "Accès Officiel Immédiat" : "Acesso Oficial Imediato"}
                   </span>
                   <span className="text-[10px] font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded-full uppercase tracking-wide">
-                    {lang === "en" ? "89% OFF" : "89% DCTO"}
+                    {lang === "en" ? "89% OFF" : lang === "fr" ? "-89%" : "89% DCTO"}
                   </span>
                 </div>
 
@@ -1189,16 +1292,26 @@ export default function Checkout() {
                       )}
 
                       {/* Price Anchoring */}
-                      <div className="mt-2.5 flex items-baseline justify-center sm:justify-start gap-2.5">
-                        <span className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                          {formatMoney(Number(link.amount), currencySymbol, locale)}
-                        </span>
-                        <span className="text-sm text-muted-foreground line-through decoration-destructive/60">
-                          {formatMoney(Number(link.amount) * 9.8, currencySymbol, locale)}
-                        </span>
-                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-                          {lang === "en" ? "Save 89%" : "Ahorro del 89%"}
-                        </span>
+                      <div className="mt-2.5 space-y-1">
+                        <div className="flex items-baseline justify-center sm:justify-start gap-2.5">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                            {formatMoney(stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * Number(link.amount)) : Number(link.amount), stripeChargeCurrency || currencySymbol, locale)}
+                          </span>
+                          <span className="text-sm text-muted-foreground line-through decoration-destructive/60">
+                            {formatMoney((stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * Number(link.amount)) : Number(link.amount)) * 9.8, stripeChargeCurrency || currencySymbol, locale)}
+                          </span>
+                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                            {lang === "en" ? "Save 89%" : lang === "fr" ? "Économisez 89%" : "Ahorro del 89%"}
+                          </span>
+                        </div>
+                        {localCurrency && (stripeChargeCurrency || link?.currency) !== localCurrency.code && (
+                          <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 text-center sm:text-left">
+                            ≈ {(Number(link.amount) * localCurrency.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {localCurrency.code}
+                            <span className="text-[10px] font-normal text-muted-foreground ml-1">
+                              ({lang === "en" ? "estimated in your currency" : lang === "fr" ? "estimé dans votre devise" : "estimado en tu moneda local"})
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1208,25 +1321,25 @@ export default function Checkout() {
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
                       <span className="text-foreground font-medium">
-                        {lang === "en" ? "Complete Step-by-Step Protocol (21 Days)" : "Protocolo Clínico Paso a Paso (21 Días)"}
+                        {lang === "en" ? "Complete Step-by-Step Protocol (21 Days)" : lang === "fr" ? "Protocole Complet Étape par Étape (21 Jours)" : "Protocolo Clínico Paso a Paso (21 Días)"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
                       <span>
-                        {lang === "en" ? "Emotional Vacuum & Inverse Polarity Method" : "Protocolo de Vacío Emocional e Inversión de Polaridad"}
+                        {lang === "en" ? "Emotional Vacuum & Inverse Polarity Method" : lang === "fr" ? "500 Recettes Anti-Inflammatoires + 9 Bonus Exclusifs" : "Protocolo de Vacío Emocional e Inversión de Polaridad"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
                       <span>
-                        {lang === "en" ? "3 Exclusive Reconnection Bonus Guides included" : "3 Bonos Exclusivos de Reconciliación (Gratis)"}
+                        {lang === "en" ? "3 Exclusive Reconnection Bonus Guides included" : lang === "fr" ? "Téléchargement Immédiat après Paiement" : "3 Bonos Exclusivos de Reconciliación (Gratis)"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
                       <span>
-                        {lang === "en" ? "Instant Digital Delivery to your Email" : "Entrega Digital Inmediata a tu Correo"}
+                        {lang === "en" ? "Instant Digital Delivery to your Email" : lang === "fr" ? "Accès Direct sur la Page de Confirmation" : "Entrega Digital Inmediata a tu Correo"}
                       </span>
                     </div>
                   </div>
@@ -1238,9 +1351,13 @@ export default function Checkout() {
                       {typeof buyerCount === "number" && buyerCount > 0
                         ? lang === "en"
                           ? `${buyerCount.toLocaleString(locale)} people already unlocked this method`
+                          : lang === "fr"
+                          ? `${buyerCount.toLocaleString(locale)} personnes ont déjà téléchargé ce guide`
                           : `${buyerCount.toLocaleString(locale)} personas ya aplicaron este método con éxito`
                         : lang === "en"
                         ? "+2,480 people already unlocked this method"
+                        : lang === "fr"
+                        ? "+2 480 personnes ont déjà téléchargé ce guide"
                         : "+2,480 personas ya aplicaron este método con éxito"}
                     </span>
                   </div>
@@ -1254,8 +1371,8 @@ export default function Checkout() {
               {clientSecret && stripeOptions && stripeInstance ? (
                 <Elements stripe={stripeInstance} options={stripeOptions}>
                   <StripeCheckoutForm
-                    totalAmount={totalAmount}
-                    currency={currencySymbol}
+                    totalAmount={stripeChargeAmount || totalAmount}
+                    currency={stripeChargeCurrency || currencySymbol}
                     lang={lang}
                     transactionId={stripeTransactionId || ""}
                     stripePaymentMethods={link.stripe_payment_methods}
@@ -1269,6 +1386,8 @@ export default function Checkout() {
                     onCustomerPhoneChange={setPhone}
                     hideCustomerFields={false}
                     trackingParams={trackingParams}
+                    localCurrency={localCurrency}
+                    showTrustBadges={link.show_trust_badges !== false}
                     onInitiateCheckout={() => { if (!icAlreadyFiredExternally) fireInitiateCheckout(); }}
                     onSuccess={async () => {
                       trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);

@@ -13,6 +13,9 @@ import OrderTrackingPage from "./pages/OrderTrackingPage";
 import NotFound from "./pages/NotFound";
 import RefundRequest from "./pages/RefundRequest";
 import Membros from "./pages/Membros";
+import DownloadHubFR from "./pages/DownloadHubFR";
+import UpsellBoulangerie from "./pages/UpsellBoulangerie";
+import DownsellPainsExpress from "./pages/DownsellPainsExpress";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,9 @@ const App = () => (
           <Route path="/rastreio/:transactionId" element={<OrderTrackingPage />} />
           <Route path="/refund" element={<RefundRequest />} />
           <Route path="/membros" element={<Membros />} />
+          <Route path="/telecharger/:linkId" element={<DownloadHubFR />} />
+          <Route path="/offre-boulangerie" element={<UpsellBoulangerie />} />
+          <Route path="/offre-pains-express" element={<DownsellPainsExpress />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
