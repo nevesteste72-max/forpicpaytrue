@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle, Zap, Lock, ShieldCheck, Sparkles } from "lucide-react";
 import { getStripePromise } from "@/lib/stripeClient";
 
-const FLOW_STEP_ID = "813585fa-8397-469f-8597-9e41719a07dd";
-const FALLBACK_PAYMENT_LINK_ID = "515087d8-9397-4833-8c32-68fa19657788";
-const FRONT_END_LINK_ID = "bbe49736-16c7-448a-a0bf-92de074644ae";
+const FLOW_STEP_ID = "95e01709-9ee0-4fb5-9700-f7ea77353966";
+const FALLBACK_PAYMENT_LINK_ID = "c2350c61-7b38-4617-b711-59bd151f472b";
+const FRONT_END_LINK_ID = "df4fc3a5-0ed9-448e-87c9-3acf30f90b09";
 
 type OfferState = "offer" | "processing" | "authenticating" | "success" | "failed";
 
