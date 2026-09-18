@@ -598,11 +598,11 @@ export default function Checkout() {
   // (see handleMobileSubmit and the Stripe form's onInitiateCheckout), not on page load.
   const vcFired = useRef(false);
   useEffect(() => {
-    if (link && !vcFired.current && link.facebook_pixel_id) {
+    if (link && !vcFired.current) {
       vcFired.current = true;
       trackViewContent(
         Number(link.amount),
-        link.currency || "MZN"
+        link.currency || "ZAR"
       );
     }
   }, [link]);
