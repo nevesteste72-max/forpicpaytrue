@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ShieldCheck, Mail, User, Phone, Lock } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, User, Phone, Lock, EyeOff } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
 import { suggestEmail } from "@/lib/emailSuggest";
 
@@ -237,7 +237,11 @@ export function StripeCheckoutForm({
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: window.location.href + "?payment=success",
+          // No hardcoded "?payment=success" here — Stripe appends its own
+          // redirect_status (succeeded/failed/processing) and payment_intent
+          // params on return. A self-set success flag survived a cancel on
+          // the bank's page (e.g. Revolut) and let people through unpaid.
+          return_url: window.location.href,
           payment_method_data: {
             billing_details: {
               name: customerName,
@@ -489,6 +493,24 @@ export function StripeCheckoutForm({
               {t("Se não gostares, devolvemos 100% do teu dinheiro.", "Not happy? We refund 100%, no questions.", "Si no te gusta, te devolvemos el 100%.", "Pas satisfait(e) ? Nous vous remboursons à 100%, sans question.")}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Discrição na fatura — medo comum em nichos sensíveis (relacionamento,
+          saúde, etc.): "isto vai aparecer no meu extrato com o nome do produto?" */}
+      {showTrustBadges && (
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3">
+          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            <EyeOff className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <p className="text-xs text-muted-foreground leading-tight">
+            {t(
+              "Compra discreta: no teu extrato aparece só o nome do processador, nunca o nome deste produto.",
+              "Discreet billing: your card statement shows only the processor's name, never this product's name.",
+              "Compra discreta: en tu resumen de tarjeta solo aparece el nombre del procesador, nunca el de este producto.",
+              "Facturation discrète : votre relevé affiche uniquement le nom du prestataire, jamais celui de ce produit."
+            )}
+          </p>
         </div>
       )}
 

@@ -631,7 +631,13 @@ export default function Checkout() {
     if (isStripe && link && !clientSecret && !stripeLoading && stripeInstance && geoChecked) {
       createStripePaymentIntent();
     }
-  }, [isStripe, link?.id, stripeInstance, geoChecked]);
+    // clientSecret is a dependency on purpose: resetForm() clears it to null to
+    // trigger a fresh PaymentIntent on retry (e.g. after a canceled/declined
+    // redirect payment) — without it here, that reset never fires this effect
+    // again and the retry button hangs forever waiting for a clientSecret that
+    // is never (re)created.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStripe, link?.id, stripeInstance, geoChecked, clientSecret]);
 
   // Create PaymentIntent
   const createStripePaymentIntent = async () => {
@@ -765,24 +771,78 @@ export default function Checkout() {
   }, [email, customerName, isStripe, stripePaymentIntentId, stripeTransactionId, link?.id]);
 
   useEffect(() => {
-    const paymentStatus = searchParams.get("payment");
-    if (paymentStatus === "success") {
-      setPaymentState("success");
-      // Redirect payment methods (MB Way / Multibanco / Klarna) land here after
-      // the bank. Fire the browser Purchase now — the browser carries fbc/fbp
-      // cookies (strong attribution), deduplicated with the server CAPI via the
-      // transaction id as eventID.
-      try {
-        const raw = localStorage.getItem("pending_purchase");
-        if (raw) {
-          const p = JSON.parse(raw) as { txid?: string; value?: number; currency?: string };
-          if (p.txid) {
-            trackPurchase(p.value ?? totalAmount, p.currency ?? currencySymbol, p.txid);
-            localStorage.removeItem("pending_purchase");
-          }
-        }
-      } catch { /* ignore */ }
+    // Stripe appends its OWN redirect_status/payment_intent params on return
+    // from an off-site payment method (Revolut Pay, MB Way, Multibanco,
+    // Klarna...). A self-set "?payment=success" on the return_url used to
+    // survive a cancel on the bank's page and let people through unpaid —
+    // never trust that; always re-verify the real PaymentIntent status with
+    // the server before granting anything.
+    const redirectStatus = searchParams.get("redirect_status");
+    const paymentIntentId = searchParams.get("payment_intent");
+    if (!redirectStatus) return;
+
+    let txid: string | undefined;
+    let pendingValue: number | undefined;
+    let pendingCurrency: string | undefined;
+    try {
+      const raw = localStorage.getItem("pending_purchase");
+      if (raw) {
+        const p = JSON.parse(raw) as { txid?: string; value?: number; currency?: string };
+        txid = p.txid;
+        pendingValue = p.value;
+        pendingCurrency = p.currency;
+      }
+    } catch { /* ignore */ }
+
+    if (!txid) {
+      // No transaction to verify against — do not assume success.
+      return;
     }
+
+    (async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-webhook-confirm`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              apikey: `${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              transaction_id: txid,
+              payment_intent_id: paymentIntentId || undefined,
+              payment_status: paymentIntentId ? undefined : "failed",
+            }),
+          }
+        );
+        const result = await res.json();
+        if (result.status === "successful") {
+          try { localStorage.removeItem("pending_purchase"); } catch { /* ignore */ }
+          // Fire the browser Purchase now — the browser carries fbc/fbp
+          // cookies (strong attribution), deduplicated with the server CAPI
+          // via the transaction id as eventID.
+          trackPurchase(pendingValue ?? totalAmount, pendingCurrency ?? currencySymbol, txid);
+          const hasFlow = await checkAndRedirectToFlow(txid);
+          if (!hasFlow) setPaymentState("success");
+        } else if (result.status === "pending") {
+          // Voucher methods (OXXO/Boleto) settle asynchronously — the buyer
+          // still has to go pay in cash, sometimes days later. This is not a
+          // decline; showing failure here would scare off someone who did
+          // everything right and just hasn't paid the voucher yet.
+          setPaymentState("pending");
+        } else {
+          // Canceled on the bank's page or actually declined — never show
+          // success or advance into the paid funnel for this.
+          setPaymentState("failed");
+          setErrorMessage(t.paymentDeclined);
+        }
+      } catch (err) {
+        console.error("Failed to verify redirect payment status:", err);
+        setPaymentState("failed");
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -928,6 +988,17 @@ export default function Checkout() {
     }
   };
 
+  // Fire InitiateCheckout on BOTH browser pixel and server CAPI as soon as the
+  // checkout page loads with the product data. This ensures Meta Ads records 100%
+  // of visitors who enter the checkout flow, rather than waiting for form submit.
+  const icPageFired = useRef(false);
+  useEffect(() => {
+    if (link && !icPageFired.current && !icAlreadyFiredExternally) {
+      icPageFired.current = true;
+      fireInitiateCheckout();
+    }
+  }, [link, totalAmount]);
+
   // --- M-Pesa / eMola submit ---
   const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1064,7 +1135,41 @@ export default function Checkout() {
             </>
           )}
 
-          {paymentState === "pending" && (
+          {paymentState === "pending" && isStripe && (
+            // Vouchers like OXXO/Boleto don't confirm on this page at all — the
+            // buyer pays in cash at a store, hours or days later, and the
+            // status only flips once Stripe's webhook fires. This is NOT a
+            // failure; showing t.paymentFailed here would scare away a buyer
+            // who did everything right and just hasn't paid the voucher yet.
+            <>
+              <div className="w-16 h-16 rounded-full bg-pending/10 mx-auto mb-4 flex items-center justify-center">
+                <Clock className="w-8 h-8 text-pending animate-pulse" />
+              </div>
+              <h2 className="text-xl font-bold mb-2 text-foreground">
+                {lang === "en" ? "Payment pending" : lang === "es" ? "Pago pendiente" : lang === "fr" ? "Paiement en attente" : "Pagamento pendente"}
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {lang === "en"
+                  ? "We haven't received your payment yet. If you got a voucher (e.g. OXXO), pay it before it expires — we'll email you as soon as it's confirmed."
+                  : lang === "es"
+                  ? "Aún no hemos recibido tu pago. Si recibiste un comprobante (p. ej. OXXO), complétalo antes de que expire — te avisaremos por correo en cuanto se confirme."
+                  : lang === "fr"
+                  ? "Nous n'avons pas encore reçu votre paiement. Si vous avez reçu un bon (ex. OXXO), réglez-le avant expiration — nous vous préviendrons par e-mail dès sa confirmation."
+                  : "Ainda não recebemos o teu pagamento. Se recebeste um comprovativo (ex: OXXO), paga antes de expirar — avisamos por email assim que for confirmado."}
+              </p>
+              <div className="bg-muted/50 rounded-xl p-4 mb-6">
+                <p className="text-sm text-muted-foreground mb-1">{t.totalValue}</p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatMoney(totalAmount, currencySymbol, locale)}
+                </p>
+              </div>
+              <Button variant="outline" onClick={resetForm} className="rounded-lg">
+                {t.cancel}
+              </Button>
+            </>
+          )}
+
+          {paymentState === "pending" && !isStripe && (
             <>
               <div className="w-16 h-16 rounded-full bg-pending/10 mx-auto mb-4 flex items-center justify-center">
                 <Phone className="w-8 h-8 text-pending animate-pulse" />
@@ -1239,6 +1344,22 @@ export default function Checkout() {
       <div className="min-h-screen bg-muted flex flex-col md:items-center md:justify-center" style={accentColorToCssVars(link.checkout_accent_color)}>
         <div className="w-full md:max-w-lg md:p-4">
           <div className="bg-card md:rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden md:border border-border min-h-screen md:min-h-0">
+            {/* Continuity banner — the visitor just left a different domain (the
+                sales/quiz page) and lands here mid-purchase; without this bridge
+                a checkout domain unrelated to the offer's branding reads as a
+                trust break ("did I land somewhere else?") and drives abandonment
+                right at the payment step. */}
+            <div className="bg-muted/60 border-b border-border px-4 py-2 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+              <Lock className="w-3 h-3 shrink-0" />
+              <span className="truncate">
+                {lang === "en"
+                  ? <>Secure checkout for <strong className="text-foreground">{link.product_name}</strong> · processed by Tecnhogar Pagos</>
+                  : lang === "fr"
+                  ? <>Paiement sécurisé pour <strong className="text-foreground">{link.product_name}</strong> · traité par Tecnhogar Pagos</>
+                  : <>Pago seguro de <strong className="text-foreground">{link.product_name}</strong> · procesado por Tecnhogar Pagos</>}
+              </span>
+            </div>
+
             {/* Countdown Timer */}
             {Number(link.checkout_timer_minutes) > 0 && (
               <CheckoutTimer minutes={link.checkout_timer_minutes} lang={lang} />
@@ -1256,17 +1377,6 @@ export default function Checkout() {
             {/* Product Header — Rich personalized presentation */}
             <div className="p-4 md:p-6 pb-0">
               <div className="rounded-2xl border border-border bg-gradient-to-b from-card via-card to-muted/20 shadow-lg overflow-hidden">
-                {/* Top Badge Bar */}
-                <div className="bg-primary/10 border-b border-primary/15 px-4 py-2 flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    {lang === "en" ? "Official Special Access" : lang === "es" ? "Acceso Oficial Inmediato" : lang === "fr" ? "Accès Officiel Immédiat" : "Acesso Oficial Imediato"}
-                  </span>
-                  <span className="text-[10px] font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded-full uppercase tracking-wide">
-                    {lang === "en" ? "89% OFF" : lang === "fr" ? "-89%" : "89% DCTO"}
-                  </span>
-                </div>
-
                 <div className="p-4 md:p-5">
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                     {link.logo_url && (
@@ -1314,52 +1424,6 @@ export default function Checkout() {
                         )}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Included Deliverables Stack */}
-                  <div className="mt-4 pt-3 border-t border-border/60 space-y-1.5 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span className="text-foreground font-medium">
-                        {lang === "en" ? "Complete Step-by-Step Protocol (21 Days)" : lang === "fr" ? "Protocole Complet Étape par Étape (21 Jours)" : "Protocolo Clínico Paso a Paso (21 Días)"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span>
-                        {lang === "en" ? "Emotional Vacuum & Inverse Polarity Method" : lang === "fr" ? "500 Recettes Anti-Inflammatoires + 9 Bonus Exclusifs" : "Protocolo de Vacío Emocional e Inversión de Polaridad"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span>
-                        {lang === "en" ? "3 Exclusive Reconnection Bonus Guides included" : lang === "fr" ? "Téléchargement Immédiat après Paiement" : "3 Bonos Exclusivos de Reconciliación (Gratis)"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span>
-                        {lang === "en" ? "Instant Digital Delivery to your Email" : lang === "fr" ? "Accès Direct sur la Page de Confirmation" : "Entrega Digital Inmediata a tu Correo"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Social proof buyer count */}
-                  <div className="mt-3.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-semibold text-primary">
-                    <span aria-hidden>🔥</span>
-                    <span>
-                      {typeof buyerCount === "number" && buyerCount > 0
-                        ? lang === "en"
-                          ? `${buyerCount.toLocaleString(locale)} people already unlocked this method`
-                          : lang === "fr"
-                          ? `${buyerCount.toLocaleString(locale)} personnes ont déjà téléchargé ce guide`
-                          : `${buyerCount.toLocaleString(locale)} personas ya aplicaron este método con éxito`
-                        : lang === "en"
-                        ? "+2,480 people already unlocked this method"
-                        : lang === "fr"
-                        ? "+2 480 personnes ont déjà téléchargé ce guide"
-                        : "+2,480 personas ya aplicaron este método con éxito"}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -1480,18 +1544,6 @@ export default function Checkout() {
                   )}
                 </div>
               </div>
-              {typeof buyerCount === "number" && buyerCount > 0 && (
-                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
-                  <span aria-hidden>🔥</span>
-                  <span>
-                    {lang === "en"
-                      ? `${buyerCount.toLocaleString(locale)} people already bought this`
-                      : lang === "es"
-                      ? `${buyerCount.toLocaleString(locale)} personas ya compraron`
-                      : `${buyerCount.toLocaleString(locale)} pessoas já compraram`}
-                  </span>
-                </div>
-              )}
             </div>
 
             <div className="p-6 md:p-8 space-y-6">
