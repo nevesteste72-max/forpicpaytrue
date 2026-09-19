@@ -373,53 +373,52 @@ export default function UpsellPage() {
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-gray-900 font-sans pb-12">
       <main className="max-w-xl mx-auto px-4 pt-4 md:pt-6">
-        {/* Real-time Order Feedback Banner */}
-        <section className="bg-white rounded-2xl border border-emerald-200 shadow-sm overflow-hidden mb-4">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-white flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <p className="text-xs font-bold tracking-wide uppercase">Payment Verified & Approved</p>
-                <p className="text-xs text-white/90">Your initial order has been successfully placed!</p>
-              </div>
+        {/* Top Progress & Order Security Status */}
+        <section aria-label="Order security status" className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-4">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-3.5 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 font-bold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+              <span>PAYMENT VERIFIED & APPROVED</span>
             </div>
-            <div className="flex items-center gap-1 bg-black/20 px-2 py-1 rounded text-[11px] font-mono shrink-0">
-              <Clock className="w-3 h-3 text-amber-300" />
-              <span>{formatTimer(countdown)}</span>
+            <div className="flex items-center gap-1.5 font-mono text-[11px] bg-black/20 px-2 py-0.5 rounded">
+              <Clock className="w-3.5 h-3.5 text-amber-300" />
+              <span>{formatTime(countdown)}</span>
             </div>
           </div>
 
-          {/* 3-Step Live Dispatch Timeline */}
-          <div className="p-4 bg-gray-50/70 border-b border-gray-100">
-            <div className="flex items-center justify-between relative">
-              <div className="absolute left-6 right-6 top-3.5 h-0.5 bg-gray-200 -z-0" />
-              
-              {/* Step 1: Paid */}
+          {/* 3-Step Digital Activation Tracker */}
+          <div className="p-4 bg-gray-50 border-b border-gray-100">
+            <div className="flex items-center justify-between relative max-w-sm mx-auto">
+              <div className="absolute top-3.5 left-6 right-6 h-0.5 bg-gray-200 z-0" />
+              <div
+                className="absolute top-3.5 left-6 h-0.5 bg-emerald-500 z-0 transition-all duration-500"
+                style={{ width: "50%" }}
+              />
+
+              {/* Step 1: Payment */}
               <div className="flex flex-col items-center relative z-10">
-                <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-xs">
+                <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-xs font-bold">
                   ✓
                 </div>
                 <span className="text-[11px] font-bold text-gray-700 mt-1">Payment</span>
                 <span className="text-[9px] text-emerald-600 font-semibold">Done</span>
               </div>
 
-              {/* Step 2: Packaging (Current Active) */}
+              {/* Step 2: Account Setup (Current Active) */}
               <div className="flex flex-col items-center relative z-10">
                 <div className="w-7 h-7 rounded-full bg-[#0b72e7] text-white flex items-center justify-center text-xs shadow-md animate-pulse">
-                  <Package className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[11px] font-bold text-[#0b72e7] mt-1">Packaging</span>
+                <span className="text-[11px] font-bold text-[#0b72e7] mt-1">Portal Setup</span>
                 <span className="text-[9px] text-[#0b72e7] font-semibold animate-pulse">In Progress...</span>
               </div>
 
-              {/* Step 3: Dispatch */}
+              {/* Step 3: Instant Access */}
               <div className="flex flex-col items-center relative z-10">
                 <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs">
-                  <Truck className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[11px] font-medium text-gray-400 mt-1">Dispatch</span>
+                <span className="text-[11px] font-medium text-gray-400 mt-1">Instant Access</span>
                 <span className="text-[9px] text-gray-400">Next</span>
               </div>
             </div>
@@ -429,7 +428,7 @@ export default function UpsellPage() {
           <div className="p-4 bg-amber-50/70 text-amber-900 text-xs flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="font-bold">Wait! Do not close or refresh this window.</strong> Your package is currently open at our Johannesburg distribution hub. Before final sealing, you can add this matching item into your parcel with <span className="underline font-bold">ZERO additional delivery fees</span>.
+              <strong className="font-bold">Wait! Do not close or refresh this window.</strong> Your member portal account is currently being initialized. Before final activation, you can add this special upgrade to your account with <span className="underline font-bold">instant 1-click unlock and zero monthly fees</span>.
             </p>
           </div>
         </section>
@@ -441,7 +440,7 @@ export default function UpsellPage() {
             <div className="bg-[#0b72e7] text-white py-2 px-4 flex items-center justify-between text-xs font-bold uppercase tracking-wider">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Exclusive Dispatch Upgrade
+                Special VIP Member Upgrade
               </span>
               <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">
                 Save {discountPercent}% OFF
@@ -462,7 +461,7 @@ export default function UpsellPage() {
                   ))}
                 </div>
                 <span className="text-xs font-bold text-gray-700">4.8</span>
-                <span className="text-xs text-gray-500">(1,842 verified customer reviews)</span>
+                <span className="text-xs text-gray-500">(1,842 verified members)</span>
               </div>
 
               {/* Product Image - Mobile-first uncropped showcase */}
@@ -478,14 +477,14 @@ export default function UpsellPage() {
 
                 return (
                   <div className="mb-5">
-                    {/* Clean badge row ABOVE the product image - nothing overlaps the product */}
+                    {/* Clean badge row ABOVE the product image */}
                     <div className="flex items-center justify-between gap-2 mb-2.5">
                       <span className="inline-flex items-center gap-1 bg-red-600 text-white text-[11px] font-black px-2.5 py-1 rounded-md shadow-xs">
-                        🔥 -{discountPercent}% OFF {is99Upsell ? "TAKEALOT PRICE" : "CLEARANCE"}
+                        🔥 -{discountPercent}% OFF ONE-TIME LAUNCH OFFER
                       </span>
                       <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-md">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        In Stock • JHB Hub
+                        Instant Digital Unlock
                       </span>
                     </div>
 
@@ -499,27 +498,6 @@ export default function UpsellPage() {
                         loading="eager"
                       />
                     </div>
-
-                    {/* Interactive Angle Selectors for multi-angle view */}
-                    {galleryImages.length > 1 && (
-                      <div className="flex items-center justify-center gap-2 mt-3">
-                        {galleryImages.map((img, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => setSelectedImgIdx(idx)}
-                            className={cn(
-                              "w-14 h-14 rounded-xl border-2 p-1 bg-white transition-all flex items-center justify-center cursor-pointer",
-                              selectedImgIdx === idx
-                                ? "border-[#0b72e7] shadow-xs ring-2 ring-[#0b72e7]/20"
-                                : "border-gray-200 opacity-60 hover:opacity-100"
-                            )}
-                          >
-                            <img src={img} alt="" className="max-h-full max-w-full object-contain" />
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })()}
@@ -531,20 +509,20 @@ export default function UpsellPage() {
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600 font-medium">
                   <div className="flex items-center gap-1.5">
-                    <Truck className="w-3.5 h-3.5 text-[#0b72e7]" />
-                    <span>Combined Free Courier</span>
+                    <Zap className="w-3.5 h-3.5 text-[#0b72e7]" />
+                    <span>Instant Digital Access</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>2-Year Full Warranty</span>
+                    <span>Full VIP Priority</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>100% Genuine Retail Pack</span>
+                    <span>Weekly Supplier Updates</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Instant 1-Click Addition</span>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Zero Monthly Fees</span>
                   </div>
                 </div>
               </div>
@@ -553,14 +531,14 @@ export default function UpsellPage() {
               <div className="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
                 <div className="flex items-baseline justify-between mb-1">
                   <span className="text-xs text-gray-500 line-through">
-                    {is99Upsell ? "Takealot List Price: R 285.00" : `Standard List Price: R ${regularPrice.toFixed(2)}`}
+                    Standard List Price: R {regularPrice.toFixed(2)}
                   </span>
                   <span className="text-xs font-bold text-red-600">
                     You Save: R {savingsAmount.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xs font-bold text-gray-700 uppercase">Special Dispatch Price:</span>
+                  <span className="text-xs font-bold text-gray-700 uppercase">Special Launch Upgrade Price:</span>
                   <div className="text-right">
                     <span className="text-3xl font-black text-[#178a3b]">
                       R {Number(step.amount).toFixed(2)}
@@ -568,7 +546,7 @@ export default function UpsellPage() {
                   </div>
                 </div>
                 <p className="text-[11px] text-gray-500 mt-2 text-center">
-                  One-time charge billed to your card on file • Zero extra shipping fees
+                  One-time charge billed to your card on file • Instant digital activation
                 </p>
               </div>
 
@@ -578,7 +556,7 @@ export default function UpsellPage() {
                 className="w-full h-14 bg-[#178a3b] hover:bg-[#147633] active:scale-[0.99] text-white rounded-xl font-black text-base shadow-lg shadow-green-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Zap className="w-5 h-5 fill-current" />
-                <span>YES! ADD TO MY PACKAGE — R {Number(step.amount).toFixed(0)}</span>
+                <span>YES! UPGRADE MY ACCESS — R {Number(step.amount).toFixed(0)}</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
 
@@ -587,7 +565,7 @@ export default function UpsellPage() {
                 onClick={handleDecline}
                 className="w-full mt-3.5 text-center text-xs text-gray-500 hover:text-gray-800 underline transition-colors py-2 cursor-pointer"
               >
-                No thank you, please dispatch only my original order without this item
+                No thank you, please continue to my original member portal without this upgrade
               </button>
             </div>
           </article>
@@ -612,10 +590,10 @@ export default function UpsellPage() {
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-md">
             <Loader2 className="w-12 h-12 text-[#0b72e7] mx-auto mb-4 animate-spin" />
             <h2 className="text-lg font-bold text-gray-900 mb-1">
-              Adding to your package...
+              Activating your VIP upgrade...
             </h2>
             <p className="text-xs text-gray-500 mb-3">
-              Authorizing 1-Click addition with your bank. Please do not refresh.
+              Authorizing 1-Click upgrade with your bank. Please do not refresh.
             </p>
             <div className="w-48 h-1.5 bg-gray-100 rounded-full mx-auto overflow-hidden">
               <div className="h-full bg-[#0b72e7] rounded-full animate-pulse w-3/4" />
@@ -630,13 +608,13 @@ export default function UpsellPage() {
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-1">
-              Item Added to Your Parcel!
+              Upgrade Added to Your Account!
             </h2>
             <p className="text-xs text-gray-600">
-              {step.product_name} has been added to your combined shipment.
+              {step.product_name} has been activated on your member portal.
             </p>
             <p className="text-[11px] text-gray-400 mt-2">
-              Redirecting to your order confirmation summary...
+              Redirecting to your member portal...
             </p>
           </div>
         )}
@@ -684,7 +662,7 @@ export default function UpsellPage() {
             </span>
           </div>
           <p className="text-[11px] text-gray-400">
-            © 2026 Combined Express Warehouse Dispatch • All Rights Reserved
+            © 2026 SA Ecom Start 2.0 • Official Member Portal & Supplier Network
           </p>
         </footer>
       </main>
