@@ -16,6 +16,7 @@ import Membros from "./pages/Membros";
 import DownloadHubFR from "./pages/DownloadHubFR";
 import UpsellBoulangerie from "./pages/UpsellBoulangerie";
 import DownsellPainsExpress from "./pages/DownsellPainsExpress";
+import Vault from "./pages/Vault";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,8 @@ const App = () => (
           <Route path="/telecharger/:linkId" element={<DownloadHubFR />} />
           <Route path="/offre-boulangerie" element={<UpsellBoulangerie />} />
           <Route path="/offre-pains-express" element={<DownsellPainsExpress />} />
+          <Route path="/vault" element={<Vault />} />
+          <Route path="/portal" element={<Vault />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
