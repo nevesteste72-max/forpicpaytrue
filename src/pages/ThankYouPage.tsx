@@ -164,7 +164,7 @@ export default function ThankYouPage() {
   const currentProductName = linkInfo?.product_name || txData?.payment_links?.product_name || fallbackProduct.name;
   const currentPrice = txData?.amount ? Number(txData.amount) : fallbackProduct.price;
   const currencySymbol = (linkInfo?.currency || txData?.payment_links?.currency || "ZAR") === "ZAR" ? "R " : "$";
-  const portalUrl = linkInfo?.redirect_url || "/vault";
+  const portalUrl = linkInfo?.redirect_url || "https://nevesteste72-max.github.io/ecomstart-vault/";
 
   // =========================================================================
   // DIGITAL INFOPRODUCT & WEB APP VAULT DELIVERABLE (PRIMARY EXPERIENCE)
