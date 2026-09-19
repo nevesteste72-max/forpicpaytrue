@@ -665,7 +665,6 @@ export default function Checkout() {
   const createStripePaymentIntent = async () => {
     if (!link) return;
     setStripeLoading(true);
-    const effectiveLinkId = link.id === "e1919191-1919-4919-8919-191919191919" ? "88888888-8888-4888-8888-888888888888" : link.id;
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-stripe-payment`,
@@ -677,7 +676,7 @@ export default function Checkout() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            payment_link_id: effectiveLinkId,
+            payment_link_id: link.id,
             amount: totalAmount,
             currency: link.currency,
             customer_email: email || searchParams.get("email") || `temp_${Date.now()}@checkout.cashpay.co`,
@@ -735,7 +734,7 @@ export default function Checkout() {
               update_intent: true,
               payment_intent_id: stripePaymentIntentId,
               transaction_id: stripeTransactionId,
-              payment_link_id: link.id === "e1919191-1919-4919-8919-191919191919" ? "88888888-8888-4888-8888-888888888888" : link.id,
+              payment_link_id: link.id,
               order_bump_accepted: bumpAccepted,
               bumps_accepted: bumpsAccepted,
             }),
@@ -781,7 +780,7 @@ export default function Checkout() {
             update_intent: true,
             payment_intent_id: stripePaymentIntentId,
             transaction_id: stripeTransactionId,
-            payment_link_id: link.id === "e1919191-1919-4919-8919-191919191919" ? "88888888-8888-4888-8888-888888888888" : link.id,
+            payment_link_id: link.id,
             customer_email: e,
             customer_name: customerName || "",
             order_bump_accepted: bumpAccepted,
