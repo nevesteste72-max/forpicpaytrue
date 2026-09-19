@@ -34,6 +34,7 @@ interface FlowStep {
   accept_redirect_url: string | null;
   decline_redirect_url: string | null;
   payment_link_id: string;
+  checkout_link_id: string | null;
   button_accept_text: string;
   button_accept_color: string;
   button_decline_text: string;
@@ -43,6 +44,78 @@ interface FlowStep {
   page_headline: string | null;
   page_subheadline: string | null;
 }
+
+const FALLBACK_STEPS: Record<string, FlowStep> = {
+  // Upsell #1: 19-Piece Non-Stick Cookware Set with Silicone Utensils (R99 - Physical Products)
+  "88888888-8888-4888-8888-888888888881": {
+    id: "88888888-8888-4888-8888-888888888881",
+    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
+    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    amount: 99,
+    image_url: "/images/panela_hero.png",
+    step_type: "upsell",
+    accept_step_id: null,
+    decline_step_id: null,
+    accept_redirect_url: null,
+    decline_redirect_url: null,
+    payment_link_id: "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
+    checkout_link_id: "57300a28-4553-4bb4-9586-06941387717d",
+    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_color: "#10b981",
+    button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
+    button_decline_color: "#6b7280",
+    show_accept_button: true,
+    show_decline_button: true,
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+  },
+  // Upsell #1: VIP Inner Circle & Automation Suite (R247 - Digital)
+  "77777777-7777-4777-8777-777777777771": {
+    id: "77777777-7777-4777-8777-777777777771",
+    product_name: "Lifetime VIP Access Upgrade & 2026 Automation Pack",
+    product_description: "Unlock instant access to our automated store launcher, 150+ direct factory WhatsApp contacts in Joburg & Durban, and pre-negotiated PEP Paxi bulk shipping discounts.",
+    amount: 247,
+    image_url: "/sa_vip_upsell.jpg",
+    step_type: "upsell",
+    accept_step_id: "77777777-7777-4777-8777-777777777772",
+    decline_step_id: "77777777-7777-4777-8777-777777777772",
+    accept_redirect_url: null,
+    decline_redirect_url: null,
+    payment_link_id: "a7777777-7777-4777-8777-777777777777",
+    checkout_link_id: "d2472472-2472-4472-8472-247247247247",
+    button_accept_text: "YES! UPGRADE TO VIP INNER CIRCLE (R247)",
+    button_accept_color: "#0b72e7",
+    button_decline_text: "No thanks, I will manage suppliers and store setup manually",
+    button_decline_color: "#6b7280",
+    show_accept_button: true,
+    show_decline_button: true,
+    page_headline: "UPGRADE YOUR ORDER: Unlock Automated WhatsApp Store Builder & VIP Supplier Direct Line",
+    page_subheadline: "Get 1-Click Access to 150+ Direct WhatsApp Wholesalers, Ready-Made Product Catalogs & Priority Dispatch Channels."
+  },
+  // Downsell #2: Core Fast-Track Pack (R147 - Digital)
+  "77777777-7777-4777-8777-777777777772": {
+    id: "77777777-7777-4777-8777-777777777772",
+    product_name: "Lifetime Access VIP License (Special R100 Off)",
+    product_description: "Wait! Save R100 instantly. Get Lifetime Access with zero renewal fees forever, Core WhatsApp Automation, Top 10 High-Margin Direct Supplier Contacts, and the 2026 Sales Scriptbook for just R147.",
+    amount: 147,
+    image_url: "/sa_vip_downsell.jpg",
+    step_type: "downsell",
+    accept_step_id: null,
+    decline_step_id: null,
+    accept_redirect_url: null,
+    decline_redirect_url: null,
+    payment_link_id: "a7777777-7777-4777-8777-777777777777",
+    checkout_link_id: "d1471471-1471-4471-8471-147147147147",
+    button_accept_text: "YES! CLAIM SPECIAL R147 LIFETIME OFFER",
+    button_accept_color: "#10b981",
+    button_decline_text: "No thanks, I will skip this discount and proceed to my order",
+    button_decline_color: "#6b7280",
+    show_accept_button: true,
+    show_decline_button: true,
+    page_headline: "WAIT! SPECIAL ONE-TIME DOWNSELL: Get Lifetime Access Forever for Only R147",
+    page_subheadline: "We understand R247 might be tight right now. Save R100 instantly and lock in Lifetime Access forever with Core WhatsApp Automation & Supplier Fast-Pass."
+  }
+};
 
 type UpsellState = "offer" | "processing" | "authenticating" | "success" | "failed";
 
@@ -124,7 +197,7 @@ export default function UpsellPage() {
     return () => clearInterval(timer);
   }, [state]);
 
-  const formatTimer = (seconds: number) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
@@ -132,6 +205,13 @@ export default function UpsellPage() {
 
   const fetchStep = async () => {
     try {
+      if (stepId && FALLBACK_STEPS[stepId]) {
+        setStep(FALLBACK_STEPS[stepId]);
+        setCurrency("ZAR");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("flow_steps")
         .select("*")
@@ -139,7 +219,18 @@ export default function UpsellPage() {
         .maybeSingle();
 
       if (error || !data) {
-        goToThankYou();
+        const isPhysicalLink = linkId && (
+          linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
+          linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
+          linkId === "57300a28-4553-4bb4-9586-06941387717d"
+        );
+        const fallbackKey = isPhysicalLink ? "88888888-8888-4888-8888-888888888881" : "77777777-7777-4777-8777-777777777771";
+        if (FALLBACK_STEPS[fallbackKey]) {
+          setStep(FALLBACK_STEPS[fallbackKey]);
+          setCurrency("ZAR");
+        } else {
+          goToThankYou();
+        }
         return;
       }
 
@@ -159,7 +250,18 @@ export default function UpsellPage() {
         }
       }
     } catch {
-      goToThankYou();
+      const isPhysicalLink = linkId && (
+        linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
+        linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
+        linkId === "57300a28-4553-4bb4-9586-06941387717d"
+      );
+      const fallbackKey = isPhysicalLink ? "88888888-8888-4888-8888-888888888881" : "77777777-7777-4777-8777-777777777771";
+      if (FALLBACK_STEPS[fallbackKey]) {
+        setStep(FALLBACK_STEPS[fallbackKey]);
+        setCurrency("ZAR");
+      } else {
+        goToThankYou();
+      }
     } finally {
       setLoading(false);
     }
@@ -177,6 +279,19 @@ export default function UpsellPage() {
     if (txId) params.set("tx", txId);
     if (linkId) params.set("link", linkId);
     if (isEmbed) params.set("embed", "true");
+    const qName = searchParams.get("name");
+    const qEmail = searchParams.get("email");
+    const qPhone = searchParams.get("phone");
+    if (qName) params.set("name", qName);
+    if (qEmail) params.set("email", qEmail);
+    if (qPhone) params.set("phone", qPhone);
+    if (trackingParams.utm_source) params.set("utm_source", trackingParams.utm_source);
+    if (trackingParams.utm_medium) params.set("utm_medium", trackingParams.utm_medium);
+    if (trackingParams.utm_campaign) params.set("utm_campaign", trackingParams.utm_campaign);
+    if (trackingParams.utm_content) params.set("utm_content", trackingParams.utm_content);
+    if (trackingParams.utm_term) params.set("utm_term", trackingParams.utm_term);
+    if (trackingParams.src) params.set("src", trackingParams.src);
+    if (trackingParams.sck) params.set("sck", trackingParams.sck);
     const query = params.toString();
     return query ? `${basePath}?${query}` : basePath;
   };
@@ -191,7 +306,7 @@ export default function UpsellPage() {
   };
 
   const goToThankYou = () => {
-    const targetLink = linkId || step?.payment_link_id || "";
+    const targetLink = linkId || step?.payment_link_id || "a7777777-7777-4777-8777-777777777777";
     const path = buildInternalPath(`/thank-you/${targetLink}`);
     doRedirect(toFullUrl(path), false);
   };
@@ -202,45 +317,42 @@ export default function UpsellPage() {
       const fullUrl = `${redirectUrl}${separator}cashpay_tx=${txId || ""}&cashpay_link=${linkId || ""}`;
       doRedirect(fullUrl, true);
     } else if (nextStepId) {
-      try {
-        const { data: nextStep } = await supabase
-          .from("flow_steps")
-          .select("page_url")
-          .eq("id", nextStepId)
-          .maybeSingle();
-
-        const pageUrl = nextStep?.page_url;
-        if (pageUrl) {
-          const separator = pageUrl.includes("?") ? "&" : "?";
-          const externalUrl = `${pageUrl}${separator}cashpay_tx=${txId || ""}&cashpay_link=${linkId || ""}`;
-          doRedirect(externalUrl, true);
-        } else {
-          const path = buildInternalPath(`/upsell/${nextStepId}`);
-          doRedirect(toFullUrl(path), false);
-        }
-      } catch {
-        const path = buildInternalPath(`/upsell/${nextStepId}`);
-        doRedirect(toFullUrl(path), false);
-      }
+      const path = buildInternalPath(`/upsell/${nextStepId}`);
+      doRedirect(toFullUrl(path), false);
     } else {
       goToThankYou();
     }
   };
 
+  const redirectToCheckout = () => {
+    if (!step) return;
+    const isDownsell = step.step_type === "downsell" || step.id === "77777777-7777-4777-8777-777777777772";
+    const upsellLinkId = step.checkout_link_id || (isDownsell ? "d1471471-1471-4471-8471-147147147147" : "d2472472-2472-4472-8472-247247247247");
+    const qParams = new URLSearchParams();
+    const qName = searchParams.get("name");
+    const qEmail = searchParams.get("email");
+    const qPhone = searchParams.get("phone");
+    if (qName) qParams.set("name", qName);
+    if (qEmail) qParams.set("email", qEmail);
+    if (qPhone) qParams.set("phone", qPhone);
+    if (txId && txId !== "preview") qParams.set("parent_tx", txId);
+    if (trackingParams.utm_source) qParams.set("utm_source", trackingParams.utm_source);
+    if (trackingParams.utm_medium) qParams.set("utm_medium", trackingParams.utm_medium);
+    if (trackingParams.utm_campaign) qParams.set("utm_campaign", trackingParams.utm_campaign);
+    if (trackingParams.utm_content) qParams.set("utm_content", trackingParams.utm_content);
+    if (trackingParams.utm_term) qParams.set("utm_term", trackingParams.utm_term);
+    if (trackingParams.src) qParams.set("src", trackingParams.src);
+    if (trackingParams.sck) qParams.set("sck", trackingParams.sck);
+
+    const queryStr = qParams.toString() ? `?${qParams.toString()}` : "";
+    const targetUrl = `/pay/${upsellLinkId}${queryStr}`;
+    doRedirect(toFullUrl(targetUrl), false);
+  };
+
   const handleAccept = async () => {
     if (!step) return;
     if (!txId || txId === "preview") {
-      // No saved card to charge off-session -> send to this product's own checkout page
-      const upsellLinkId = step.payment_link_id;
-      const qParams = new URLSearchParams();
-      const qName = searchParams.get("name");
-      const qEmail = searchParams.get("email");
-      const qPhone = searchParams.get("phone");
-      if (qName) qParams.set("name", qName);
-      if (qEmail) qParams.set("email", qEmail);
-      if (qPhone) qParams.set("phone", qPhone);
-      const queryStr = qParams.toString() ? `?${qParams.toString()}` : "";
-      window.location.href = buildInternalPath(`/pay/${upsellLinkId}${queryStr}`);
+      redirectToCheckout();
       return;
     }
     setState("processing");
@@ -271,8 +383,7 @@ export default function UpsellPage() {
         setState("authenticating");
         const stripe = await getStripePromise();
         if (!stripe) {
-          setErrorMessage("Could not start card authentication.");
-          setState("failed");
+          redirectToCheckout();
           return;
         }
 
@@ -281,8 +392,8 @@ export default function UpsellPage() {
         });
 
         if (actionError) {
-          setErrorMessage(actionError.message || "Card authentication was not completed.");
-          setState("failed");
+          console.warn("3DS challenge failed or cancelled, redirecting to checkout:", actionError);
+          redirectToCheckout();
           return;
         }
 
@@ -308,18 +419,20 @@ export default function UpsellPage() {
         setTimeout(() => {
           if (step.accept_redirect_url) {
             redirectTo(step.accept_step_id, step.accept_redirect_url);
+          } else if (step.accept_step_id) {
+            redirectTo(step.accept_step_id, null);
           } else {
             goToThankYou();
           }
         }, 1200);
       } else {
-        setErrorMessage(result.error || "1-Click authorization failed. Please proceed to order confirmation.");
-        setState("failed");
+        // If 1-click charge is not accepted (e.g. no saved token or bank decline), IMMEDIATELY redirect to the offer's checkout!
+        console.warn("1-click not successful, taking user directly to checkout:", result.error);
+        redirectToCheckout();
       }
     } catch (err) {
-      console.error("Upsell error:", err);
-      setErrorMessage("Connection timeout. Redirecting to your confirmation.");
-      setState("failed");
+      console.error("Upsell error, redirecting to checkout:", err);
+      redirectToCheckout();
     }
   };
 
@@ -349,7 +462,9 @@ export default function UpsellPage() {
 
   // Same product, same price, but paid on a normal checkout page. Used when
   // the off-session 1-click charge is declined (typically 3DS/SCA) or tested.
-  const upsellCheckoutLink = "e1919191-1919-4919-8919-191919191919";
+  // Each upsell falls back to ITS OWN checkout (checkout_link_id), never a shared
+  // hardcoded product. Falls back to the funnel's main link only if unset.
+  const upsellCheckoutLink = step.checkout_link_id || step.payment_link_id;
   const payByCard = () => {
     const qParams = new URLSearchParams();
     const qName = searchParams.get("name");
@@ -364,9 +479,20 @@ export default function UpsellPage() {
   };
 
   // Calculate comparative regular price for clearance display
-  // Takealot reference price is R 285 ZAR, our special sale price is R 99 ZAR (65% OFF)
-  const is99Upsell = Number(step.amount) === 99;
-  const regularPrice = is99Upsell ? 285 : Number(step.amount) === 597 ? 2899 : 3499;
+  const upsellAmount = Number(step.amount);
+  const is99Upsell = upsellAmount === 99;
+  const isPhysical = is99Upsell ||
+    step.product_name?.toLowerCase().includes("19-piece") ||
+    step.product_name?.toLowerCase().includes("cookware") ||
+    step.image_url?.includes("panela") ||
+    step.id === "88888888-8888-4888-8888-888888888881" ||
+    (linkId && (
+      linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
+      linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
+      linkId === "57300a28-4553-4bb4-9586-06941387717d"
+    ));
+
+  const regularPrice = is99Upsell ? 285 : upsellAmount === 597 ? 2899 : Math.round(upsellAmount * 2);
   const savingsAmount = regularPrice - Number(step.amount);
   const discountPercent = Math.round((savingsAmount / regularPrice) * 100);
 
@@ -386,7 +512,7 @@ export default function UpsellPage() {
             </div>
           </div>
 
-          {/* 3-Step Digital Activation Tracker */}
+          {/* 3-Step Progress Tracker */}
           <div className="p-4 bg-gray-50 border-b border-gray-100">
             <div className="flex items-center justify-between relative max-w-sm mx-auto">
               <div className="absolute top-3.5 left-6 right-6 h-0.5 bg-gray-200 z-0" />
@@ -404,21 +530,25 @@ export default function UpsellPage() {
                 <span className="text-[9px] text-emerald-600 font-semibold">Done</span>
               </div>
 
-              {/* Step 2: Account Setup (Current Active) */}
+              {/* Step 2: Package Setup (Current Active) */}
               <div className="flex flex-col items-center relative z-10">
                 <div className="w-7 h-7 rounded-full bg-[#0b72e7] text-white flex items-center justify-center text-xs shadow-md animate-pulse">
                   <Sparkles className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[11px] font-bold text-[#0b72e7] mt-1">Portal Setup</span>
+                <span className="text-[11px] font-bold text-[#0b72e7] mt-1">
+                  {isPhysical ? "Package Upgrade" : "Portal Setup"}
+                </span>
                 <span className="text-[9px] text-[#0b72e7] font-semibold animate-pulse">In Progress...</span>
               </div>
 
-              {/* Step 3: Instant Access */}
+              {/* Step 3: Instant Access / Dispatch */}
               <div className="flex flex-col items-center relative z-10">
                 <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs">
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[11px] font-medium text-gray-400 mt-1">Instant Access</span>
+                <span className="text-[11px] font-medium text-gray-400 mt-1">
+                  {isPhysical ? "Dispatched" : "Instant Access"}
+                </span>
                 <span className="text-[9px] text-gray-400">Next</span>
               </div>
             </div>
@@ -428,7 +558,12 @@ export default function UpsellPage() {
           <div className="p-4 bg-amber-50/70 text-amber-900 text-xs flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="font-bold">Wait! Do not close or refresh this window.</strong> Your member portal account is currently being initialized. Before final activation, you can add this special upgrade to your account with <span className="underline font-bold">instant 1-click unlock and zero monthly fees</span>.
+              <strong className="font-bold">Wait! Do not close or refresh this window.</strong>{" "}
+              {isPhysical ? (
+                <span>Your main order is confirmed and being prepared at the warehouse. Before final packaging, you can add this <span className="underline font-bold">19-Piece Cookware Set for ONLY R99 with instant 1-click unlock and zero extra delivery fees</span>.</span>
+              ) : (
+                <span>Your member portal account is currently being initialized. Before final activation, you can add this special upgrade to your account with <span className="underline font-bold">instant 1-click unlock and zero monthly fees</span>.</span>
+              )}
             </p>
           </div>
         </section>
@@ -440,7 +575,7 @@ export default function UpsellPage() {
             <div className="bg-[#0b72e7] text-white py-2 px-4 flex items-center justify-between text-xs font-bold uppercase tracking-wider">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Special VIP Member Upgrade
+                {isPhysical ? "Special Warehouse Clearance Upgrade" : "Special VIP Member Upgrade"}
               </span>
               <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">
                 Save {discountPercent}% OFF
@@ -460,19 +595,17 @@ export default function UpsellPage() {
                     <Star key={i} className="w-4 h-4 fill-current" />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-gray-700">4.8</span>
-                <span className="text-xs text-gray-500">(1,842 verified members)</span>
+                <span className="text-xs font-bold text-gray-700">4.9</span>
+                <span className="text-xs text-gray-500">
+                  ({isPhysical ? "2,480 verified buyers" : "1,842 verified members"})
+                </span>
               </div>
 
               {/* Product Image - Mobile-first uncropped showcase */}
               {step.image_url && (() => {
-                const is19Pc = step.product_name?.toLowerCase().includes("19-piece") || step.image_url?.includes("upsell-19pc");
-                const isAirFryer = !is19Pc && step.product_name?.toLowerCase().includes("air fryer");
-                const galleryImages = is19Pc
-                  ? [step.image_url || "/assets/upsell-19pc.png"]
-                  : isAirFryer
-                    ? ["/images/air_1.png", "/images/air_2.png", "/images/air_3.png"]
-                    : [step.image_url || "/images/p1.png"];
+                const galleryImages = isPhysical
+                  ? ["/images/panela_hero.png", "/images/panela_1.png", "/images/panela_2.png", "/images/panela_3.png", "/images/panela_4.png", "/images/panela_5.png"]
+                  : [step.image_url];
                 const activeImg = galleryImages[selectedImgIdx] || step.image_url;
 
                 return (
@@ -480,11 +613,11 @@ export default function UpsellPage() {
                     {/* Clean badge row ABOVE the product image */}
                     <div className="flex items-center justify-between gap-2 mb-2.5">
                       <span className="inline-flex items-center gap-1 bg-red-600 text-white text-[11px] font-black px-2.5 py-1 rounded-md shadow-xs">
-                        🔥 -{discountPercent}% OFF ONE-TIME LAUNCH OFFER
+                        🔥 -{discountPercent}% OFF ONE-TIME DEAL
                       </span>
                       <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-md">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        Instant Digital Unlock
+                        {isPhysical ? "Free Combined Delivery" : "Instant Digital Unlock"}
                       </span>
                     </div>
 
@@ -508,22 +641,45 @@ export default function UpsellPage() {
                   {step.product_description}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600 font-medium">
-                  <div className="flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-[#0b72e7]" />
-                    <span>Instant Digital Access</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Full VIP Priority</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Weekly Supplier Updates</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Zero Monthly Fees</span>
-                  </div>
+                  {isPhysical ? (
+                    <>
+                      <div className="flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-[#0b72e7]" />
+                        <span>Granite Non-Stick Coating</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Heat-Resistant Silicone Set</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>PFOA Free & Induction Ready</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Full 2-Year Warranty</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-[#0b72e7]" />
+                        <span>Instant Digital Access</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Full VIP Priority</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Weekly Supplier Updates</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Zero Monthly Fees</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -546,7 +702,7 @@ export default function UpsellPage() {
                   </div>
                 </div>
                 <p className="text-[11px] text-gray-500 mt-2 text-center">
-                  One-time charge billed to your card on file • Instant digital activation
+                  One-time charge billed to your card on file • {isPhysical ? "Free Combined Delivery" : "Instant digital activation"}
                 </p>
               </div>
 
@@ -556,7 +712,7 @@ export default function UpsellPage() {
                 className="w-full h-14 bg-[#178a3b] hover:bg-[#147633] active:scale-[0.99] text-white rounded-xl font-black text-base shadow-lg shadow-green-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Zap className="w-5 h-5 fill-current" />
-                <span>YES! UPGRADE MY ACCESS — R {Number(step.amount).toFixed(0)}</span>
+                <span>{step.button_accept_text || `YES! ADD TO ORDER — R ${Number(step.amount).toFixed(0)}`}</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
 
@@ -565,7 +721,7 @@ export default function UpsellPage() {
                 onClick={handleDecline}
                 className="w-full mt-3.5 text-center text-xs text-gray-500 hover:text-gray-800 underline transition-colors py-2 cursor-pointer"
               >
-                No thank you, please continue to my original member portal without this upgrade
+                {step.button_decline_text || "No thank you, please continue to my order confirmation"}
               </button>
             </div>
           </article>

@@ -559,6 +559,28 @@ export default function Checkout() {
   // Check if this product has upsell/downsell flow steps
   const checkAndRedirectToFlow = useCallback(async (transactionId: string) => {
     if (!link) return false;
+
+    // Check if this is a physical product (Smeg / Air Fryer / Cookware)
+    const PHYSICAL_LINK_IDS = [
+      "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34", // Smeg
+      "4b585d8e-6df4-4019-8ca0-2a32b8e68844", // Airfryer
+      "57300a28-4553-4bb4-9586-06941387717d", // Cookware
+    ];
+
+    const isPhysical = PHYSICAL_LINK_IDS.includes(link.id) ||
+      link.title?.toLowerCase().includes("smeg") ||
+      link.title?.toLowerCase().includes("air fryer") ||
+      link.title?.toLowerCase().includes("airfryer") ||
+      link.title?.toLowerCase().includes("cookware") ||
+      link.title?.toLowerCase().includes("panela") ||
+      link.title?.toLowerCase().includes("breakfast set");
+
+    if (isPhysical) {
+      const custParams = `&name=${encodeURIComponent(customerName || "")}&email=${encodeURIComponent(email || "")}&phone=${encodeURIComponent(phone || "")}`;
+      navigate(`/upsell/88888888-8888-4888-8888-888888888881?tx=${transactionId}&link=${link.id}${custParams}`);
+      return true;
+    }
+
     try {
       const { data: flowSteps } = await supabase
         .from("flow_steps")
@@ -587,7 +609,7 @@ export default function Checkout() {
       console.error("Failed to check flow steps:", err);
     }
     return false;
-  }, [link, navigate]);
+  }, [link, navigate, customerName, email, phone]);
 
   useEffect(() => {
     if (linkId) fetchLink();
@@ -892,17 +914,24 @@ export default function Checkout() {
       const timer = setTimeout(() => {
         try {
           const targetUrl = new URL(link.redirect_url!, window.location.origin);
-          if (internalTxId) {
-            targetUrl.searchParams.set("tx", internalTxId);
+          const effectiveTxId = stripeTransactionId || internalTxId;
+          if (effectiveTxId) {
+            targetUrl.searchParams.set("tx", effectiveTxId);
           }
+          if (link?.id) {
+            targetUrl.searchParams.set("link", link.id);
+          }
+          if (customerName) targetUrl.searchParams.set("name", customerName);
+          if (email) targetUrl.searchParams.set("email", email);
+          if (phone) targetUrl.searchParams.set("phone", phone);
           window.location.href = targetUrl.toString();
         } catch {
           window.location.href = link.redirect_url!;
         }
-      }, 1800);
+      }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [paymentState, link?.redirect_url, internalTxId]);
+  }, [paymentState, link?.redirect_url, internalTxId, stripeTransactionId, customerName, email, phone, link?.id]);
 
   const fetchLink = async (attempt = 0) => {
     try {
