@@ -350,56 +350,90 @@ export default function ThankYouPage() {
     );
   }
 
-  // Fallback for digital products
+  // Fallback for digital products (e.g. SA Ecom Start 2.0 & Web App Vault)
   const lang = linkInfo?.checkout_language === "pt" ? "pt" : "en";
-  const currency = linkInfo?.currency || "EUR";
-  const title = linkInfo?.thank_you_title || (lang === "en" ? "Thank you for your purchase!" : "Obrigado pela sua compra!");
-  const message = linkInfo?.thank_you_message || (lang === "en"
-    ? "Your purchase was successful. You will receive an email with all the details — if you don't see it, please check your spam/junk folder."
-    : "A sua compra foi realizada com sucesso. Você receberá um email com todos os detalhes — se não encontrar, verifique a caixa de spam.");
+  const portalUrl = linkInfo?.redirect_url || "/vault";
+  const productName = linkInfo?.product_name || "SA Ecom Start 2.0 — Reseller Web App & Supplier Vault";
 
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-lg">
-        <div className="bg-card rounded-3xl shadow-xl shadow-muted-foreground/5 overflow-hidden border border-border">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
           
-          <div className="bg-success/5 border-b border-success/10 p-8 text-center">
-            <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <PartyPopper className="w-10 h-10 text-success" />
+          {/* Header */}
+          <div className="bg-gradient-to-b from-emerald-950/80 to-slate-900 border-b border-emerald-500/20 p-6 sm:p-8 text-center relative">
+            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-950/50">
+              <CheckCircle2 className="w-9 h-9 text-emerald-400 animate-bounce" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">{title}</h1>
-            <p className="text-muted-foreground text-sm">{message}</p>
+            <span className="inline-block bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+              Payment Confirmed • Instant Access
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              {lang === "en" ? "Welcome to the Portal!" : "Acesso Liberado com Sucesso!"}
+            </h1>
+            <p className="text-slate-300 text-xs sm:text-sm mt-2 max-w-sm mx-auto">
+              Your order for <strong>{productName}</strong> is complete. You can access your member vault immediately below.
+            </p>
+            {txId && (
+              <div className="mt-3 inline-block bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-full text-xs font-mono text-slate-300">
+                Order Ref: #{txId.slice(0, 8).toUpperCase()}
+              </div>
+            )}
           </div>
 
-          <div className="p-6 md:p-8 space-y-6">
-            <a
-              href="/membros"
-              className="w-full h-12 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
-            >
-              <PackageOpen className="w-4 h-4" />
-              {lang === "en" ? "Access My Members Area" : "Aceder à Área de Membros"}
-            </a>
-            <p className="text-xs text-muted-foreground text-center -mt-3">
-              {lang === "en"
-                ? "Enter the email you used on this purchase to download your materials."
-                : "Entra com o email desta compra para descarregares os teus materiais."}
-            </p>
-
-            {linkInfo?.redirect_url && (
-              <Button
-                onClick={() => window.open(linkInfo.redirect_url!, "_blank")}
-                variant="outline"
-                className="w-full h-11 rounded-xl font-semibold"
+          <div className="p-6 sm:p-8 space-y-5">
+            
+            {/* Main CTA Button to Access Deliverable / Vault */}
+            <div className="space-y-2">
+              <a
+                href={portalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-base flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20 transition-all transform active:scale-[0.98] text-center"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                {lang === "en" ? "Access Content" : "Acessar Conteúdo"}
-              </Button>
-            )}
+                <PackageOpen className="w-5 h-5 shrink-0" />
+                <span>{lang === "en" ? "Click Here to Access Your Vault Now" : "Clique Aqui Para Acessar Seu Portal"}</span>
+                <ExternalLink className="w-4 h-4 shrink-0 opacity-80" />
+              </a>
+              <p className="text-[11px] text-center text-slate-400">
+                ⚡ Instant unlock: All 50+ WhatsApp suppliers, scripts, and PEP Paxi tools are ready.
+              </p>
+            </div>
+
+            {/* Email Notification & Spam Box */}
+            <div className="bg-amber-950/30 border border-amber-500/30 rounded-2xl p-4.5 space-y-2 text-left">
+              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
+                <Mail className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Access Sent to Email (Check Spam / Junk)</span>
+              </div>
+              <p className="text-xs text-amber-200/90 leading-relaxed">
+                We have also sent your official access receipt and backup link directly to your email address.
+              </p>
+              <div className="bg-amber-500/10 rounded-xl p-2.5 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
+                <span className="font-bold">⚠️ Tip:</span>
+                <span>If you don't see our email in your Primary Inbox within 5 minutes, please check your <strong>Spam / Junk / Promotions</strong> folder and mark it as "Not Spam".</span>
+              </div>
+            </div>
+
+            {/* Quick Support Link */}
+            <div className="pt-2 text-center border-t border-slate-800">
+              <p className="text-xs text-slate-400">
+                Need help with your order? Contact us at{" "}
+                <a
+                  href="mailto:support673@gmail.com"
+                  className="text-emerald-400 hover:underline font-semibold"
+                >
+                  support673@gmail.com
+                </a>
+              </p>
+            </div>
+
           </div>
         </div>
 
-        <div className="text-center mt-6">
-          <img src={cashpayLogoFull} alt="PicPay" className="h-20 w-20 mx-auto rounded-full object-contain" />
+        <div className="text-center text-xs text-slate-500 flex items-center justify-center gap-1 mt-6">
+          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <span>256-Bit SSL Encrypted Access • Official Reseller Portal</span>
         </div>
       </div>
     </div>

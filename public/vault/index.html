@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#020617">
+<title>EcomStart Member Vault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#020617; --surface:#0f172a; --surface-soft:#0b1220; --border:#1e293b; --border-soft:#1e293b80;
+    --emerald:#10B981; --teal:#14B8A6; --gold:#fbbf24; --danger:#f87171;
+    --text:#f1f5f9; --text-dim:#94a3b8; --text-faint:#64748b;
+    --nav-h:64px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:'Inter',ui-sans-serif,system-ui,sans-serif;
+    background-image:radial-gradient(ellipse 700px 340px at 15% -8%, rgba(16,185,129,0.13), transparent),
+                      radial-gradient(ellipse 500px 300px at 100% 30%, rgba(20,184,166,0.08), transparent);
+    background-attachment:fixed;
+  }
+  h1,h2,h3,.jakarta{font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;}
+  button{font-family:inherit;}
+  a{color:inherit;}
+
+  .shell{display:flex;flex-direction:column;min-height:100%;}
+  .main{flex:1;padding:0 16px calc(var(--nav-h) + 28px);max-width:760px;width:100%;margin:0 auto;}
+
+  /* header */
+  .topbar{
+    position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top,0px));
+    background:rgba(2,6,23,0.85);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15.5px;letter-spacing:-0.01em;}
+  .brand-badge{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--emerald),var(--teal));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#022c22;flex-shrink:0;}
+  .demo-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-faint);font-weight:600;}
+  .switch{width:34px;height:19px;border-radius:999px;background:var(--border);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
+  .switch.on{background:var(--emerald);}
+  .switch .knob{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:999px;background:#fff;transition:transform .2s;}
+  .switch.on .knob{transform:translateX(15px);}
+
+  .welcome{padding:20px 0 6px;}
+  .welcome .hi{font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+  .welcome h1{font-size:22px;margin:0 0 4px;letter-spacing:-0.01em;}
+  .welcome p{font-size:13px;color:var(--text-dim);margin:0;}
+
+  .progress-card{
+    margin:16px 0;display:flex;align-items:center;gap:16px;
+    background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:16px;
+  }
+  .ring{width:52px;height:52px;flex-shrink:0;}
+  .progress-info{flex:1;min-width:0;}
+  .progress-info .pt{font-size:13.5px;font-weight:700;margin-bottom:2px;}
+  .progress-info .ps{font-size:12px;color:var(--text-faint);}
+
+  .section{display:none;flex-direction:column;gap:14px;animation:fadeUp .35s ease;}
+  .section.active{display:flex;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .section-title{font-size:18px;font-weight:800;margin:6px 0 -2px;letter-spacing:-0.01em;}
+  .section-sub{font-size:13px;color:var(--text-dim);margin:-8px 0 4px;line-height:1.5;}
+
+  /* chips */
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+  .chip{
+    flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--text-dim);
+    background:var(--surface-soft);border:1px solid var(--border);padding:7px 13px;border-radius:999px;cursor:pointer;
+  }
+  .chip.active{color:#022c22;background:var(--emerald);border-color:var(--emerald);}
+
+  /* generic card */
+  .card{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:16px;}
+
+  /* supplier card */
+  .supplier{display:flex;gap:12px;align-items:center;}
+  .supplier-ava{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#1e293b,#0b1220);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:1px solid var(--border);}
+  .supplier-body{flex:1;min-width:0;}
+  .supplier-name{font-size:14px;font-weight:700;margin:0 0 2px;}
+  .supplier-meta{font-size:11.5px;color:var(--text-faint);display:flex;flex-wrap:wrap;gap:6px;}
+  .supplier-tag{background:rgba(16,185,129,0.1);color:#6ee7b7;padding:2px 7px;border-radius:6px;font-weight:600;}
+  .wa-btn{
+    flex-shrink:0;display:flex;align-items:center;gap:6px;background:#0b1220;border:1px solid rgba(16,185,129,0.35);
+    color:var(--emerald);font-weight:700;font-size:12px;padding:9px 12px;border-radius:10px;text-decoration:none;white-space:nowrap;
+  }
+  .wa-btn:active{transform:scale(.97);}
+  .supplier-note{font-size:11.5px;color:var(--text-faint);line-height:1.55;background:var(--surface-soft);border:1px solid var(--border);border-radius:12px;padding:11px 12px;}
+
+  /* script card */
+  .script-card .script-label{font-size:11px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+  .script-text{font-size:13.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;background:var(--surface-soft);border:1px solid var(--border);border-radius:12px;padding:12px 13px;margin-bottom:10px;}
+  .copy-btn{
+    display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+    background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);color:var(--emerald);
+    font-weight:700;font-size:13px;padding:10px;border-radius:10px;cursor:pointer;
+  }
+  .copy-btn.copied{background:var(--emerald);color:#022c22;}
+
+  /* accordion (logistics) */
+  .acc-item{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;overflow:hidden;}
+  .acc-q{width:100%;background:none;border:none;color:var(--text);font-family:'Inter';font-size:13.5px;font-weight:700;text-align:left;padding:15px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;}
+  .acc-step-badge{width:22px;height:22px;border-radius:7px;background:rgba(20,184,166,0.15);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+  .acc-chevron{margin-left:auto;color:var(--emerald);transition:transform .25s;flex-shrink:0;}
+  .acc-item.open .acc-chevron{transform:rotate(45deg);}
+  .acc-a{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:13px;color:var(--text-dim);line-height:1.6;}
+  .acc-item.open .acc-a{max-height:260px;}
+  .acc-a-inner{padding:0 16px 16px 46px;}
+
+  .checklist{display:flex;flex-direction:column;gap:2px;}
+  .check-row{display:flex;align-items:flex-start;gap:10px;padding:11px 4px;border-bottom:1px solid var(--border-soft);cursor:pointer;}
+  .check-row:last-child{border-bottom:none;}
+  .check-box{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#022c22;transition:all .15s;}
+  .check-row.done .check-box{background:var(--emerald);border-color:var(--emerald);}
+  .check-row.done .check-label{color:var(--text-faint);text-decoration:line-through;}
+  .check-label{font-size:13px;line-height:1.5;}
+
+  /* payment methods */
+  .pay-card{display:flex;flex-direction:column;gap:8px;}
+  .pay-head{display:flex;align-items:center;gap:10px;}
+  .pay-icon{width:38px;height:38px;border-radius:10px;background:var(--surface-soft);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .pay-name{font-size:14.5px;font-weight:700;}
+  .pay-fee{font-size:11px;color:var(--emerald);font-weight:700;}
+  .pay-steps{margin:4px 0 0;padding-left:18px;font-size:12.5px;color:var(--text-dim);line-height:1.7;}
+
+  /* bonus */
+  .bonus-card{display:flex;gap:13px;align-items:flex-start;}
+  .bonus-icon{width:42px;height:42px;border-radius:11px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+  .bonus-title{font-size:14px;font-weight:700;margin:0 0 3px;}
+  .bonus-desc{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin:0 0 8px;}
+  .bonus-list{font-size:12.5px;color:var(--text-dim);line-height:1.8;margin:0;padding-left:16px;}
+  .mini-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--emerald);background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);padding:7px 12px;border-radius:9px;cursor:pointer;text-decoration:none;}
+
+  /* vip / locked */
+  .vip-banner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(251,191,36,0.12),rgba(16,185,129,0.06));border:1px solid rgba(251,191,36,0.3);border-radius:14px;padding:13px 14px;font-size:12.5px;color:#fcd34d;font-weight:600;line-height:1.5;}
+  .upsell-card{position:relative;overflow:hidden;}
+  .upsell-card.locked{opacity:0.92;}
+  .upsell-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
+  .upsell-title{font-size:15px;font-weight:800;margin:0 0 3px;}
+  .upsell-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;}
+  .upsell-badge.included{background:rgba(16,185,129,0.15);color:#6ee7b7;}
+  .upsell-badge.locked{background:rgba(251,191,36,0.15);color:var(--gold);}
+  .upsell-desc{font-size:12.5px;color:var(--text-dim);line-height:1.55;margin:0 0 12px;}
+  .upsell-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:12px;border-top:1px dashed var(--border);}
+  .upsell-price{font-size:16px;font-weight:800;font-family:'Plus Jakarta Sans';}
+  .upsell-price .was{font-size:11px;font-weight:500;color:var(--text-faint);text-decoration:line-through;margin-right:5px;}
+  .unlock-btn{background:linear-gradient(90deg,var(--gold),#f59e0b);color:#451a03;font-weight:800;font-size:12.5px;padding:9px 14px;border-radius:10px;border:none;cursor:pointer;}
+  .unlocked-tag{display:flex;align-items:center;gap:6px;color:var(--emerald);font-weight:700;font-size:12.5px;}
+
+  /* bottom nav / sidebar */
+  nav.tabbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    display:flex;justify-content:flex-start;align-items:center;overflow-x:auto;
+    height:var(--nav-h);padding-bottom:env(safe-area-inset-bottom,0px);
+    background:rgba(9,14,28,0.92);backdrop-filter:blur(12px);
+    border-top:1px solid var(--border-soft);
+    scrollbar-width:none;
+  }
+  nav.tabbar::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    background:none;border:none;color:var(--text-faint);font-size:9.5px;font-weight:700;
+    padding:6px 4px;cursor:pointer;flex:0 0 auto;width:58px;
+  }
+  .tab-btn .ic{font-size:18px;line-height:1;}
+  .tab-btn.active{color:var(--emerald);}
+
+  /* long-form guide content */
+  .guide h4{font-size:13.5px;font-weight:800;margin:0 0 6px;color:var(--text);display:flex;align-items:center;gap:7px;}
+  .guide p{font-size:13px;color:var(--text-dim);line-height:1.6;margin:0 0 10px;}
+  .guide ol,.guide ul{margin:0 0 10px;padding-left:19px;font-size:13px;color:var(--text-dim);line-height:1.75;}
+  .guide ol li::marker,.guide ul li::marker{color:var(--teal);font-weight:700;}
+  .guide-icon{width:34px;height:34px;border-radius:9px;background:rgba(20,184,166,0.12);border:1px solid rgba(20,184,166,0.3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .callout{display:flex;gap:10px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px;padding:11px 12px;font-size:12px;color:#fcd34d;line-height:1.55;margin:2px 0 10px;}
+  .code-block{
+    background:#000814;border:1px solid var(--border);border-radius:12px;padding:13px 14px;margin-bottom:10px;
+    font-family:'SFMono-Regular',Consolas,Menlo,monospace;font-size:12px;line-height:1.65;color:#a7f3d0;
+    white-space:pre;overflow-x:auto;
+  }
+  .prompt-block{
+    background:var(--surface-soft);border:1px solid rgba(20,184,166,0.3);border-radius:12px;padding:14px;margin-bottom:10px;
+    font-size:12.5px;line-height:1.7;color:var(--text);white-space:pre-wrap;
+  }
+  .tool-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2px;}
+  .tool-chip{font-size:11.5px;font-weight:700;color:var(--text-dim);background:var(--surface-soft);border:1px solid var(--border);padding:6px 11px;border-radius:9px;}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(var(--nav-h) + 16px);transform:translateX(-50%) translateY(20px);
+    background:var(--emerald);color:#022c22;font-weight:700;font-size:12.5px;
+    padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:all .25s;z-index:50;
+    box-shadow:0 10px 25px -8px rgba(16,185,129,0.5);white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media(min-width:860px){
+    .shell{flex-direction:row;justify-content:center;gap:0;}
+    .main{padding:0 24px 40px;max-width:600px;}
+    nav.tabbar{
+      position:sticky;top:0;bottom:auto;left:auto;right:auto;height:100vh;
+      flex-direction:column;justify-content:flex-start;align-items:stretch;
+      width:220px;flex-shrink:0;padding:24px 12px;gap:4px;
+      border-top:none;border-right:1px solid var(--border-soft);
+    }
+    .tab-btn{flex-direction:row;justify-content:flex-start;gap:11px;font-size:13px;padding:11px 13px;border-radius:11px;}
+    .tab-btn.active{background:rgba(16,185,129,0.1);}
+    .tab-btn .ic{font-size:17px;}
+    .toast{bottom:24px;}
+  }
+</style>
+</head>
+<body>
+
+
+<div class="shell">
+  <div class="main">
+    <div class="topbar">
+      <div class="brand"><span class="brand-badge">SA</span>EcomStart Vault</div>
+      <div class="demo-toggle">✓ Acesso completo</div>
+    </div>
+
+    <div class="welcome">
+      <div class="hi">Bem-vindo(a) de volta</div>
+      <h1>Olá, Revendedor 👋</h1>
+      <p>SA Ecom Start 2.0 · Acesso vitalício ativo</p>
+    </div>
+
+    <div class="progress-card">
+      <svg class="ring" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="22" fill="none" stroke="#1e293b" stroke-width="5"/>
+        <circle id="ringFg" cx="26" cy="26" r="22" fill="none" stroke="url(#g1)" stroke-width="5" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)"/>
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#14B8A6"/></linearGradient></defs>
+      </svg>
+      <div class="progress-info">
+        <div class="pt">Progresso do treinamento: <span id="progressPct">0%</span></div>
+        <div class="ps" id="progressSub">0 de 4 módulos concluídos</div>
+      </div>
+    </div>
+
+    <!-- INÍCIO -->
+    <section class="section active" data-panel="inicio">
+      <div class="section-title">O que é o SA Ecom Start 2.0</div>
+      <div class="card guide">
+        <p>É um modelo de revenda <strong style="color:var(--text);">sem comprar stock primeiro</strong>. Você anuncia o produto de um fornecedor, o cliente paga a você antes, e só depois você compra e despacha. O lucro é a diferença entre o que o cliente pagou e o preço de atacado.</p>
+        <ol>
+          <li>Você publica o anúncio (Marketplace/WhatsApp) usando fotos e preços do fornecedor.</li>
+          <li>O cliente paga <strong style="color:var(--text);">antes</strong> — por EFT, Capitec Pay, Ozow ou cartão.</li>
+          <li>Só depois de receber, você compra do fornecedor pelo preço de atacado.</li>
+          <li>Você despacha direto para o cliente via Paxi ou Courier Guy.</li>
+        </ol>
+        <div class="callout">⚠️ Risco zero de stock parado — mas isso também significa que <strong>nunca despache antes de confirmar o pagamento</strong> (ver Módulo 3, checklist anti-golpe).</div>
+      </div>
+
+      <div class="section-title" style="margin-top:6px;">Seu caminho de aprendizado</div>
+      <div class="section-sub">Siga os 4 módulos principais nesta ordem para montar sua operação em 2026.</div>
+      <div class="card" style="display:flex;flex-direction:column;gap:10px;" id="moduleList"></div>
+
+      <div class="section-title" style="margin-top:6px;">Recursos extra</div>
+      <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>🛒 Como montar sua loja + integrar Shopify/Stripe</span><span style="color:var(--text-faint);font-size:11.5px;">Ver aba Loja Online</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>🤖 Prompt pronto para construir seu site com IA</span><span style="color:var(--text-faint);font-size:11.5px;">Ver aba Construir com IA</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>🎁 Top 20 produtos de Natal + checklist + comunidade</span><span style="color:var(--text-faint);font-size:11.5px;">Ver aba Bônus</span></div>
+      </div>
+    </section>
+
+    <!-- FORNECEDORES -->
+    <section class="section" data-panel="fornecedores">
+      <div class="section-title">Módulo 1 · Cofre de Fornecedores</div>
+      <div class="section-sub">Empresas reais e públicas de atacado na África do Sul. Toque para abrir o site oficial e pedir cotação.</div>
+      <div class="chips" id="supplierChips"></div>
+      <div id="supplierList" style="display:flex;flex-direction:column;gap:10px;"></div>
+      <div class="supplier-note">🔎 Estes são fornecedores reais, com site público — confirme sempre preço, MOQ (quantidade mínima) e prazos diretamente com cada empresa antes de fechar um pedido. Para ampliar a lista por categoria, use os diretórios abaixo.</div>
+      <div class="card guide">
+        <h4><span class="guide-icon">📚</span>Diretórios com centenas de fornecedores verificados</h4>
+        <p style="margin-bottom:6px;">Bases públicas onde pode pesquisar por categoria e cidade:</p>
+        <ul style="margin-bottom:0;">
+          <li><a href="https://wholesalersinsouthafrica.co.za/" target="_blank" rel="noopener" style="color:var(--teal);">wholesalersinsouthafrica.co.za</a> — listagens por categoria (eletrónicos, moda, beleza, casa)</li>
+          <li><a href="https://www.goafricaonline.com/za/directory/distributors-wholesalers" target="_blank" rel="noopener" style="color:var(--teal);">goafricaonline.com</a> — diretório de distribuidores e atacadistas na África do Sul</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- VENDAS / SCRIPTS -->
+    <section class="section" data-panel="vendas">
+      <div class="section-title">Módulo 2 · Máquina de Vendas</div>
+      <div class="section-sub">Anúncios prontos para o Marketplace e scripts de WhatsApp testados. Toque em "Copiar" e cole direto.</div>
+      <div id="scriptList" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </section>
+
+    <!-- LOGÍSTICA -->
+    <section class="section" data-panel="logistica">
+      <div class="section-title">Módulo 3 · Logística & Envio</div>
+      <div class="section-sub">Como enviar pela Paxi (lojas PEP) e pela The Courier Guy, sem sustos.</div>
+      <div id="accList" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <div class="section-title" style="margin-top:6px;">Checklist anti-golpe (COD)</div>
+      <div class="card">
+        <div class="checklist" id="scamChecklist"></div>
+      </div>
+    </section>
+
+    <!-- PAGAMENTOS / LOJA ONLINE -->
+    <section class="section" data-panel="pagamentos">
+      <div class="section-title">Módulo 4 · Recebimento & Loja Online</div>
+      <div class="section-sub">Do WhatsApp manual a uma loja própria com Shopify e Stripe integrados.</div>
+
+      <div class="section-title" style="font-size:14.5px;margin-top:2px;">Recebimento rápido (sem loja)</div>
+      <div id="payList" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <div class="section-title" style="margin-top:6px;">Como criar sua loja no Shopify</div>
+      <div class="card guide">
+        <h4><span class="guide-icon">🛍️</span>Passo a passo</h4>
+        <ol>
+          <li>Crie a conta em shopify.com e escolha o plano básico.</li>
+          <li>Em "Temas", instale um tema gratuito (ex.: Dawn) e ajuste cores/logo para combinar com sua marca.</li>
+          <li>Em "Produtos", cadastre cada item com fotos do fornecedor, preço em ZAR e descrição (reaproveite os textos do Módulo 2).</li>
+          <li>Em "Definições → Transporte", crie zonas de entrega e associe às tabelas da Paxi e Courier Guy (Módulo 3).</li>
+          <li>Ligue um domínio próprio (ex.: .co.za) em "Domínios" — opcional, mas passa mais confiança.</li>
+        </ol>
+        <div class="callout">💡 A Shopify Payments nativa não cobre todos os bancos sul-africanos. Por isso o passo seguinte ensina a ligar Stripe/Ozow/PayFast como gateway.</div>
+      </div>
+
+      <div class="section-title" style="margin-top:6px;">Integrar Stripe na sua loja Shopify</div>
+      <div class="card guide">
+        <ol>
+          <li>Crie uma conta em stripe.com e complete a verificação de negócio (dados da empresa/CPF-CNPJ ou equivalente sul-africano).</li>
+          <li>Na Shopify, vá em "Definições → Pagamentos → Adicionar novo gateway" e procure por "Stripe" na lista de parceiros, ou instale a app "Stripe Payments" na Shopify App Store.</li>
+          <li>Copie a sua <em>Publishable key</em> e <em>Secret key</em> do painel Stripe (Programadores → Chaves de API) e cole nos campos da app.</li>
+          <li>Ative o gateway e faça uma compra de teste em modo sandbox antes de abrir ao público.</li>
+        </ol>
+      </div>
+
+      <div class="section-title" style="margin-top:6px;">Integrar Stripe no seu próprio site (projeto raiz)</div>
+      <div class="card guide">
+        <p>Se você (ou alguém que contratou) está a construir um site próprio em vez de usar a Shopify, o fluxo mínimo com Stripe Checkout é este:</p>
+        <ol>
+          <li>Instale o SDK: <code style="color:var(--teal);">npm install stripe</code></li>
+          <li>No servidor, crie uma sessão de checkout apontando para o seu produto e URLs de sucesso/cancelamento.</li>
+          <li>Redirecione o cliente para o <code style="color:var(--teal);">session.url</code> devolvido pela Stripe.</li>
+          <li>Configure um <em>webhook</em> (<code style="color:var(--teal);">checkout.session.completed</code>) para liberar o acesso ou disparar o envio assim que o pagamento for confirmado.</li>
+        </ol>
+        <div class="code-block">// server.js — criar sessão de checkout
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+const session = await stripe.checkout.sessions.create({
+  mode: 'payment',
+  line_items: [{
+    price_data: {
+      currency: 'zar',
+      product_data: { name: 'SA Ecom Start 2.0' },
+      unit_amount: 19700, // R197.00 em centavos
+    },
+    quantity: 1,
+  }],
+  success_url: 'https://seusite.co.za/obrigado?session_id={CHECKOUT_SESSION_ID}',
+  cancel_url: 'https://seusite.co.za/checkout',
+});
+
+res.redirect(303, session.url);</div>
+        <button class="copy-btn" id="copyStripeCode">📋 Copiar código</button>
+        <div class="callout">🔑 Nunca coloque a <em>Secret key</em> no código do navegador — ela fica só no servidor. No front-end use apenas a <em>Publishable key</em>.</div>
+      </div>
+    </section>
+
+    <!-- CONSTRUIR COM IA -->
+    <section class="section" data-panel="ia">
+      <div class="section-title">Construa seu site com IA</div>
+      <div class="section-sub">Você não precisa saber programar. Use estas ferramentas e este prompt pronto.</div>
+
+      <div class="card guide">
+        <h4><span class="guide-icon">🧰</span>Ferramentas recomendadas</h4>
+        <div class="tool-row">
+          <span class="tool-chip">Lovable</span><span class="tool-chip">v0.dev</span><span class="tool-chip">bolt.new</span>
+          <span class="tool-chip">Claude</span><span class="tool-chip">ChatGPT</span>
+        </div>
+        <p style="margin-top:10px;">Todas geram um site funcional a partir de uma descrição em texto. Lovable, v0 e bolt.new já entregam o site publicado com um link; Claude e ChatGPT geram o código para você publicar depois (ex.: na Vercel).</p>
+      </div>
+
+      <div class="card guide">
+        <h4><span class="guide-icon">✍️</span>Prompt pronto — copie e cole na IA</h4>
+        <div class="prompt-block" id="aiPromptText">Crie uma landing page de vendas moderna e mobile-first para a minha loja de revenda online na África do Sul chamada "[NOME DA SUA LOJA]".
+
+Especificações:
+- Tema visual escuro com um verde/teal de destaque (transmitir confiança e tecnologia)
+- Seção principal (hero) mostrando o produto "[SEU PRODUTO PRINCIPAL]" com preço em Rand (R)
+- Galeria de produtos: foto, nome, preço e botão "Comprar"
+- 3 depoimentos de clientes fictícios de exemplo (vou substituir por reais depois)
+- Selo de confiança citando: aceita Capitec, FNB, Standard Bank, Nedbank e EFT instantâneo via Ozow
+- Botão de checkout ligado a "[SEU LINK DE PAGAMENTO STRIPE/OZOW/PAYFAST]"
+- Rodapé com política de entrega via Paxi e The Courier Guy
+- 100% responsivo (celular, tablet, desktop), rápido, sem exigir login
+- Código simples em HTML/CSS/JS ou React, sem frameworks pesados desnecessários
+
+Depois de gerar a primeira versão, vou pedir para você:
+1. "Ligar o botão de compra ao Stripe Checkout"
+2. "Adicionar uma página de agradecimento com o número de rastreio"
+3. "Deixar o menu mobile mais fácil de usar com o polegar"</div>
+        <button class="copy-btn" id="copyPrompt">📋 Copiar prompt completo</button>
+      </div>
+
+      <div class="card guide">
+        <h4><span class="guide-icon">💡</span>Como falar com a IA (para não perder tempo)</h4>
+        <ul>
+          <li>Peça <strong style="color:var(--text);">uma mudança de cada vez</strong> — "muda só a cor do botão para verde" funciona melhor do que pedir 5 coisas juntas.</li>
+          <li>Mostre o que está errado com detalhe: "o texto do preço está cortado no celular" em vez de "está feio".</li>
+          <li>Peça sempre para testar em tela de celular antes de aprovar — a maioria dos seus clientes vai comprar pelo telemóvel.</li>
+          <li>Guarde o link do projeto assim que gostar de uma versão — muitas dessas ferramentas permitem voltar a versões anteriores.</li>
+        </ul>
+      </div>
+
+      <div class="card guide">
+        <h4><span class="guide-icon">🚀</span>Onde publicar</h4>
+        <p>Lovable, v0 e bolt.new já publicam automaticamente com um link. Se gerou código à parte (Claude/ChatGPT), suba num destes serviços gratuitos: <strong style="color:var(--text);">Vercel</strong> ou <strong style="color:var(--text);">Netlify</strong> — arraste a pasta do projeto e em minutos tem um link público. Depois ligue seu domínio próprio (.co.za) nas definições do projeto.</p>
+      </div>
+    </section>
+
+    <!-- BÔNUS -->
+    <section class="section" data-panel="bonus">
+      <div class="section-title">Seus 3 bônus gratuitos</div>
+      <div class="card bonus-card">
+        <div class="bonus-icon">🎄</div>
+        <div style="flex:1;min-width:0;">
+          <div class="bonus-title">Top 20 Produtos de Natal & Fim de Ano 2026</div>
+          <div class="bonus-desc">Os itens mais procurados em Novembro e Dezembro na África do Sul.</div>
+          <ol class="bonus-list" id="xmasList"></ol>
+        </div>
+      </div>
+      <div class="card bonus-card">
+        <div class="bonus-icon">🛡️</div>
+        <div style="flex:1;min-width:0;">
+          <div class="bonus-title">Checklist Anti-Fraude e Proteção de Pedidos</div>
+          <div class="bonus-desc">As mesmas 6 verificações do Módulo 3, num resumo rápido antes de despachar qualquer encomenda.</div>
+          <button class="mini-btn" data-goto="logistica">Abrir checklist →</button>
+        </div>
+      </div>
+      <div class="card bonus-card">
+        <div class="bonus-icon">💬</div>
+        <div style="flex:1;min-width:0;">
+          <div class="bonus-title">Comunidade de Suporte no WhatsApp</div>
+          <div class="bonus-desc">Tire dúvidas com outros revendedores e com o suporte SA EcomStart.</div>
+          <a class="mini-btn" href="https://wa.me/27000000000?text=Ol%C3%A1%2C%20comprei%20o%20SA%20Ecom%20Start%202.0%20e%20quero%20entrar%20na%20comunidade" target="_blank" rel="noopener">Entrar no grupo →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXTRAS INCLUSOS -->
+    <section class="section" data-panel="vip">
+      <div class="section-title">Extras inclusos no seu acesso</div>
+      <div class="vip-banner">✓ Tudo abaixo já está liberado — faz parte do que você adquiriu, sem custos adicionais.</div>
+      <div id="vipList" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </section>
+  </div>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab-btn active" data-panel="inicio"><span class="ic">🏠</span>Início</button>
+    <button class="tab-btn" data-panel="fornecedores"><span class="ic">📇</span>Fornec.</button>
+    <button class="tab-btn" data-panel="vendas"><span class="ic">💬</span>Vendas</button>
+    <button class="tab-btn" data-panel="pagamentos"><span class="ic">🛍️</span>Loja</button>
+    <button class="tab-btn" data-panel="ia"><span class="ic">🤖</span>IA</button>
+    <button class="tab-btn" data-panel="logistica"><span class="ic">📦</span>Logíst.</button>
+    <button class="tab-btn" data-panel="bonus"><span class="ic">🎁</span>Bônus</button>
+    <button class="tab-btn" data-panel="vip"><span class="ic">👑</span>Extras</button>
+  </nav>
+</div>
+
+<div class="toast" id="toast">Copiado!</div>
+
+<script>
+(function(){
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function ls(key, fallback){ try{ var v = localStorage.getItem(key); return v===null?fallback:JSON.parse(v);}catch(e){return fallback;} }
+  function setLs(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 1600);
+  }
+
+  function copyText(text, btn){
+    function ok(){
+      var orig = btn.textContent;
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copiado';
+      toast('Copiado para a área de transferência');
+      setTimeout(function(){ btn.classList.remove('copied'); btn.textContent = orig; }, 1500);
+    }
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(ok).catch(function(){ fallbackCopy(text, ok); });
+      } else { fallbackCopy(text, ok); }
+    }catch(e){ fallbackCopy(text, ok); }
+  }
+  function fallbackCopy(text, cb){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); cb();
+    }catch(e){ toast('Não foi possível copiar automaticamente'); }
+  }
+
+  /* -------- navigation -------- */
+  var panels = document.querySelectorAll('.section');
+  var tabs = document.querySelectorAll('.tab-btn');
+  function goto(name){
+    panels.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-panel')===name); });
+    tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-panel')===name); });
+    setLs('vault_tab', name);
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+  tabs.forEach(function(t){ t.onclick = function(){ goto(t.getAttribute('data-panel')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-goto]'), function(b){
+    b.onclick = function(){ goto(b.getAttribute('data-goto')); };
+  });
+
+  /* -------- module progress (Início) -------- */
+  var moduleDefs = [
+    {id:'fornecedores', num:1, title:'Cofre de Fornecedores', desc:'Contatos diretos de atacadistas em Joburg & Durban'},
+    {id:'vendas', num:2, title:'Máquina de Vendas', desc:'Anúncios e scripts de WhatsApp prontos'},
+    {id:'logistica', num:3, title:'Logística & Envio', desc:'Paxi, Courier Guy e proteção contra golpes'},
+    {id:'pagamentos', num:4, title:'Recebimento & Bancos', desc:'Capitec Pay, EFT, Ozow e cartão'}
+  ];
+  var visited = ls('vault_visited', {});
+  function renderModuleList(){
+    var html = '';
+    moduleDefs.forEach(function(m){
+      var done = !!visited[m.id];
+      html += '<div class="check-row' + (done?' done':'') + '" data-visit="' + m.id + '">';
+      html += '<div class="check-box">' + (done?'✓':'') + '</div>';
+      html += '<div class="check-label"><strong style="color:var(--text);">Módulo ' + m.num + ' · ' + esc(m.title) + '</strong><br><span style="color:var(--text-faint);">' + esc(m.desc) + '</span></div>';
+      html += '</div>';
+    });
+    document.getElementById('moduleList').innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-visit]'), function(row){
+      row.onclick = function(){ goto(row.getAttribute('data-visit')); };
+    });
+  }
+  function markVisited(id){
+    if(moduleDefs.some(function(m){return m.id===id;}) && !visited[id]){
+      visited[id] = true; setLs('vault_visited', visited);
+      renderModuleList(); updateProgress();
+    }
+  }
+  function updateProgress(){
+    var count = moduleDefs.filter(function(m){ return visited[m.id]; }).length;
+    var pct = Math.round((count/moduleDefs.length)*100);
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressSub').textContent = count + ' de ' + moduleDefs.length + ' módulos concluídos';
+    var circumference = 138.2;
+    document.getElementById('ringFg').style.strokeDashoffset = circumference - (circumference*pct/100);
+  }
+  var origGoto = goto;
+  goto = function(name){ origGoto(name); markVisited(name); };
+  tabs.forEach(function(t){ t.onclick = function(){ goto(t.getAttribute('data-panel')); }; });
+
+  /* -------- suppliers (empresas reais e públicas) -------- */
+  var suppliers = [
+    {name:'Jico Electronics', city:'Joanesburgo', cat:'Eletrônicos', emoji:'📱', url:'https://jico.co.za/'},
+    {name:'Romor Electrical', city:'Gauteng', cat:'Eletrônicos', emoji:'🔌', url:'https://romorgroup.co.za/'},
+    {name:'Perfect Dealz', city:'Sandton, Joanesburgo', cat:'Beleza', emoji:'💄', url:'https://perfectdealz.co.za/'},
+    {name:'Hair Health & Beauty', city:'Nacional', cat:'Beleza', emoji:'✨', url:'https://www.hairhealthbeauty.co.za/'},
+    {name:'QH Distribution', city:'Nacional', cat:'Beleza', emoji:'🧴', url:'https://qhdistribution.com/'},
+    {name:'Tomotex', city:'Nacional', cat:'Moda', emoji:'👕', url:'https://tomotex.co.za/'},
+    {name:'Scarf World Wholesale', city:'Nacional', cat:'Moda', emoji:'👗', url:'https://www.wholesale.scarfworld.co.za/clothing.html'},
+    {name:'Traders Warehouse', city:'Nacional', cat:'Moda', emoji:'🛍️', url:'https://traderswarehouse.co.za/'},
+    {name:'Berunwear', city:'Nacional', cat:'Fitness', emoji:'🩳', url:'https://www.berunwear.com/'},
+    {name:'Fitness Breakthru', city:'Nacional', cat:'Fitness', emoji:'🏋️', url:'https://gymequipment.co.za/'}
+  ];
+  var cats = ['Todos','Eletrônicos','Beleza','Moda','Fitness'];
+  var activeCat = 'Todos';
+  function renderChips(){
+    document.getElementById('supplierChips').innerHTML = cats.map(function(c){
+      return '<button class="chip' + (c===activeCat?' active':'') + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(ch){
+      ch.onclick = function(){ activeCat = ch.getAttribute('data-cat'); renderChips(); renderSuppliers(); };
+    });
+  }
+  function renderSuppliers(){
+    var list = suppliers.filter(function(s){ return activeCat==='Todos' || s.cat===activeCat; });
+    document.getElementById('supplierList').innerHTML = list.map(function(s){
+      return '<div class="card supplier">' +
+        '<div class="supplier-ava">' + s.emoji + '</div>' +
+        '<div class="supplier-body">' +
+          '<div class="supplier-name">' + esc(s.name) + '</div>' +
+          '<div class="supplier-meta"><span>📍 ' + esc(s.city) + '</span><span>· ' + esc(s.cat) + '</span></div>' +
+        '</div>' +
+        '<a class="wa-btn" href="' + esc(s.url) + '" target="_blank" rel="noopener">🌐 Ver site</a>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* -------- sales scripts -------- */
+  var scripts = [
+    {label:'Título de anúncio · Marketplace', text:'🔥 NOVO em Joburg — Fone Bluetooth Premium com Cancelamento de Ruído | Entrega Rápida via Paxi | Pagamento na Entrega Disponível'},
+    {label:'Descrição de anúncio · Marketplace', text:'✅ Produto original, lacrado\n✅ Garantia de 6 meses\n✅ Envio em 24-48h por Paxi ou Courier Guy\n✅ Pagamento por EFT, Capitec Pay ou na entrega\n\nInteressado? Chama no WhatsApp 👇'},
+    {label:'Script WhatsApp · Primeira resposta', text:'Olá! 😊 Sim, ainda está disponível! Temos em estoque pronto para envio hoje. Você prefere retirar ou receber em casa pela Paxi/Courier Guy? Qual o seu bairro para eu calcular o frete certinho?'},
+    {label:'Script WhatsApp · Fechando o pedido', text:'Perfeito! Fica assim:\n📦 Produto: R{preço}\n🚚 Frete até {cidade}: R{frete}\n💳 Total: R{total}\n\nPode pagar por EFT, Capitec Pay ou Ozow. Assim que o pagamento cair eu já despacho hoje mesmo e te mando o código de rastreio 🙌'},
+    {label:'Script WhatsApp · Objeção de confiança', text:'Entendo a preocupação! Já entreguei para dezenas de clientes na região e tenho comprovantes de envio recentes que posso te mostrar. Também aceito pagamento na entrega em alguns casos — quer que eu verifique essa opção para você?'}
+  ];
+  function renderScripts(){
+    document.getElementById('scriptList').innerHTML = scripts.map(function(s, i){
+      return '<div class="card script-card">' +
+        '<div class="script-label">' + esc(s.label) + '</div>' +
+        '<div class="script-text">' + esc(s.text) + '</div>' +
+        '<button class="copy-btn" data-idx="' + i + '">📋 Copiar texto</button>' +
+      '</div>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.copy-btn[data-idx]'), function(btn){
+      btn.onclick = function(){ copyText(scripts[+btn.getAttribute('data-idx')].text, btn); };
+    });
+  }
+
+  /* -------- logistics accordion -------- */
+  var accSteps = [
+    {q:'Passo 1 — Embalar com segurança', a:'Use caixa ou envelope resistente da Paxi. Proteja itens frágeis com plástico bolha. Anote o número do pedido do lado de fora para facilitar a conferência.'},
+    {q:'Passo 2 — Enviar via Paxi (lojas PEP)', a:'Leve o pacote a qualquer loja PEP com o código Paxi gerado. Frete a partir de R59.95. Entrega em 3-5 dias úteis entre a maioria das cidades da África do Sul.'},
+    {q:'Passo 3 — Coleta porta a porta (Courier Guy)', a:'Para produtos mais caros ou frágeis, agende coleta com a The Courier Guy direto no seu endereço. Entrega em 1-2 dias úteis nas principais cidades.'},
+    {q:'Passo 4 — Rastreio e confirmação', a:'Envie o código de rastreio ao cliente assim que despachar. Confirme a entrega por WhatsApp 24h depois para reduzir disputas e golpes de "não recebi".'}
+  ];
+  function renderAcc(){
+    document.getElementById('accList').innerHTML = accSteps.map(function(s,i){
+      return '<div class="acc-item" data-i="' + i + '">' +
+        '<button class="acc-q"><span class="acc-step-badge">' + (i+1) + '</span><span style="flex:1;">' + esc(s.q) + '</span><span class="acc-chevron">+</span></button>' +
+        '<div class="acc-a"><div class="acc-a-inner">' + esc(s.a) + '</div></div>' +
+      '</div>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.acc-item'), function(item){
+      item.querySelector('.acc-q').onclick = function(){
+        var open = item.classList.contains('open');
+        document.querySelectorAll('.acc-item').forEach(function(x){ x.classList.remove('open'); });
+        if(!open) item.classList.add('open');
+      };
+    });
+  }
+
+  var scamItems = [
+    'Confirme o pagamento na sua conta ANTES de despachar (nunca envie por promessa de PIX/EFT futuro).',
+    'Evite aceitar comprovantes editados — confira o app do banco, nunca só o print.',
+    'Para Cash-on-Delivery, combine local público e movimentado para a entrega.',
+    'Fotografe o pacote fechado com etiqueta antes de despachar, como prova de envio.',
+    'Desconfie de pedidos muito acima da média sem histórico de conversa prévio.',
+    'Guarde o comprovante de postagem da Paxi/Courier Guy até a confirmação de entrega.'
+  ];
+  var scamDone = ls('vault_scam', {});
+  function renderScam(){
+    document.getElementById('scamChecklist').innerHTML = scamItems.map(function(t, i){
+      var done = !!scamDone[i];
+      return '<div class="check-row' + (done?' done':'') + '" data-i="' + i + '"><div class="check-box">' + (done?'✓':'') + '</div><div class="check-label">' + esc(t) + '</div></div>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#scamChecklist .check-row'), function(row){
+      row.onclick = function(){
+        var i = row.getAttribute('data-i');
+        scamDone[i] = !scamDone[i]; setLs('vault_scam', scamDone); renderScam();
+      };
+    });
+  }
+
+  /* -------- payments -------- */
+  var payMethods = [
+    {icon:'🟢', name:'Capitec Pay', fee:'Sem mensalidade', steps:['Abra o app Capitec e ative "Capitec Pay" em Configurações','Gere seu link/QR de cobrança pessoal','Envie o link pelo WhatsApp junto ao valor combinado']},
+    {icon:'⚡', name:'Instant EFT (Ozow)', fee:'Confirmação em segundos', steps:['Crie conta gratuita de comerciante na Ozow','Gere um link de pagamento por pedido','Cliente paga direto do banco dele, sem cartão']},
+    {icon:'💳', name:'Cartão via link de pagamento', fee:'Taxa por transação', steps:['Use um provedor de link de pagamento com cartão (ex.: PayFast, Yoco)','Compartilhe o link gerado por pedido','Receba a confirmação automática por e-mail']},
+    {icon:'🏦', name:'EFT manual (todos os bancos)', fee:'Sem taxa', steps:['Compartilhe seus dados bancários (Capitec, FNB, Standard Bank, Nedbank)','Peça o comprovante e confira no app antes de despachar','Guarde referência do pedido na descrição da transferência']}
+  ];
+  function renderPay(){
+    document.getElementById('payList').innerHTML = payMethods.map(function(p){
+      return '<div class="card pay-card">' +
+        '<div class="pay-head"><div class="pay-icon">' + p.icon + '</div><div><div class="pay-name">' + esc(p.name) + '</div><div class="pay-fee">' + esc(p.fee) + '</div></div></div>' +
+        '<ol class="pay-steps">' + p.steps.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* -------- bonus: xmas list -------- */
+  var xmasProducts = ['Fones Bluetooth com cancelamento de ruído','Mini projetores portáteis','Luzes de LED para quarto (RGB)','Squeeze térmica personalizada','Kits de skincare presenteável','Relógios smartwatch básicos','Brinquedos educativos infantis','Power banks 20.000mAh','Caixas de som portáteis à prova d\'água','Conjuntos de panelas antiaderentes','Air fryers compactas','Perfumes importados (linha econômica)','Malas de viagem dobráveis','Óculos de sol polarizados','Kits de maquiagem em mala','Jogos de cama de microfibra','Cadeiras de camping dobráveis','Body sprays em kit','Carregadores sem fio magnéticos','Difusores de aromas USB'];
+  function renderXmas(){
+    document.getElementById('xmasList').innerHTML = xmasProducts.map(function(p){ return '<li>' + esc(p) + '</li>'; }).join('');
+  }
+
+  /* -------- extras inclusos -------- */
+  var upsellItems = [
+    {title:'Pacote Fast-Track de Alta Temporada', desc:'Catálogo com os 10 produtos de Natal mais vendidos + ideias de criativos para TikTok, Reels e WhatsApp Status.', included:['10 produtos com margem acima de 70%','Roteiro de criativos sem direitos autorais','Prontos para adaptar e postar hoje mesmo']},
+    {title:'Robô de Vendas Automáticas no WhatsApp', desc:'Guia de automação que responde clientes, envia fotos do produto, calcula o frete Paxi e manda a chave do Capitec Pay — mesmo enquanto você dorme.', included:['Passo a passo de configuração de respostas automáticas','Como plugar o cálculo de frete','Como automatizar o envio da chave de pagamento']},
+    {title:'Manual de Fechamento Rápido em 3 Minutos', desc:'50 scripts para as objeções mais comuns de clientes sul-africanos — para quem prefere fechar manualmente pelo WhatsApp.', included:['50 respostas para objeções reais','Organizado por tipo de dúvida','Copiar e colar direto no WhatsApp']},
+    {title:'VIP Inner Circle · Acompanhamento 3 Meses', desc:'Um produto vencedor novo sugerido toda semana + acesso ao canal fechado de suporte da comunidade.', included:['1 sugestão de produto vencedor por semana, 12 semanas','Prioridade no canal de suporte','Acesso direto à comunidade WhatsApp/Telegram']}
+  ];
+  function renderVip(){
+    document.getElementById('vipList').innerHTML = upsellItems.map(function(u){
+      return '<div class="card upsell-card">' +
+        '<div class="upsell-head"><div class="upsell-title">' + esc(u.title) + '</div>' +
+          '<span class="upsell-badge included">✓ Incluído</span></div>' +
+        '<div class="upsell-desc">' + esc(u.desc) + '</div>' +
+        '<ul class="bonus-list" style="margin:-4px 0 0;">' + u.included.map(function(x){return '<li>'+esc(x)+'</li>';}).join('') + '</ul>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* -------- copy: AI prompt + Stripe code -------- */
+  var copyPromptBtn = document.getElementById('copyPrompt');
+  if(copyPromptBtn){
+    copyPromptBtn.onclick = function(){ copyText(document.getElementById('aiPromptText').textContent, copyPromptBtn); };
+  }
+  var copyStripeBtn = document.getElementById('copyStripeCode');
+  if(copyStripeBtn){
+    copyStripeBtn.onclick = function(){ copyText(copyStripeBtn.previousElementSibling.textContent, copyStripeBtn); };
+  }
+
+  /* init */
+  renderModuleList(); updateProgress();
+  renderChips(); renderSuppliers();
+  renderScripts(); renderAcc(); renderScam();
+  renderPay(); renderXmas(); renderVip();
+
+  var savedTab = ls('vault_tab', 'inicio');
+  if(savedTab !== 'inicio') goto(savedTab);
+})();
+</script>
+
+</body>
+</html>
