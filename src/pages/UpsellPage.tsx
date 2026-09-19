@@ -59,7 +59,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     accept_redirect_url: null,
     decline_redirect_url: null,
     payment_link_id: "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
-    checkout_link_id: "57300a28-4553-4bb4-9586-06941387717d",
+    checkout_link_id: "e1919191-1919-4919-8919-191919191919",
     button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
     button_accept_color: "#10b981",
     button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
@@ -326,8 +326,12 @@ export default function UpsellPage() {
 
   const redirectToCheckout = () => {
     if (!step) return;
+    const isPhysicalUpsell = step.id === "88888888-8888-4888-8888-888888888881" ||
+      step.product_name?.toLowerCase().includes("19-piece") ||
+      step.product_name?.toLowerCase().includes("cookware") ||
+      is99Upsell;
     const isDownsell = step.step_type === "downsell" || step.id === "77777777-7777-4777-8777-777777777772";
-    const upsellLinkId = step.checkout_link_id || (isDownsell ? "d1471471-1471-4471-8471-147147147147" : "d2472472-2472-4472-8472-247247247247");
+    const upsellLinkId = step.checkout_link_id || (isPhysicalUpsell ? "e1919191-1919-4919-8919-191919191919" : isDownsell ? "d1471471-1471-4471-8471-147147147147" : "d2472472-2472-4472-8472-247247247247");
     const qParams = new URLSearchParams();
     const qName = searchParams.get("name");
     const qEmail = searchParams.get("email");

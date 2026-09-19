@@ -933,8 +933,119 @@ export default function Checkout() {
     }
   }, [paymentState, link?.redirect_url, internalTxId, stripeTransactionId, customerName, email, phone, link?.id]);
 
+  const FALLBACK_PAYMENT_LINKS: Record<string, PaymentLink> = {
+    "e1919191-1919-4919-8919-191919191919": {
+      id: "e1919191-1919-4919-8919-191919191919",
+      product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
+      product_description: "Exclusive Special Offer: Complete your kitchen set with this heavy-duty 19-Piece Granite Marble Non-Stick Cookware Set including heat-resistant silicone spatulas, spoons & countertop storage container.",
+      logo_url: "/images/panela_hero.png",
+      amount: 99,
+      order_bump_name: null,
+      order_bump_description: null,
+      order_bump_price: null,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1116244420968778",
+      checkout_banner_url: "/images/panela_hero.png",
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#10b981",
+    },
+    "d2472472-2472-4472-8472-247247247247": {
+      id: "d2472472-2472-4472-8472-247247247247",
+      product_name: "Lifetime VIP Access Upgrade & 2026 Automation Pack",
+      product_description: "Unlock instant access to our automated store launcher, 150+ direct factory WhatsApp contacts in Joburg & Durban, and pre-negotiated PEP Paxi bulk shipping discounts.",
+      logo_url: "/sa_vip_upsell.jpg",
+      amount: 247,
+      order_bump_name: null,
+      order_bump_description: null,
+      order_bump_price: null,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/a7777777-7777-4777-8777-777777777777",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1116244420968778",
+      checkout_banner_url: "/sa_vip_upsell.jpg",
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#0b72e7",
+    },
+    "d1471471-1471-4471-8471-147147147147": {
+      id: "d1471471-1471-4471-8471-147147147147",
+      product_name: "Lifetime Access VIP License (Special R100 Off)",
+      product_description: "Save R100 instantly. Get Lifetime Access with zero renewal fees forever, Core WhatsApp Automation, and Top 10 High-Margin Direct Supplier Contacts.",
+      logo_url: "/sa_vip_downsell.jpg",
+      amount: 147,
+      order_bump_name: null,
+      order_bump_description: null,
+      order_bump_price: null,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/a7777777-7777-4777-8777-777777777777",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1116244420968778",
+      checkout_banner_url: "/sa_vip_downsell.jpg",
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#10b981",
+    }
+  };
+
   const fetchLink = async (attempt = 0) => {
     try {
+      if (linkId && FALLBACK_PAYMENT_LINKS[linkId]) {
+        setLink(FALLBACK_PAYMENT_LINKS[linkId]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("payment_links")
         .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, checkout_accent_color")
@@ -944,17 +1055,23 @@ export default function Checkout() {
 
       if (error) throw error; // transient (network / in-app webview) -> retry below
       if (!data) {
-        // Genuinely no matching active link -> real "not found"; retrying won't help.
-        setNotFound(true);
-        setLoading(false);
+        if (linkId && FALLBACK_PAYMENT_LINKS[linkId]) {
+          setLink(FALLBACK_PAYMENT_LINKS[linkId]);
+          setLoading(false);
+        } else {
+          setNotFound(true);
+          setLoading(false);
+        }
       } else {
         setLink(data);
         setLoading(false);
       }
     } catch {
-      // Transient failures are common inside FB/IG in-app webviews (89% of traffic).
-      // Retry a few times before giving up, so the FIRST click never shows
-      // "link não encontrado" and kills the sale.
+      if (linkId && FALLBACK_PAYMENT_LINKS[linkId]) {
+        setLink(FALLBACK_PAYMENT_LINKS[linkId]);
+        setLoading(false);
+        return;
+      }
       if (attempt < 3) {
         setTimeout(() => fetchLink(attempt + 1), 500 * (attempt + 1));
       } else {
