@@ -69,6 +69,72 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
     page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
   },
+  "11111111-1111-4111-8111-111111111111": {
+    id: "11111111-1111-4111-8111-111111111111",
+    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
+    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    amount: 99,
+    image_url: "/images/panela_hero.png",
+    step_type: "upsell",
+    accept_step_id: null,
+    decline_step_id: null,
+    accept_redirect_url: null,
+    decline_redirect_url: null,
+    payment_link_id: "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
+    checkout_link_id: "e1919191-1919-4919-8919-191919191919",
+    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_color: "#10b981",
+    button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
+    button_decline_color: "#6b7280",
+    show_accept_button: true,
+    show_decline_button: true,
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+  },
+  "22222222-2222-4222-8222-222222222222": {
+    id: "22222222-2222-4222-8222-222222222222",
+    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
+    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    amount: 99,
+    image_url: "/images/panela_hero.png",
+    step_type: "upsell",
+    accept_step_id: null,
+    decline_step_id: null,
+    accept_redirect_url: null,
+    decline_redirect_url: null,
+    payment_link_id: "4b585d8e-6df4-4019-8ca0-2a32b8e68844",
+    checkout_link_id: "e1919191-1919-4919-8919-191919191919",
+    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_color: "#10b981",
+    button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
+    button_decline_color: "#6b7280",
+    show_accept_button: true,
+    show_decline_button: true,
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+  },
+  "33333333-3333-4333-8333-333333333333": {
+    id: "33333333-3333-4333-8333-333333333333",
+    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
+    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    amount: 99,
+    image_url: "/images/panela_hero.png",
+    step_type: "upsell",
+    accept_step_id: null,
+    decline_step_id: null,
+    accept_redirect_url: null,
+    decline_redirect_url: null,
+    payment_link_id: "57300a28-4553-4bb4-9586-06941387717d",
+    checkout_link_id: "e1919191-1919-4919-8919-191919191919",
+    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_color: "#10b981",
+    button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
+    button_decline_color: "#6b7280",
+    show_accept_button: true,
+    show_decline_button: true,
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+  },
   // Upsell #1: VIP Inner Circle & Automation Suite (R247 - Digital)
   "77777777-7777-4777-8777-777777777771": {
     id: "77777777-7777-4777-8777-777777777771",
@@ -219,11 +285,14 @@ export default function UpsellPage() {
         .maybeSingle();
 
       if (error || !data) {
-        const isPhysicalLink = linkId && (
+        const isPhysicalLink = (linkId && (
           linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
           linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
-          linkId === "57300a28-4553-4bb4-9586-06941387717d"
-        );
+          linkId === "57300a28-4553-4bb4-9586-06941387717d" ||
+          linkId === "e1919191-1919-4919-8919-191919191919"
+        )) || (stepId && (
+          stepId.startsWith("8888") || stepId.startsWith("1111") || stepId.startsWith("2222") || stepId.startsWith("3333")
+        ));
         const fallbackKey = isPhysicalLink ? "88888888-8888-4888-8888-888888888881" : "77777777-7777-4777-8777-777777777771";
         if (FALLBACK_STEPS[fallbackKey]) {
           setStep(FALLBACK_STEPS[fallbackKey]);
@@ -250,11 +319,14 @@ export default function UpsellPage() {
         }
       }
     } catch {
-      const isPhysicalLink = linkId && (
+      const isPhysicalLink = (linkId && (
         linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
         linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
-        linkId === "57300a28-4553-4bb4-9586-06941387717d"
-      );
+        linkId === "57300a28-4553-4bb4-9586-06941387717d" ||
+        linkId === "e1919191-1919-4919-8919-191919191919"
+      )) || (stepId && (
+        stepId.startsWith("8888") || stepId.startsWith("1111") || stepId.startsWith("2222") || stepId.startsWith("3333")
+      ));
       const fallbackKey = isPhysicalLink ? "88888888-8888-4888-8888-888888888881" : "77777777-7777-4777-8777-777777777771";
       if (FALLBACK_STEPS[fallbackKey]) {
         setStep(FALLBACK_STEPS[fallbackKey]);
@@ -306,7 +378,16 @@ export default function UpsellPage() {
   };
 
   const goToThankYou = () => {
-    const targetLink = linkId || step?.payment_link_id || "a7777777-7777-4777-8777-777777777777";
+    const isPhys = (stepId && (stepId.startsWith("8888") || stepId.startsWith("1111") || stepId.startsWith("2222") || stepId.startsWith("3333"))) ||
+      (linkId && (
+        linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
+        linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
+        linkId === "57300a28-4553-4bb4-9586-06941387717d" ||
+        linkId === "e1919191-1919-4919-8919-191919191919"
+      ));
+    const defaultPhysicalLink = "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34";
+    const defaultDigitalLink = "a7777777-7777-4777-8777-777777777777";
+    const targetLink = linkId || step?.payment_link_id || (isPhys ? defaultPhysicalLink : defaultDigitalLink);
     const path = buildInternalPath(`/thank-you/${targetLink}`);
     doRedirect(toFullUrl(path), false);
   };
@@ -768,13 +849,15 @@ export default function UpsellPage() {
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-1">
-              Upgrade Added to Your Account!
+              {isPhysical ? "Cookware Set Added to Your Parcel! 🎉" : "Upgrade Added to Your Account!"}
             </h2>
             <p className="text-xs text-gray-600">
-              {step.product_name} has been activated on your member portal.
+              {isPhysical
+                ? `${step.product_name} has been added directly to your delivery parcel with Free Shipping.`
+                : `${step.product_name} has been activated on your member portal.`}
             </p>
             <p className="text-[11px] text-gray-400 mt-2">
-              Redirecting to your member portal...
+              {isPhysical ? "Redirecting to your delivery confirmation..." : "Redirecting to your member portal..."}
             </p>
           </div>
         )}
@@ -822,7 +905,9 @@ export default function UpsellPage() {
             </span>
           </div>
           <p className="text-[11px] text-gray-400">
-            © 2026 SA Ecom Start 2.0 • Official Member Portal & Supplier Network
+            {isPhysical
+              ? "© 2026 Kitchen Express South Africa • Direct Warehouse Fulfillment & Delivery"
+              : "© 2026 SA Ecom Start 2.0 • Official Member Portal & Supplier Network"}
           </p>
         </footer>
       </main>

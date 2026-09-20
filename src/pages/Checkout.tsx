@@ -560,6 +560,11 @@ export default function Checkout() {
   const checkAndRedirectToFlow = useCallback(async (transactionId: string) => {
     if (!link) return false;
 
+    // Prevent loop if the user is purchasing the upsell directly
+    if (link.id === "e1919191-1919-4919-8919-191919191919" || link.id.startsWith("e1919191")) {
+      return false;
+    }
+
     // Check if this is a physical product (Smeg / Air Fryer / Cookware)
     const PHYSICAL_LINK_IDS = [
       "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34", // Smeg
