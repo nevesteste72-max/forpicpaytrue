@@ -1583,7 +1583,27 @@ export default function Checkout() {
             {/* Single-step form — reserve height so the Stripe form loading in
                 does not shift the layout (CLS was 0.33 at the payment moment). */}
             <div className="p-6 md:p-8 min-h-[540px]">
-              {clientSecret && stripeOptions && stripeInstance ? (
+              {clientSecret && stripeOptions && stripeInstance ? (() => {
+                const isPhysicalProduct = Boolean(
+                  link && (
+                    [
+                      "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34", // Smeg
+                      "4b585d8e-6df4-4019-8ca0-2a32b8e68844", // Airfryer
+                      "57300a28-4553-4bb4-9586-06941387717d", // Cookware
+                      "e1919191-1919-4919-8919-191919191919", // 19-Piece Chef Set
+                    ].includes(link.id) ||
+                    link.product_type === "physical" ||
+                    link.title?.toLowerCase().includes("smeg") ||
+                    link.title?.toLowerCase().includes("air fryer") ||
+                    link.title?.toLowerCase().includes("airfryer") ||
+                    link.title?.toLowerCase().includes("cookware") ||
+                    link.title?.toLowerCase().includes("panela") ||
+                    link.title?.toLowerCase().includes("chef knife") ||
+                    link.title?.toLowerCase().includes("19-piece") ||
+                    link.title?.toLowerCase().includes("breakfast set")
+                  )
+                );
+                return (
                 <Elements stripe={stripeInstance} options={stripeOptions}>
                   <StripeCheckoutForm
                     totalAmount={stripeChargeAmount || totalAmount}
@@ -1603,6 +1623,7 @@ export default function Checkout() {
                     trackingParams={trackingParams}
                     localCurrency={localCurrency}
                     showTrustBadges={link.show_trust_badges !== false}
+                    isPhysical={isPhysicalProduct}
                     onInitiateCheckout={() => { if (!icAlreadyFiredExternally) fireInitiateCheckout(); }}
                     onSuccess={async () => {
                       trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);
@@ -1620,7 +1641,8 @@ export default function Checkout() {
                     orderBumpSlot={orderBumpSlot}
                   />
                 </Elements>
-              ) : (
+                );
+              })() : (
                 <div className="flex items-center justify-center min-h-[480px]">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>

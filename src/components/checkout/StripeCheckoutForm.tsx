@@ -99,6 +99,7 @@ interface StripeCheckoutFormProps {
   stripePaymentMethods?: string[];
   localCurrency?: { code: string; amount: number; symbol: string } | null;
   showTrustBadges?: boolean;
+  isPhysical?: boolean;
 }
 
 export function StripeCheckoutForm({
@@ -123,6 +124,7 @@ export function StripeCheckoutForm({
   stripePaymentMethods,
   localCurrency,
   showTrustBadges = true,
+  isPhysical = false,
 }: StripeCheckoutFormProps) {
   const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
   // Display methods in optimal conversion order. Wallets (Apple Pay / Google Pay)
@@ -496,9 +498,9 @@ export function StripeCheckoutForm({
         </div>
       )}
 
-      {/* Discrição na fatura — medo comum em nichos sensíveis (relacionamento,
-          saúde, etc.): "isto vai aparecer no meu extrato com o nome do produto?" */}
-      {showTrustBadges && (
+      {/* Discrição na fatura — apenas para infoprodutos (nichos sensíveis, cursos, etc.).
+          NUNCA exibir para produtos físicos (panelas, airfryer, eletrodomésticos, etc.). */}
+      {showTrustBadges && !isPhysical && (
         <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex-shrink-0 w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <EyeOff className="w-4 h-4 text-muted-foreground" />
