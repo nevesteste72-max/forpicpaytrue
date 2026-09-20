@@ -51,7 +51,7 @@ const PRODUCTS_MAP: Record<string, ProductFallback> = {
     name: "Berlinger Haus 15-Piece Non-Stick Cookware Set",
     subtitle: "Metallic Grey Edition • Induction Turbo Bottom",
     price: 597,
-    image: "/images/p1.png",
+    image: "/images/panela_hero.png",
     isPhysical: true,
   },
   // 19-Piece Chef Knife & Silicone Kitchen Utensil Set (R99 Physical Upsell)
@@ -73,6 +73,7 @@ interface PaymentLinkInfo {
   thank_you_video_url: string | null;
   currency: string;
   checkout_language: string;
+  logo_url?: string | null;
 }
 
 export default function ThankYouPage() {
@@ -113,14 +114,27 @@ export default function ThankYouPage() {
   const fetchData = async () => {
     try {
       if (linkId) {
-        const { data: link } = await supabase
-          .from("payment_links")
-          .select("id, product_name, product_type, redirect_url, thank_you_title, thank_you_message, thank_you_video_url, currency, checkout_language")
+        // Try public view first for anon access
+        let linkData: any = null;
+        const { data: pubLink } = await supabase
+          .from("payment_links_public")
+          .select("id, product_name, product_type, redirect_url, thank_you_title, thank_you_message, thank_you_video_url, currency, checkout_language, logo_url")
           .eq("id", linkId)
           .maybeSingle();
 
-        if (link) {
-          setLinkInfo(link as any);
+        if (pubLink) {
+          linkData = pubLink;
+        } else {
+          const { data: privLink } = await supabase
+            .from("payment_links")
+            .select("id, product_name, product_type, redirect_url, thank_you_title, thank_you_message, thank_you_video_url, currency, checkout_language, logo_url")
+            .eq("id", linkId)
+            .maybeSingle();
+          if (privLink) linkData = privLink;
+        }
+
+        if (linkData) {
+          setLinkInfo(linkData as any);
         } else {
           setLinkInfo({
             product_name: fallbackProduct.name,
@@ -133,6 +147,7 @@ export default function ThankYouPage() {
             thank_you_video_url: null,
             currency: "ZAR",
             checkout_language: "en",
+            logo_url: fallbackProduct.image,
           });
         }
       }

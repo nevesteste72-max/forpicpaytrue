@@ -581,8 +581,14 @@ export default function Checkout() {
       link.title?.toLowerCase().includes("breakfast set");
 
     if (isPhysical) {
+      const stepMap: Record<string, string> = {
+        "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34": "11111111-1111-4111-8111-111111111111", // Smeg
+        "4b585d8e-6df4-4019-8ca0-2a32b8e68844": "22222222-2222-4222-8222-222222222222", // Airfryer
+        "57300a28-4553-4bb4-9586-06941387717d": "33333333-3333-4333-8333-333333333333", // Cookware
+      };
+      const targetStep = stepMap[link.id] || "88888888-8888-4888-8888-888888888881";
       const custParams = `&name=${encodeURIComponent(customerName || "")}&email=${encodeURIComponent(email || "")}&phone=${encodeURIComponent(phone || "")}`;
-      navigate(`/upsell/88888888-8888-4888-8888-888888888881?tx=${transactionId}&link=${link.id}${custParams}`);
+      navigate(`/upsell/${targetStep}?tx=${transactionId}&link=${link.id}${custParams}`);
       return true;
     }
 
@@ -852,7 +858,18 @@ export default function Checkout() {
           // via the transaction id as eventID.
           trackPurchase(pendingValue ?? totalAmount, pendingCurrency ?? currencySymbol, txid);
           const hasFlow = await checkAndRedirectToFlow(txid);
-          if (!hasFlow) setPaymentState("success");
+          if (!hasFlow) {
+            const parentLink = searchParams.get("parent_link");
+            const parentTx = searchParams.get("parent_tx");
+            if (link?.id === "e1919191-1919-4919-8919-191919191919" || link?.id?.startsWith("e1919191")) {
+              const dest = parentLink
+                ? `/thank-you/${parentLink}?tx=${parentTx || txid}&upsell=1`
+                : `/thank-you/e1919191-1919-4919-8919-191919191919?tx=${txid}`;
+              window.location.href = dest;
+              return;
+            }
+            setPaymentState("success");
+          }
         } else if (result.status === "pending") {
           // Voucher methods (OXXO/Boleto) settle asynchronously — the buyer
           // still has to go pay in cash, sometimes days later. This is not a
@@ -893,7 +910,18 @@ export default function Checkout() {
             if (pollingRef.current) clearInterval(pollingRef.current);
             // Check for upsell flow before showing success
             const hasFlow = await checkAndRedirectToFlow(internalTxId || "");
-            if (!hasFlow) setPaymentState("success");
+            if (!hasFlow) {
+              const parentLink = searchParams.get("parent_link");
+              const parentTx = searchParams.get("parent_tx");
+              if (link?.id === "e1919191-1919-4919-8919-191919191919" || link?.id?.startsWith("e1919191")) {
+                const dest = parentLink
+                  ? `/thank-you/${parentLink}?tx=${parentTx || internalTxId || ""}&upsell=1`
+                  : `/thank-you/e1919191-1919-4919-8919-191919191919?tx=${internalTxId || ""}`;
+                window.location.href = dest;
+                return;
+              }
+              setPaymentState("success");
+            }
           } else if (result.status === "failed") {
             setErrorMessage(t.paymentDeclined);
             setPaymentState("failed");
@@ -939,6 +967,7 @@ export default function Checkout() {
   }, [paymentState, link?.redirect_url, internalTxId, stripeTransactionId, customerName, email, phone, link?.id]);
 
   const FALLBACK_PAYMENT_LINKS: Record<string, PaymentLink> = {
+    // 19-Piece Set (Physical Upsell)
     "e1919191-1919-4919-8919-191919191919": {
       id: "e1919191-1919-4919-8919-191919191919",
       product_name: "19-Piece Chef Knife & Silicone Kitchen Utensil Set with Organizer",
@@ -957,12 +986,117 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
-      redirect_url: "/thank-you/9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
+      redirect_url: "/thank-you/e1919191-1919-4919-8919-191919191919",
       currency: "ZAR",
       checkout_language: "en",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
       facebook_pixel_id: "1116244420968778",
       checkout_banner_url: "/assets/upsell-19pc.png",
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#10b981",
+    },
+    // Smeg 3-Piece Breakfast Set (Physical)
+    "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34": {
+      id: "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
+      product_name: "Smeg 3-Piece Breakfast Set",
+      product_description: "Toaster, Kettle & Blender • Luxury Matte Black Edition with 2-Year Warranty.",
+      logo_url: "/images/p1.png",
+      amount: 697,
+      order_bump_name: null,
+      order_bump_description: null,
+      order_bump_price: null,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1116244420968778",
+      checkout_banner_url: "/images/p1.png",
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#10b981",
+    },
+    // Russell Hobbs Air Fryer (Physical)
+    "4b585d8e-6df4-4019-8ca0-2a32b8e68844": {
+      id: "4b585d8e-6df4-4019-8ca0-2a32b8e68844",
+      product_name: "Russell Hobbs Dual Basket 9L Air Fryer",
+      product_description: "Model RHAF09DSS • 1700W Rapid Air Digital Sync Dual Cooking Baskets.",
+      logo_url: "/images/air_1.png",
+      amount: 597,
+      order_bump_name: null,
+      order_bump_description: null,
+      order_bump_price: null,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/4b585d8e-6df4-4019-8ca0-2a32b8e68844",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1116244420968778",
+      checkout_banner_url: "/images/air_1.png",
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#10b981",
+    },
+    // Berlinger Haus Cookware (Physical)
+    "57300a28-4553-4bb4-9586-06941387717d": {
+      id: "57300a28-4553-4bb4-9586-06941387717d",
+      product_name: "Berlinger Haus 15-Piece Non-Stick Cookware Set",
+      product_description: "Metallic Grey Edition • Induction Turbo Bottom Non-Stick Marble Coating.",
+      logo_url: "/images/panela_hero.png",
+      amount: 597,
+      order_bump_name: null,
+      order_bump_description: null,
+      order_bump_price: null,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/57300a28-4553-4bb4-9586-06941387717d",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1116244420968778",
+      checkout_banner_url: "/images/panela_hero.png",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,
@@ -1045,8 +1179,13 @@ export default function Checkout() {
 
   const fetchLink = async (attempt = 0) => {
     try {
+      const parentLink = searchParams.get("parent_link");
       if (linkId && FALLBACK_PAYMENT_LINKS[linkId]) {
-        setLink(FALLBACK_PAYMENT_LINKS[linkId]);
+        const fallback = { ...FALLBACK_PAYMENT_LINKS[linkId] };
+        if ((linkId === "e1919191-1919-4919-8919-191919191919" || linkId.startsWith("e1919191")) && parentLink) {
+          fallback.redirect_url = `/thank-you/${parentLink}`;
+        }
+        setLink(fallback);
         setLoading(false);
         return;
       }
@@ -1061,14 +1200,22 @@ export default function Checkout() {
       if (error) throw error; // transient (network / in-app webview) -> retry below
       if (!data) {
         if (linkId && FALLBACK_PAYMENT_LINKS[linkId]) {
-          setLink(FALLBACK_PAYMENT_LINKS[linkId]);
+          const fallback = { ...FALLBACK_PAYMENT_LINKS[linkId] };
+          if ((linkId === "e1919191-1919-4919-8919-191919191919" || linkId.startsWith("e1919191")) && parentLink) {
+            fallback.redirect_url = `/thank-you/${parentLink}`;
+          }
+          setLink(fallback);
           setLoading(false);
         } else {
           setNotFound(true);
           setLoading(false);
         }
       } else {
-        setLink(data);
+        const loadedData = { ...data };
+        if ((linkId === "e1919191-1919-4919-8919-191919191919" || linkId?.startsWith("e1919191")) && parentLink) {
+          loadedData.redirect_url = `/thank-you/${parentLink}`;
+        }
+        setLink(loadedData);
         setLoading(false);
       }
     } catch {
@@ -1390,7 +1537,18 @@ export default function Checkout() {
               </div>
               {link?.redirect_url && (
                 <Button
-                  onClick={() => { window.location.href = link.redirect_url!; }}
+                  onClick={() => {
+                    const parentLink = searchParams.get("parent_link");
+                    const parentTx = searchParams.get("parent_tx");
+                    if (link?.id === "e1919191-1919-4919-8919-191919191919" || link?.id?.startsWith("e1919191")) {
+                      const dest = parentLink
+                        ? `/thank-you/${parentLink}?tx=${parentTx || stripeTransactionId || internalTxId || ""}&upsell=1`
+                        : `/thank-you/e1919191-1919-4919-8919-191919191919?tx=${stripeTransactionId || internalTxId || ""}`;
+                      window.location.href = dest;
+                      return;
+                    }
+                    window.location.href = link.redirect_url!;
+                  }}
                   className="gradient-primary text-white rounded-lg"
                 >
                   {t.accessContent}
@@ -1628,7 +1786,18 @@ export default function Checkout() {
                     onSuccess={async () => {
                       trackPurchase(totalAmount, currencySymbol, stripeTransactionId || undefined);
                       const hasFlow = await checkAndRedirectToFlow(stripeTransactionId || "");
-                      if (!hasFlow) setPaymentState("success");
+                      if (!hasFlow) {
+                        const parentLink = searchParams.get("parent_link");
+                        const parentTx = searchParams.get("parent_tx");
+                        if (link?.id === "e1919191-1919-4919-8919-191919191919" || link?.id?.startsWith("e1919191")) {
+                          const dest = parentLink
+                            ? `/thank-you/${parentLink}?tx=${parentTx || stripeTransactionId || ""}&upsell=1`
+                            : `/thank-you/e1919191-1919-4919-8919-191919191919?tx=${stripeTransactionId || ""}`;
+                          window.location.href = dest;
+                          return;
+                        }
+                        setPaymentState("success");
+                      }
                     }}
                     onError={(msg) => {
                       setErrorMessage(msg);

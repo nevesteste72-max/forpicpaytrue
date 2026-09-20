@@ -385,9 +385,15 @@ export default function UpsellPage() {
         linkId === "57300a28-4553-4bb4-9586-06941387717d" ||
         linkId === "e1919191-1919-4919-8919-191919191919"
       ));
+    const stepToLink: Record<string, string> = {
+      "11111111-1111-4111-8111-111111111111": "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
+      "22222222-2222-4222-8222-222222222222": "4b585d8e-6df4-4019-8ca0-2a32b8e68844",
+      "33333333-3333-4333-8333-333333333333": "57300a28-4553-4bb4-9586-06941387717d",
+    };
+    const mappedLink = stepId ? stepToLink[stepId] : undefined;
     const defaultPhysicalLink = "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34";
     const defaultDigitalLink = "a7777777-7777-4777-8777-777777777777";
-    const targetLink = linkId || step?.payment_link_id || (isPhys ? defaultPhysicalLink : defaultDigitalLink);
+    const targetLink = linkId || mappedLink || step?.payment_link_id || (isPhys ? defaultPhysicalLink : defaultDigitalLink);
     const path = buildInternalPath(`/thank-you/${targetLink}`);
     doRedirect(toFullUrl(path), false);
   };
@@ -421,6 +427,8 @@ export default function UpsellPage() {
     if (qEmail) qParams.set("email", qEmail);
     if (qPhone) qParams.set("phone", qPhone);
     if (txId && txId !== "preview") qParams.set("parent_tx", txId);
+    const parentLink = linkId || step.payment_link_id;
+    if (parentLink) qParams.set("parent_link", parentLink);
     if (trackingParams.utm_source) qParams.set("utm_source", trackingParams.utm_source);
     if (trackingParams.utm_medium) qParams.set("utm_medium", trackingParams.utm_medium);
     if (trackingParams.utm_campaign) qParams.set("utm_campaign", trackingParams.utm_campaign);
