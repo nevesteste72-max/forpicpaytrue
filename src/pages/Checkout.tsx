@@ -941,9 +941,9 @@ export default function Checkout() {
   const FALLBACK_PAYMENT_LINKS: Record<string, PaymentLink> = {
     "e1919191-1919-4919-8919-191919191919": {
       id: "e1919191-1919-4919-8919-191919191919",
-      product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
-      product_description: "Exclusive Special Offer: Complete your kitchen set with this heavy-duty 19-Piece Granite Marble Non-Stick Cookware Set including heat-resistant silicone spatulas, spoons & countertop storage container.",
-      logo_url: "/images/panela_hero.png",
+      product_name: "19-Piece Chef Knife & Silicone Kitchen Utensil Set with Organizer",
+      product_description: "Exclusive Special Offer: Complete your kitchen with this 19-Piece Chef Collection featuring 5 Precision Stainless Steel Knives, Kitchen Shears, Cutting Board, 11 Heat-Resistant Silicone Utensils with Natural Wood Handles & Countertop Organizer Bucket.",
+      logo_url: "/assets/upsell-19pc.png",
       amount: 99,
       order_bump_name: null,
       order_bump_description: null,
@@ -962,7 +962,7 @@ export default function Checkout() {
       checkout_language: "en",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
       facebook_pixel_id: "1116244420968778",
-      checkout_banner_url: "/images/panela_hero.png",
+      checkout_banner_url: "/assets/upsell-19pc.png",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,

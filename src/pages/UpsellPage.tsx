@@ -46,13 +46,13 @@ interface FlowStep {
 }
 
 const FALLBACK_STEPS: Record<string, FlowStep> = {
-  // Upsell #1: 19-Piece Non-Stick Cookware Set with Silicone Utensils (R99 - Physical Products)
+  // Upsell #1: 19-Piece Chef Knife & Silicone Kitchen Utensil Set (R99 - Physical Products)
   "88888888-8888-4888-8888-888888888881": {
     id: "88888888-8888-4888-8888-888888888881",
-    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
-    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    product_name: "19-Piece Chef Knife & Silicone Kitchen Utensil Set with Organizer",
+    product_description: "Complete 19-Piece Chef Collection featuring 5 Precision Black Stainless Steel Chef Knives with Rose Gold Accents, Kitchen Shears, Heavy-Duty Cutting Board, 11 Heat-Resistant Non-Stick Silicone Utensils with Natural Wooden Handles, and Matte Black Countertop Dual Storage Organizer. Added directly to your delivery parcel with Free Shipping.",
     amount: 99,
-    image_url: "/images/panela_hero.png",
+    image_url: "/assets/upsell-19pc.png",
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
@@ -60,21 +60,21 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     decline_redirect_url: null,
     payment_link_id: "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
     checkout_link_id: "e1919191-1919-4919-8919-191919191919",
-    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_text: "YES! ADD 19-PIECE CHEF SET (R99)",
     button_accept_color: "#10b981",
     button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
     button_decline_color: "#6b7280",
     show_accept_button: true,
     show_decline_button: true,
-    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
-    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Chef Collection for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Precision Knife Set, Heat-Resistant Silicone Utensils, Cutting Board & Organizer Bucket to your delivery package for just R99 (Save R1,899 Today)."
   },
   "11111111-1111-4111-8111-111111111111": {
     id: "11111111-1111-4111-8111-111111111111",
-    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
-    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    product_name: "19-Piece Chef Knife & Silicone Kitchen Utensil Set with Organizer",
+    product_description: "Complete 19-Piece Chef Collection featuring 5 Precision Black Stainless Steel Chef Knives with Rose Gold Accents, Kitchen Shears, Heavy-Duty Cutting Board, 11 Heat-Resistant Non-Stick Silicone Utensils with Natural Wooden Handles, and Matte Black Countertop Dual Storage Organizer. Added directly to your delivery parcel with Free Shipping.",
     amount: 99,
-    image_url: "/images/panela_hero.png",
+    image_url: "/assets/upsell-19pc.png",
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
@@ -82,21 +82,21 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     decline_redirect_url: null,
     payment_link_id: "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
     checkout_link_id: "e1919191-1919-4919-8919-191919191919",
-    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_text: "YES! ADD 19-PIECE CHEF SET (R99)",
     button_accept_color: "#10b981",
     button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
     button_decline_color: "#6b7280",
     show_accept_button: true,
     show_decline_button: true,
-    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
-    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Chef Collection for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Precision Knife Set, Heat-Resistant Silicone Utensils, Cutting Board & Organizer Bucket to your delivery package for just R99 (Save R1,899 Today)."
   },
   "22222222-2222-4222-8222-222222222222": {
     id: "22222222-2222-4222-8222-222222222222",
-    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
-    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    product_name: "19-Piece Chef Knife & Silicone Kitchen Utensil Set with Organizer",
+    product_description: "Complete 19-Piece Chef Collection featuring 5 Precision Black Stainless Steel Chef Knives with Rose Gold Accents, Kitchen Shears, Heavy-Duty Cutting Board, 11 Heat-Resistant Non-Stick Silicone Utensils with Natural Wooden Handles, and Matte Black Countertop Dual Storage Organizer. Added directly to your delivery parcel with Free Shipping.",
     amount: 99,
-    image_url: "/images/panela_hero.png",
+    image_url: "/assets/upsell-19pc.png",
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
@@ -104,21 +104,21 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     decline_redirect_url: null,
     payment_link_id: "4b585d8e-6df4-4019-8ca0-2a32b8e68844",
     checkout_link_id: "e1919191-1919-4919-8919-191919191919",
-    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_text: "YES! ADD 19-PIECE CHEF SET (R99)",
     button_accept_color: "#10b981",
     button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
     button_decline_color: "#6b7280",
     show_accept_button: true,
     show_decline_button: true,
-    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
-    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Chef Collection for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Precision Knife Set, Heat-Resistant Silicone Utensils, Cutting Board & Organizer Bucket to your delivery package for just R99 (Save R1,899 Today)."
   },
   "33333333-3333-4333-8333-333333333333": {
     id: "33333333-3333-4333-8333-333333333333",
-    product_name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
-    product_description: "Complete your kitchen with this premium 19-Piece Granite Marble Non-Stick Cookware Set. Includes tempered glass lids, heat-resistant silicone cooking utensils, and matching countertop organizer bucket. Added directly to your delivery parcel with Free Shipping.",
+    product_name: "19-Piece Chef Knife & Silicone Kitchen Utensil Set with Organizer",
+    product_description: "Complete 19-Piece Chef Collection featuring 5 Precision Black Stainless Steel Chef Knives with Rose Gold Accents, Kitchen Shears, Heavy-Duty Cutting Board, 11 Heat-Resistant Non-Stick Silicone Utensils with Natural Wooden Handles, and Matte Black Countertop Dual Storage Organizer. Added directly to your delivery parcel with Free Shipping.",
     amount: 99,
-    image_url: "/images/panela_hero.png",
+    image_url: "/assets/upsell-19pc.png",
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
@@ -126,14 +126,14 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     decline_redirect_url: null,
     payment_link_id: "57300a28-4553-4bb4-9586-06941387717d",
     checkout_link_id: "e1919191-1919-4919-8919-191919191919",
-    button_accept_text: "YES! ADD 19-PIECE COOKWARE SET (R99)",
+    button_accept_text: "YES! ADD 19-PIECE CHEF SET (R99)",
     button_accept_color: "#10b981",
     button_decline_text: "No thanks, I will skip this special R99 offer and proceed to my order",
     button_decline_color: "#6b7280",
     show_accept_button: true,
     show_decline_button: true,
-    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Cookware Set for ONLY R99!",
-    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Non-Stick Granite Cookware Set & Utensil Organizer to your delivery package for just R99 (Save R1,899 Today)."
+    page_headline: "EXCLUSIVE WAREHOUSE UPGRADE: Add 19-Piece Chef Collection for ONLY R99!",
+    page_subheadline: "Special Warehouse Clearance: Add the full 19-Piece Precision Knife Set, Heat-Resistant Silicone Utensils, Cutting Board & Organizer Bucket to your delivery package for just R99 (Save R1,899 Today)."
   },
   // Upsell #1: VIP Inner Circle & Automation Suite (R247 - Digital)
   "77777777-7777-4777-8777-777777777771": {
@@ -645,7 +645,7 @@ export default function UpsellPage() {
             <p className="leading-relaxed">
               <strong className="font-bold">Wait! Do not close or refresh this window.</strong>{" "}
               {isPhysical ? (
-                <span>Your main order is confirmed and being prepared at the warehouse. Before final packaging, you can add this <span className="underline font-bold">19-Piece Cookware Set for ONLY R99 with instant 1-click unlock and zero extra delivery fees</span>.</span>
+                <span>Your main order is confirmed and being prepared at the warehouse. Before final packaging, you can add this <span className="underline font-bold">19-Piece Chef Knife & Silicone Utensil Set for ONLY R99 with instant 1-click unlock and zero extra delivery fees</span>.</span>
               ) : (
                 <span>Your member portal account is currently being initialized. Before final activation, you can add this special upgrade to your account with <span className="underline font-bold">instant 1-click unlock and zero monthly fees</span>.</span>
               )}
@@ -689,7 +689,7 @@ export default function UpsellPage() {
               {/* Product Image - Mobile-first uncropped showcase */}
               {step.image_url && (() => {
                 const galleryImages = isPhysical
-                  ? ["/images/panela_hero.png", "/images/panela_1.png", "/images/panela_2.png", "/images/panela_3.png", "/images/panela_4.png", "/images/panela_5.png"]
+                  ? ["/assets/upsell-19pc.png"]
                   : [step.image_url];
                 const activeImg = galleryImages[selectedImgIdx] || step.image_url;
 
@@ -730,19 +730,19 @@ export default function UpsellPage() {
                     <>
                       <div className="flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-[#0b72e7]" />
-                        <span>Granite Non-Stick Coating</span>
+                        <span>5 Precision Chef Knives</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Heat-Resistant Silicone Set</span>
+                        <span>11 Heat-Resistant Utensils</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>PFOA Free & Induction Ready</span>
+                        <span>Cutting Board & Shears</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Full 2-Year Warranty</span>
+                        <span>Countertop Organizer</span>
                       </div>
                     </>
                   ) : (
@@ -849,7 +849,7 @@ export default function UpsellPage() {
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {isPhysical ? "Cookware Set Added to Your Parcel! 🎉" : "Upgrade Added to Your Account!"}
+              {isPhysical ? "19-Piece Chef Set Added to Your Parcel! 🎉" : "Upgrade Added to Your Account!"}
             </h2>
             <p className="text-xs text-gray-600">
               {isPhysical

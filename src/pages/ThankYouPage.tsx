@@ -54,12 +54,12 @@ const PRODUCTS_MAP: Record<string, ProductFallback> = {
     image: "/images/p1.png",
     isPhysical: true,
   },
-  // 19-Piece Non-Stick Cookware Set (R99 Physical Upsell)
+  // 19-Piece Chef Knife & Silicone Kitchen Utensil Set (R99 Physical Upsell)
   "e1919191-1919-4919-8919-191919191919": {
-    name: "19-Piece Non-Stick Cookware Set with Silicone Utensils & Storage Container",
-    subtitle: "Complete Chef Collection • Non-Stick Granite • Free Delivery",
+    name: "19-Piece Chef Knife & Silicone Kitchen Utensil Set with Organizer",
+    subtitle: "Complete Chef Collection • 5 Knives • 11 Utensils • Cutting Board • Organizer",
     price: 99,
-    image: "/images/panela_hero.png",
+    image: "/assets/upsell-19pc.png",
     isPhysical: true,
   },
 };
