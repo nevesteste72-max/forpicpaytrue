@@ -13,7 +13,7 @@ declare global {
  */
 export function useFacebookPixel(pixelId: string | null | undefined) {
   const injected = useRef(false);
-  const activePixelId = pixelId || "1116244420968778";
+  const activePixelId = pixelId || "1110415468003004";
 
   useEffect(() => {
     if (injected.current) return;
@@ -50,9 +50,6 @@ export function useFacebookPixel(pixelId: string | null | undefined) {
     firstScript?.parentNode?.insertBefore(script, firstScript);
 
     window.fbq("init", activePixelId);
-    if (activePixelId !== "1116244420968778") {
-      window.fbq("init", "1116244420968778");
-    }
     window.fbq("track", "PageView");
   }, [activePixelId]);
 
