@@ -99,6 +99,7 @@ interface StripeCheckoutFormProps {
   stripePaymentMethods?: string[];
   localCurrency?: { code: string; amount: number; symbol: string } | null;
   showTrustBadges?: boolean;
+  showDiscreetBilling?: boolean;
   isPhysical?: boolean;
 }
 
@@ -124,6 +125,7 @@ export function StripeCheckoutForm({
   stripePaymentMethods,
   localCurrency,
   showTrustBadges = true,
+  showDiscreetBilling = false,
   isPhysical = false,
 }: StripeCheckoutFormProps) {
   const enabledMethods = stripePaymentMethods?.length ? stripePaymentMethods : ["card"];
@@ -500,7 +502,7 @@ export function StripeCheckoutForm({
 
       {/* Discrição na fatura — apenas para infoprodutos (nichos sensíveis, cursos, etc.).
           NUNCA exibir para produtos físicos (panelas, airfryer, eletrodomésticos, etc.). */}
-      {showTrustBadges && !isPhysical && (
+      {showDiscreetBilling && !isPhysical && (
         <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex-shrink-0 w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <EyeOff className="w-4 h-4 text-muted-foreground" />
