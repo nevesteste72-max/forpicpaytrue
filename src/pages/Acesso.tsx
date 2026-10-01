@@ -9,6 +9,38 @@ interface Item {
   tipo: "file" | "link";
 }
 
+function resolveItemImage(item: Item): string | null {
+  const t = (item.titulo || "").toLowerCase();
+  if (t.includes("chá seca barriga") || t.includes("cha seca barriga")) {
+    return "/produtos/chas-detox.webp";
+  }
+  if (t.includes("sucos detox") || t.includes("suco detox")) {
+    return "/produtos/chas-detox.webp";
+  }
+  if (t.includes("farmácia caseira") || t.includes("farmacia caseira")) {
+    return "/produtos/plantas-e-chas.webp";
+  }
+  if (t.includes("air fryer") || t.includes("airfryer")) {
+    return "/produtos/150-receitas-airfryer.webp";
+  }
+  if (t.includes("marmitas fit")) {
+    return "/produtos/receitas-de-mamitas-fit-congelada.webp";
+  }
+  if (t.includes("bolos sem açúcar") || t.includes("bolos sem acucar")) {
+    return "/produtos/receitas-de-bolos-sem-acucar.webp";
+  }
+  if (t.includes("170 planos")) {
+    return "/produtos/170-cardapios.webp";
+  }
+  if (t.includes("desafio 24 dias")) {
+    return "/desafio-24-dias/assets/desafio-24-dias-hero.png";
+  }
+  if (t.includes("155 receitas") || t.includes("150 receitas fitness")) {
+    return "/produtos/155-receitas-fitness.png";
+  }
+  return item.imagem;
+}
+
 /**
  * "Conteúdos da sua compra" — a página onde o cliente aterra depois de pagar.
  *
@@ -98,31 +130,34 @@ export default function Acesso() {
             </div>
           )}
 
-          {itens.map((item, i) => (
-            <div
-              key={`${item.titulo}-${i}`}
-              className="rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm"
-            >
-              {item.imagem && (
-                <img
-                  src={item.imagem}
-                  alt=""
-                  className="w-16 h-16 object-contain mx-auto mb-2"
-                  loading="lazy"
-                />
-              )}
-              <p className="text-sm font-bold text-gray-900 mb-3">{item.titulo}</p>
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+          {itens.map((item, i) => {
+            const imgSrc = resolveItemImage(item);
+            return (
+              <div
+                key={`${item.titulo}-${i}`}
+                className="rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm"
               >
-                ACESSAR CONTEÚDO
-                <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          ))}
+                {imgSrc && (
+                  <img
+                    src={imgSrc}
+                    alt=""
+                    className="w-16 h-16 object-contain mx-auto mb-2"
+                    loading="lazy"
+                  />
+                )}
+                <p className="text-sm font-bold text-gray-900 mb-3">{item.titulo}</p>
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  ACESSAR CONTEÚDO
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            );
+          })}
 
           {itens.length > 0 && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 mt-4">

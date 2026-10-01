@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Desafio 24 Dias — organização de refeições</title>
+  <meta name="description" content="Acrescenta à tua compra um guia prático com refeições diárias e orientações para organizar os próximos 24 dias.">
+  <meta property="og:title" content="Desafio 24 Dias — organização de refeições">
+  <meta property="og:description" content="Um roteiro de refeições diárias e orientações para organizar o teu dia a dia.">
+  <meta property="og:image" content="https://www.tecnhogar.store/desafio-24-dias/assets/desafio-24-dias-hero.png">
+  <meta name="theme-color" content="#143f2d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17241d;
+      --muted: #58665d;
+      --green: #174b35;
+      --green2: #236a49;
+      --cream: #fbfaf5;
+      --line: #e3e8df;
+      --sun: #f2c75c;
+      --sun-dark: #d2a82f;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      line-height: 1.55;
+      overflow-x: hidden;
+      width: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+    .top {
+      background: #143f2d;
+      color: #fff;
+      text-align: center;
+      padding: 10px 14px;
+      font-size: clamp(11px, 3vw, 13px);
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    main {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 32px;
+      align-items: center;
+      padding: 16px 0 32px;
+    }
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: #28714b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: clamp(22px, 4.5vw, 44px);
+      line-height: 1.15;
+      letter-spacing: -.03em;
+      margin-bottom: 14px;
+      color: var(--ink);
+      font-weight: 900;
+      word-break: break-word;
+    }
+    .lead {
+      font-size: clamp(14px, 3.5vw, 17px);
+      line-height: 1.55;
+      color: #435249;
+      margin-bottom: 18px;
+    }
+    .points {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 20px;
+      list-style: none;
+    }
+    .points li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: clamp(13px, 3.3vw, 15px);
+      line-height: 1.45;
+      color: #24352c;
+    }
+    .check {
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 20px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #e1efe4;
+      color: #17603d;
+      font-weight: 900;
+      font-size: 12px;
+      margin-top: 1px;
+    }
+    .pricebox {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #eef4ec;
+      border: 1px solid #d7e5d4;
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+    }
+    .pricebox span {
+      font-size: clamp(13px, 3.2vw, 14px);
+      color: #45554a;
+      font-weight: 600;
+    }
+    .pricebox strong {
+      font-size: clamp(24px, 5.5vw, 30px);
+      color: var(--green);
+      white-space: nowrap;
+      font-weight: 900;
+    }
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+    .accept {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: #f4c647;
+      color: #172a1e;
+      text-decoration: none;
+      font-size: clamp(14px, 3.8vw, 16px);
+      font-weight: 900;
+      border-radius: 12px;
+      padding: 15px 16px;
+      box-shadow: 0 5px 0 var(--sun-dark);
+      transition: transform .12s, box-shadow .12s;
+      cursor: pointer;
+      line-height: 1.25;
+    }
+    .accept:hover {
+      transform: translateY(2px);
+      box-shadow: 0 3px 0 var(--sun-dark);
+    }
+    .accept:active {
+      transform: translateY(4px);
+      box-shadow: none;
+    }
+    .decline {
+      justify-self: center;
+      color: #647168;
+      font-size: clamp(12px, 3.2vw, 14px);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      padding: 6px 10px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .note {
+      font-size: 11px;
+      color: #657168;
+      margin-top: 6px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .visual {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .visual img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      border-radius: 18px;
+      box-shadow: 0 12px 36px rgba(23, 58, 38, 0.12);
+    }
+    .visual-tag {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--green);
+      border: 1px solid #e1e6dc;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(4px);
+    }
+    .section {
+      padding: 30px 0;
+      border-top: 1px solid var(--line);
+    }
+    h2 {
+      font-size: clamp(20px, 4vw, 28px);
+      line-height: 1.25;
+      margin-bottom: 8px;
+      letter-spacing: -.02em;
+      font-weight: 850;
+    }
+    .intro {
+      color: var(--muted);
+      margin-bottom: 18px;
+      max-width: 700px;
+      font-size: clamp(13px, 3.3vw, 15px);
+      line-height: 1.5;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .number {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      background: #e8f1e8;
+      color: var(--green);
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      font-size: clamp(15px, 3.5vw, 17px);
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+    .card p {
+      font-size: clamp(13px, 3.2vw, 14px);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .final {
+      max-width: 580px;
+      margin: 0 auto;
+      text-align: center;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+    }
+    .final h2 {
+      margin-bottom: 8px;
+    }
+    .final p {
+      color: var(--muted);
+      font-size: clamp(13px, 3.2vw, 14px);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .foot {
+      color: #768078;
+      font-size: 11px;
+      text-align: center;
+      margin-top: 20px;
+      line-height: 1.4;
+    }
+    .sticky {
+      display: none;
+    }
+
+    /* Regras Mobile Especializadas */
+    @media (max-width: 768px) {
+      main {
+        padding: 14px 14px 110px;
+      }
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 8px 0 24px;
+      }
+      .hero-copy {
+        order: 0;
+      }
+      .visual {
+        order: -1;
+        margin-bottom: 6px;
+        max-width: 100%;
+      }
+      .visual img {
+        border-radius: 14px;
+      }
+      .cards {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .card {
+        padding: 14px;
+      }
+      .sticky {
+        display: block;
+        position: fixed;
+        z-index: 999;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.97);
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--line);
+        box-shadow: 0 -6px 20px rgba(20, 39, 28, 0.12);
+        backdrop-filter: blur(8px);
+      }
+      .sticky .accept {
+        padding: 13px 14px;
+        font-size: 14px;
+        font-weight: 800;
+        box-shadow: 0 4px 0 var(--sun-dark);
+      }
+      .sticky-label {
+        text-align: center;
+        color: #657168;
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top">OFERTA COMPLEMENTAR À TUA COMPRA</div>
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Um roteiro prático para a tua rotina</span>
+        <h1>Já tens ideias de refeições. Agora organiza os próximos 24 dias.</h1>
+        <p class="lead">O <strong>Desafio 24 Dias</strong> junta um cardápio com refeições diárias e orientações para começares, seguires a sequência e preparares a tua lista de compras.</p>
+        <ul class="points">
+          <li><span class="check">✓</span><span>Refeições organizadas para consulta ao longo de 24 dias.</span></li>
+          <li><span class="check">✓</span><span>Orientações para perceber como funciona e como começar.</span></li>
+          <li><span class="check">✓</span><span>Passos para planear a lista de compras e manter tudo mais organizado.</span></li>
+        </ul>
+        <div class="pricebox">
+          <span>Acrescenta o guia à tua compra</span>
+          <strong>9,90 €</strong>
+        </div>
+        <div class="actions">
+          <a class="accept" data-accept href="#">SIM, QUERO O DESAFIO 24 DIAS — 9,90 €</a>
+          <a class="decline" data-decline href="#">Agora não, continuar sem o desafio</a>
+        </div>
+        <p class="note">Pagamento único. Ao aceitar, a oferta é acrescentada à compra que acabaste de fazer.</p>
+      </div>
+      <div class="visual">
+        <img src="/desafio-24-dias/assets/desafio-24-dias-hero.png" alt="Guia de refeições no tablet, cartões de planeamento e uma refeição preparada" width="1440" height="1080" fetchpriority="high">
+        <span class="visual-tag">GUIA DE REFEIÇÕES · 24 DIAS</span>
+      </div>
+    </section>
+    <section class="section">
+      <h2>O que vais receber</h2>
+      <p class="intro">Três guias digitais para consultar quando estiveres a organizar as refeições e a preparar o teu plano.</p>
+      <div class="cards">
+        <article class="card">
+          <span class="number">01</span>
+          <h3>Como funciona</h3>
+          <p>Uma explicação do desafio e da sequência proposta.</p>
+        </article>
+        <article class="card">
+          <span class="number">02</span>
+          <h3>Como começar</h3>
+          <p>Orientações iniciais e exemplos de refeições diárias.</p>
+        </article>
+        <article class="card">
+          <span class="number">03</span>
+          <h3>Passo a passo</h3>
+          <p>Instruções para escolher o ponto de partida e organizar as compras.</p>
+        </article>
+      </div>
+    </section>
+    <section class="section">
+      <div class="final">
+        <h2>Acrescenta o Desafio 24 Dias por 9,90 €</h2>
+        <p>Recebes o acesso aos guias após a confirmação do pagamento. É um material geral de organização alimentar; adapta as sugestões às tuas necessidades.</p>
+        <a class="accept" data-accept href="#">SIM, ADICIONAR À MINHA COMPRA — 9,90 €</a>
+        <p class="foot">Se preferires, podes continuar sem acrescentar esta oferta.</p>
+      </div>
+    </section>
+    <p class="foot">Conteúdo digital. Pagamento único, sem mensalidade.</p>
+  </main>
+  <div class="sticky">
+    <p class="sticky-label">Desafio 24 Dias · 9,90 €</p>
+    <a class="accept" data-accept href="#">ADICIONAR À MINHA COMPRA</a>
+  </div>
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var tx = q.get("cashpay_tx") || q.get("tx") || "";
+      var link = q.get("cashpay_link") || q.get("link") || "";
+      var params = "?cashpay_tx=" + encodeURIComponent(tx) + "&cashpay_link=" + encodeURIComponent(link);
+      var exitFlow = link === "d1700000-0000-4000-8000-000000000490";
+      var step = exitFlow ? "e1700000-0000-4000-8000-000000000401" : "e1700000-0000-4000-8000-000000000001";
+      var checkout = "d1700000-0000-4000-8000-000000000024";
+      document.querySelectorAll("[data-accept]").forEach(function (a) {
+        a.href = tx ? "/upsell/" + step + "?tx=" + encodeURIComponent(tx) + "&link=" + encodeURIComponent(link || (exitFlow ? "d1700000-0000-4000-8000-000000000490" : "d1700000-0000-4000-8000-000000000790")) + "&auto=1" : "/pay/" + checkout;
+      });
+      var decline = document.querySelector("[data-decline]");
+      if (decline) decline.href = tx ? "/desafio-24-dias/espera/" + params : "/acesso";
+    })();
+  </script>
+</body>
+</html>
