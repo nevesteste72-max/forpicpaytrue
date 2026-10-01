@@ -17,6 +17,7 @@ import DownloadHubFR from "./pages/DownloadHubFR";
 import UpsellBoulangerie from "./pages/UpsellBoulangerie";
 import DownsellPainsExpress from "./pages/DownsellPainsExpress";
 import Vault from "./pages/Vault";
+import { TestModeBanner } from "./components/TestModeBanner";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <TestModeBanner />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
