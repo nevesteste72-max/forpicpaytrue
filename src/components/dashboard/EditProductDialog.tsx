@@ -14,6 +14,7 @@ import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { comprimirImagem } from "@/lib/comprimirImagem";
 import { UploadPaymentImageError, uploadPaymentImage } from "@/lib/paymentImageUpload";
 
 interface Product {
@@ -145,8 +146,8 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         product.order_bump_3_image_url || null,
       ]);
       setRedirectUrl((product as any).redirect_url || "");
-      setFacebookPixelId((product as any).facebook_pixel_id || "2125158571414054");
-      setFacebookToken((product as any).facebook_token || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD");
+      setFacebookPixelId((product as any).facebook_pixel_id || "1110415468003004");
+      setFacebookToken((product as any).facebook_token || "EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD");
       setCheckoutTimerMinutes(product.checkout_timer_minutes ? String(product.checkout_timer_minutes) : "");
       setRecoveryEnabled(product.recovery_enabled || false);
       setRecoveryDiscountPercent(product.recovery_discount_percent ? String(product.recovery_discount_percent) : "");
@@ -165,13 +166,14 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
 
   const isStripe = !!product && product.currency !== "MZN";
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const bruto = e.target.files?.[0];
+    const file = bruto ? await comprimirImagem(bruto) : undefined;
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
+      if (file.size > 8 * 1024 * 1024) {
         toast({
           title: "Imagem muito grande",
-          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 8MB.`,
           variant: "destructive",
         });
         return;
@@ -181,13 +183,14 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
     }
   };
 
-  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleBannerSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const bruto = e.target.files?.[0];
+    const file = bruto ? await comprimirImagem(bruto) : undefined;
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
+      if (file.size > 8 * 1024 * 1024) {
         toast({
           title: "Imagem muito grande",
-          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 8MB.`,
           variant: "destructive",
         });
         return;
@@ -225,8 +228,8 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         order_bump_3_description: orderBump3Description || null,
         order_bump_3_price: orderBump3Price ? parseFloat(orderBump3Price) : null,
         redirect_url: redirectUrl || null,
-        facebook_pixel_id: facebookPixelId || "2125158571414054",
-        facebook_token: facebookToken || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD",
+        facebook_pixel_id: facebookPixelId || "1110415468003004",
+        facebook_token: facebookToken || "EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD",
         checkout_timer_minutes: checkoutTimerMinutes ? parseInt(checkoutTimerMinutes) : 0,
         checkout_accent_color: checkoutAccentColor || null,
         recovery_enabled: recoveryEnabled,

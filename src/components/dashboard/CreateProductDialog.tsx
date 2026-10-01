@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ImagePlus, X, ExternalLink, RotateCcw, Package, Gift, Sparkles, BarChart3, Zap, Truck, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { comprimirImagem } from "@/lib/comprimirImagem";
 
 interface Product {
   id: string;
@@ -102,8 +103,8 @@ export function CreateProductDialog({
   const [currency, setCurrency] = useState("MZN");
   const [checkoutLanguage, setCheckoutLanguage] = useState("pt");
   const [stripePaymentMethods, setStripePaymentMethods] = useState<string[]>(["card", "apple_pay", "google_pay"]);
-  const [facebookPixelId, setFacebookPixelId] = useState("2125158571414054");
-  const [facebookToken, setFacebookToken] = useState("EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD");
+  const [facebookPixelId, setFacebookPixelId] = useState("1110415468003004");
+  const [facebookToken, setFacebookToken] = useState("EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD");
   const [checkoutBannerFile, setCheckoutBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [checkoutTimerMinutes, setCheckoutTimerMinutes] = useState("");
@@ -120,13 +121,14 @@ export function CreateProductDialog({
 
   const isStripe = currency !== "MZN";
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const bruto = e.target.files?.[0];
+    const file = bruto ? await comprimirImagem(bruto) : undefined;
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
+      if (file.size > 8 * 1024 * 1024) {
         toast({
           title: "Imagem muito grande",
-          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 8MB.`,
           variant: "destructive",
         });
         return;
@@ -136,13 +138,14 @@ export function CreateProductDialog({
     }
   };
 
-  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleBannerSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const bruto = e.target.files?.[0];
+    const file = bruto ? await comprimirImagem(bruto) : undefined;
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
+      if (file.size > 8 * 1024 * 1024) {
         toast({
           title: "Imagem muito grande",
-          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 2MB — escolha uma imagem menor ou comprima antes de enviar.`,
+          description: `O arquivo tem ${(file.size / (1024 * 1024)).toFixed(2)} MB. O tamanho máximo é 8MB.`,
           variant: "destructive",
         });
         return;
@@ -195,8 +198,8 @@ export function CreateProductDialog({
     setCurrency("MZN");
     setCheckoutLanguage("pt");
     setStripePaymentMethods(["card"]);
-    setFacebookPixelId("2125158571414054");
-    setFacebookToken("EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD");
+    setFacebookPixelId("1110415468003004");
+    setFacebookToken("EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD");
     setCheckoutTimerMinutes("");
     setRecoveryEnabled(false);
     setRecoveryDiscountPercent("");
@@ -240,8 +243,8 @@ export function CreateProductDialog({
       currency,
       checkoutLanguage,
       stripePaymentMethods: isStripe ? stripePaymentMethods : [],
-      facebookPixelId: (facebookPixelId.trim() || "2125158571414054"),
-      facebookToken: (facebookToken.trim() || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD"),
+      facebookPixelId: (facebookPixelId.trim() || "1110415468003004"),
+      facebookToken: (facebookToken.trim() || "EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD"),
       checkoutBannerFile,
       checkoutTimerMinutes: checkoutTimerMinutes.trim(),
       recoveryEnabled,
