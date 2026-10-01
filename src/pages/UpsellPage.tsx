@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { formatMoney } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   Loader2, 
@@ -205,6 +206,9 @@ export default function UpsellPage() {
       utm_medium: searchParams.get("utm_medium") || null,
       utm_content: searchParams.get("utm_content") || null,
       utm_term: searchParams.get("utm_term") || null,
+      ttclid: searchParams.get("ttclid") || null,
+      fbclid: searchParams.get("fbclid") || null,
+      gclid: searchParams.get("gclid") || null,
     };
     return {
       src: fromUrl.src || stored.src || null,
@@ -214,6 +218,9 @@ export default function UpsellPage() {
       utm_medium: fromUrl.utm_medium || stored.utm_medium || null,
       utm_content: fromUrl.utm_content || stored.utm_content || null,
       utm_term: fromUrl.utm_term || stored.utm_term || null,
+      ttclid: fromUrl.ttclid || stored.ttclid || null,
+      fbclid: fromUrl.fbclid || stored.fbclid || null,
+      gclid: fromUrl.gclid || stored.gclid || null,
     };
   })();
 
@@ -222,6 +229,9 @@ export default function UpsellPage() {
   const [state, setState] = useState<UpsellState>("offer");
   const [errorMessage, setErrorMessage] = useState("");
   const [currency, setCurrency] = useState("ZAR");
+  // A pagina e partilhada por funis de paises diferentes. O idioma e a
+  // moeda vem do produto; "en" fica como antes para o funil sul-africano.
+  const [idioma, setIdioma] = useState<"pt" | "en">("en");
   const [countdown, setCountdown] = useState(180); // 3 minutes urgency
   const [pixelId, setPixelId] = useState<string | null>(null);
   const [selectedImgIdx, setSelectedImgIdx] = useState(0);
@@ -308,12 +318,13 @@ export default function UpsellPage() {
       // Fetch currency and pixel from payment link
       const { data: linkData } = await supabase
         .from("payment_links")
-        .select("currency, facebook_pixel_id")
+        .select("currency, facebook_pixel_id, checkout_language")
         .eq("id", data.payment_link_id)
         .maybeSingle();
 
       if (linkData) {
         setCurrency(linkData.currency || "ZAR");
+        setIdioma((linkData as { checkout_language?: string }).checkout_language === "pt" ? "pt" : "en");
         if (linkData.facebook_pixel_id) {
           setPixelId(linkData.facebook_pixel_id);
         }
@@ -364,6 +375,9 @@ export default function UpsellPage() {
     if (trackingParams.utm_term) params.set("utm_term", trackingParams.utm_term);
     if (trackingParams.src) params.set("src", trackingParams.src);
     if (trackingParams.sck) params.set("sck", trackingParams.sck);
+    if (trackingParams.ttclid) params.set("ttclid", trackingParams.ttclid);
+    if (trackingParams.fbclid) params.set("fbclid", trackingParams.fbclid);
+    if (trackingParams.gclid) params.set("gclid", trackingParams.gclid);
     const query = params.toString();
     return query ? `${basePath}?${query}` : basePath;
   };
@@ -537,6 +551,20 @@ export default function UpsellPage() {
     redirectTo(step.decline_step_id, step.decline_redirect_url);
   };
 
+  // Quando a pessoa vem da pagina de vendas copiada, ja disse que sim la.
+  // O auto=1 faz a cobranca arrancar sozinha para ela nao ter de clicar duas
+  // vezes; so dispara uma vez e so se houver uma compra anterior a que cobrar.
+  const autoJaDisparou = useRef(false);
+  useEffect(() => {
+    if (loading || !step) return;
+    if (searchParams.get("auto") !== "1") return;
+    if (!txId || txId === "preview") return;
+    if (autoJaDisparou.current) return;
+    autoJaDisparou.current = true;
+    handleAccept();
+  }, [loading, step]);
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f4f5f7] flex flex-col items-center justify-center p-4">
@@ -589,6 +617,51 @@ export default function UpsellPage() {
   const savingsAmount = regularPrice - Number(step.amount);
   const discountPercent = Math.round((savingsAmount / regularPrice) * 100);
 
+  // Os precos seguem a moeda do produto. Estavam escritos a mao em rands, o que
+  // mostrava "R 19.90" a um comprador portugues que tinha pago em euros.
+  const locale = idioma === "pt" ? "pt-PT" : "en-US";
+  const money = (valor: number) => formatMoney(valor, currency, locale);
+
+  const pt = idioma === "pt";
+  const t = {
+    pagamentoAprovado: pt ? "PAGAMENTO CONFIRMADO" : "PAYMENT VERIFIED & APPROVED",
+    passoPagamento: pt ? "Pagamento" : "Payment",
+    feito: pt ? "Feito" : "Done",
+    passoMeio: pt ? (isPhysical ? "Encomenda" : "A preparar acesso") : (isPhysical ? "Package Upgrade" : "Portal Setup"),
+    emCurso: pt ? "A decorrer..." : "In Progress...",
+    passoFim: pt ? (isPhysical ? "Expedido" : "Acesso imediato") : (isPhysical ? "Dispatched" : "Instant Access"),
+    aSeguir: pt ? "A seguir" : "Next",
+    naoFeches: pt ? "Espera! Não feches nem atualizes esta página." : "Wait! Do not close or refresh this window.",
+    avisoDigital: pt
+      ? "O teu acesso está a ser preparado. Antes de ficar pronto, podes juntar esta oferta à tua compra, com um clique e sem mensalidades."
+      : "Your member portal account is currently being initialized. Before final activation, you can add this special upgrade to your account with instant 1-click unlock and zero monthly fees.",
+    avaliacoes: pt ? "(1842 avaliações verificadas)" : "(1,842 verified members)",
+    compradores: pt ? "(2480 compradores verificados)" : "(2,480 verified buyers)",
+    ofertaTopo: pt ? "Oferta só para quem acabou de comprar" : (isPhysical ? "Special Warehouse Clearance Upgrade" : "Special VIP Member Upgrade"),
+    poupa: pt ? `Poupa ${discountPercent}%` : `Save ${discountPercent}% OFF`,
+    soAgora: pt ? `-${discountPercent}% SÓ NESTA PÁGINA` : `-${discountPercent}% OFF ONE-TIME DEAL`,
+    desbloqueio: pt ? "Acesso imediato" : (isPhysical ? "Free Combined Delivery" : "Instant Digital Unlock"),
+    bullets: pt
+      ? ["Acesso imediato", "Fica teu para sempre", "Lê no telemóvel ou no computador", "Sem mensalidades"]
+      : ["Instant Digital Access", "Full VIP Priority", "Weekly Supplier Updates", "Zero Monthly Fees"],
+    precoNormal: pt ? "Preço normal:" : "Standard List Price:",
+    poupas: pt ? "Poupas:" : "You Save:",
+    precoAgora: pt ? "Preço só nesta página:" : "Special Launch Upgrade Price:",
+    cobrancaUnica: pt
+      ? "Cobrança única no cartão que acabaste de usar • acesso imediato"
+      : `One-time charge billed to your card on file • ${isPhysical ? "Free Combined Delivery" : "Instant digital activation"}`,
+    recusar: pt
+      ? "Não, obrigado. Continuar para a minha compra."
+      : "No thank you, please continue to my order confirmation",
+    ssl: pt ? "Ligação segura (SSL 256 bits)" : "256-Bit SSL Secured",
+    garantia: pt ? "Compra protegida" : "Quality Guarantee",
+    rodape: pt
+      ? "© 2026 tecnhogar.store • Acesso digital imediato"
+      : (isPhysical
+        ? "© 2026 Kitchen Express South Africa • Direct Warehouse Fulfillment & Delivery"
+        : "© 2026 SA Ecom Start 2.0 • Official Member Portal & Supplier Network"),
+  };
+
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-gray-900 font-sans pb-12">
       <main className="max-w-xl mx-auto px-4 pt-4 md:pt-6">
@@ -597,7 +670,7 @@ export default function UpsellPage() {
           <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-3.5 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2 font-bold">
               <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-              <span>PAYMENT VERIFIED & APPROVED</span>
+              <span>{t.pagamentoAprovado}</span>
             </div>
             <div className="flex items-center gap-1.5 font-mono text-[11px] bg-black/20 px-2 py-0.5 rounded">
               <Clock className="w-3.5 h-3.5 text-amber-300" />
@@ -619,8 +692,8 @@ export default function UpsellPage() {
                 <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-xs font-bold">
                   ✓
                 </div>
-                <span className="text-[11px] font-bold text-gray-700 mt-1">Payment</span>
-                <span className="text-[9px] text-emerald-600 font-semibold">Done</span>
+                <span className="text-[11px] font-bold text-gray-700 mt-1">{t.passoPagamento}</span>
+                <span className="text-[9px] text-emerald-600 font-semibold">{t.feito}</span>
               </div>
 
               {/* Step 2: Package Setup (Current Active) */}
@@ -629,9 +702,9 @@ export default function UpsellPage() {
                   <Sparkles className="w-3.5 h-3.5" />
                 </div>
                 <span className="text-[11px] font-bold text-[#0b72e7] mt-1">
-                  {isPhysical ? "Package Upgrade" : "Portal Setup"}
+                  {t.passoMeio}
                 </span>
-                <span className="text-[9px] text-[#0b72e7] font-semibold animate-pulse">In Progress...</span>
+                <span className="text-[9px] text-[#0b72e7] font-semibold animate-pulse">{t.emCurso}</span>
               </div>
 
               {/* Step 3: Instant Access / Dispatch */}
@@ -640,9 +713,9 @@ export default function UpsellPage() {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
                 <span className="text-[11px] font-medium text-gray-400 mt-1">
-                  {isPhysical ? "Dispatched" : "Instant Access"}
+                  {t.passoFim}
                 </span>
-                <span className="text-[9px] text-gray-400">Next</span>
+                <span className="text-[9px] text-gray-400">{t.aSeguir}</span>
               </div>
             </div>
           </div>
@@ -651,11 +724,11 @@ export default function UpsellPage() {
           <div className="p-4 bg-amber-50/70 text-amber-900 text-xs flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="font-bold">Wait! Do not close or refresh this window.</strong>{" "}
+              <strong className="font-bold">{t.naoFeches}</strong>{" "}
               {isPhysical ? (
                 <span>Your main order is confirmed and being prepared at the warehouse. Before final packaging, you can add this <span className="underline font-bold">19-Piece Chef Knife & Silicone Utensil Set for ONLY R99 with instant 1-click unlock and zero extra delivery fees</span>.</span>
               ) : (
-                <span>Your member portal account is currently being initialized. Before final activation, you can add this special upgrade to your account with <span className="underline font-bold">instant 1-click unlock and zero monthly fees</span>.</span>
+                <span>{t.avisoDigital}</span>
               )}
             </p>
           </div>
@@ -668,10 +741,10 @@ export default function UpsellPage() {
             <div className="bg-[#0b72e7] text-white py-2 px-4 flex items-center justify-between text-xs font-bold uppercase tracking-wider">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                {isPhysical ? "Special Warehouse Clearance Upgrade" : "Special VIP Member Upgrade"}
+                {t.ofertaTopo}
               </span>
               <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">
-                Save {discountPercent}% OFF
+                {t.poupa}
               </span>
             </div>
 
@@ -690,7 +763,7 @@ export default function UpsellPage() {
                 </div>
                 <span className="text-xs font-bold text-gray-700">4.9</span>
                 <span className="text-xs text-gray-500">
-                  ({isPhysical ? "2,480 verified buyers" : "1,842 verified members"})
+                  {isPhysical ? t.compradores : t.avaliacoes}
                 </span>
               </div>
 
@@ -706,11 +779,11 @@ export default function UpsellPage() {
                     {/* Clean badge row ABOVE the product image */}
                     <div className="flex items-center justify-between gap-2 mb-2.5">
                       <span className="inline-flex items-center gap-1 bg-red-600 text-white text-[11px] font-black px-2.5 py-1 rounded-md shadow-xs">
-                        🔥 -{discountPercent}% OFF ONE-TIME DEAL
+                        🔥 {t.soAgora}
                       </span>
                       <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-md">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        {isPhysical ? "Free Combined Delivery" : "Instant Digital Unlock"}
+                        {t.desbloqueio}
                       </span>
                     </div>
 
@@ -757,19 +830,19 @@ export default function UpsellPage() {
                     <>
                       <div className="flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-[#0b72e7]" />
-                        <span>Instant Digital Access</span>
+                        <span>{t.bullets[0]}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Full VIP Priority</span>
+                        <span>{t.bullets[1]}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Weekly Supplier Updates</span>
+                        <span>{t.bullets[2]}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Zero Monthly Fees</span>
+                        <span>{t.bullets[3]}</span>
                       </div>
                     </>
                   )}
@@ -780,22 +853,22 @@ export default function UpsellPage() {
               <div className="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
                 <div className="flex items-baseline justify-between mb-1">
                   <span className="text-xs text-gray-500 line-through">
-                    Standard List Price: R {regularPrice.toFixed(2)}
+                    {t.precoNormal} {money(regularPrice)}
                   </span>
                   <span className="text-xs font-bold text-red-600">
-                    You Save: R {savingsAmount.toFixed(2)}
+                    {t.poupas} {money(savingsAmount)}
                   </span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xs font-bold text-gray-700 uppercase">Special Launch Upgrade Price:</span>
+                  <span className="text-xs font-bold text-gray-700 uppercase">{t.precoAgora}</span>
                   <div className="text-right">
                     <span className="text-3xl font-black text-[#178a3b]">
-                      R {Number(step.amount).toFixed(2)}
+                      {money(Number(step.amount))}
                     </span>
                   </div>
                 </div>
                 <p className="text-[11px] text-gray-500 mt-2 text-center">
-                  One-time charge billed to your card on file • {isPhysical ? "Free Combined Delivery" : "Instant digital activation"}
+                  {t.cobrancaUnica}
                 </p>
               </div>
 
@@ -805,7 +878,7 @@ export default function UpsellPage() {
                 className="w-full h-14 bg-[#178a3b] hover:bg-[#147633] active:scale-[0.99] text-white rounded-xl font-black text-base shadow-lg shadow-green-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Zap className="w-5 h-5 fill-current" />
-                <span>{step.button_accept_text || `YES! ADD TO ORDER — R ${Number(step.amount).toFixed(0)}`}</span>
+                <span>{step.button_accept_text || `${pt ? "SIM, QUERO" : "YES! ADD TO ORDER"} — ${money(Number(step.amount))}`}</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
 
@@ -814,7 +887,7 @@ export default function UpsellPage() {
                 onClick={handleDecline}
                 className="w-full mt-3.5 text-center text-xs text-gray-500 hover:text-gray-800 underline transition-colors py-2 cursor-pointer"
               >
-                {step.button_decline_text || "No thank you, please continue to my order confirmation"}
+                {step.button_decline_text || t.recusar}
               </button>
             </div>
           </article>
@@ -887,7 +960,7 @@ export default function UpsellPage() {
             </p>
             <div className="flex flex-col gap-2">
               <Button onClick={payByCard} className="bg-[#178a3b] text-white hover:bg-[#147633] rounded-xl text-sm py-5 font-bold">
-                Add it — pay by card (R {Number(step.amount).toFixed(0)})
+                Add it — pay by card ({money(Number(step.amount))})
               </Button>
               <Button variant="outline" onClick={() => setState("offer")} className="rounded-xl text-xs py-4 font-semibold">
                 Try 1-Click Again
@@ -904,18 +977,16 @@ export default function UpsellPage() {
           <div className="flex items-center justify-center gap-4 text-gray-400 text-xs mb-3">
             <span className="flex items-center gap-1 font-semibold text-gray-500">
               <Lock className="w-3.5 h-3.5 text-gray-600" />
-              256-Bit SSL Secured
+              {t.ssl}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1 font-semibold text-gray-500">
               <ShieldCheck className="w-3.5 h-3.5 text-gray-600" />
-              Quality Guarantee
+              {t.garantia}
             </span>
           </div>
           <p className="text-[11px] text-gray-400">
-            {isPhysical
-              ? "© 2026 Kitchen Express South Africa • Direct Warehouse Fulfillment & Delivery"
-              : "© 2026 SA Ecom Start 2.0 • Official Member Portal & Supplier Network"}
+            {t.rodape}
           </p>
         </footer>
       </main>
