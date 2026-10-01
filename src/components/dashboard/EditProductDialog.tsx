@@ -32,6 +32,7 @@ interface Product {
   order_bump_image_url?: string | null;
   order_bump_2_image_url?: string | null;
   order_bump_3_image_url?: string | null;
+  order_bump_4_image_url?: string | null;
   redirect_url?: string | null;
   facebook_pixel_id?: string | null;
   facebook_token?: string | null;
@@ -85,6 +86,9 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [orderBump3Name, setOrderBump3Name] = useState("");
   const [orderBump3Description, setOrderBump3Description] = useState("");
   const [orderBump3Price, setOrderBump3Price] = useState("");
+  const [orderBump4Name, setOrderBump4Name] = useState("");
+  const [orderBump4Description, setOrderBump4Description] = useState("");
+  const [orderBump4Price, setOrderBump4Price] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [facebookPixelId, setFacebookPixelId] = useState("");
   const [facebookToken, setFacebookToken] = useState("");
@@ -104,8 +108,9 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   // Optional image per bump (new files to upload) + previews (existing or new)
-  const [bumpImageFiles, setBumpImageFiles] = useState<(File | null)[]>([null, null, null]);
-  const [bumpImagePreviews, setBumpImagePreviews] = useState<(string | null)[]>([null, null, null]);
+  // Um lugar por bump: quatro desde que o checkout passou a mostrar quatro.
+  const [bumpImageFiles, setBumpImageFiles] = useState<(File | null)[]>([null, null, null, null]);
+  const [bumpImagePreviews, setBumpImagePreviews] = useState<(string | null)[]>([null, null, null, null]);
   const bumpImageRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleBumpImageSelect = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,11 +144,15 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       setOrderBump3Name((product as any).order_bump_3_name || "");
       setOrderBump3Description((product as any).order_bump_3_description || "");
       setOrderBump3Price((product as any).order_bump_3_price ? String((product as any).order_bump_3_price) : "");
+      setOrderBump4Name((product as any).order_bump_4_name || "");
+      setOrderBump4Description((product as any).order_bump_4_description || "");
+      setOrderBump4Price((product as any).order_bump_4_price ? String((product as any).order_bump_4_price) : "");
       setBumpImageFiles([null, null, null]);
       setBumpImagePreviews([
         product.order_bump_image_url || null,
         product.order_bump_2_image_url || null,
         product.order_bump_3_image_url || null,
+        product.order_bump_4_image_url || null,
       ]);
       setRedirectUrl((product as any).redirect_url || "");
       setFacebookPixelId((product as any).facebook_pixel_id || "1110415468003004");
@@ -227,6 +236,9 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
         order_bump_3_name: orderBump3Name || null,
         order_bump_3_description: orderBump3Description || null,
         order_bump_3_price: orderBump3Price ? parseFloat(orderBump3Price) : null,
+        order_bump_4_name: orderBump4Name || null,
+        order_bump_4_description: orderBump4Description || null,
+        order_bump_4_price: orderBump4Price ? parseFloat(orderBump4Price) : null,
         redirect_url: redirectUrl || null,
         facebook_pixel_id: facebookPixelId || "1110415468003004",
         facebook_token: facebookToken || "EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD",
@@ -259,9 +271,9 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
       }
 
       // Order bump images: upload novos, ou setar null se removidos
-      const bumpImageColumns = ["order_bump_image_url", "order_bump_2_image_url", "order_bump_3_image_url"] as const;
-      const existingBumpImages = [product.order_bump_image_url, product.order_bump_2_image_url, product.order_bump_3_image_url];
-      for (let i = 0; i < 3; i++) {
+      const bumpImageColumns = ["order_bump_image_url", "order_bump_2_image_url", "order_bump_3_image_url", "order_bump_4_image_url"] as const;
+      const existingBumpImages = [product.order_bump_image_url, product.order_bump_2_image_url, product.order_bump_3_image_url, product.order_bump_4_image_url];
+      for (let i = 0; i < bumpImageColumns.length; i++) {
         if (bumpImageFiles[i]) {
           const url = await uploadPaymentImage({ file: bumpImageFiles[i]!, baseName: `${product.id}-bump${i + 1}`, toast });
           if (url) updateData[bumpImageColumns[i]] = url;
@@ -449,11 +461,12 @@ export function EditProductDialog({ open, onOpenChange, product, onSaved }: Edit
             {/* ABA: BUMPS — ofertas extras no checkout */}
             <TabsContent value="bumps" className="mt-4">
               <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
-                <Label className="text-sm font-semibold">Order Bumps (até 3)</Label>
+                <Label className="text-sm font-semibold">Order Bumps (até 4)</Label>
                 {[
                   { label: "Order Bump 1", name: orderBumpName, setName: setOrderBumpName, desc: orderBumpDescription, setDesc: setOrderBumpDescription, price: orderBumpPrice, setPrice: setOrderBumpPrice },
                   { label: "Order Bump 2", name: orderBump2Name, setName: setOrderBump2Name, desc: orderBump2Description, setDesc: setOrderBump2Description, price: orderBump2Price, setPrice: setOrderBump2Price },
                   { label: "Order Bump 3", name: orderBump3Name, setName: setOrderBump3Name, desc: orderBump3Description, setDesc: setOrderBump3Description, price: orderBump3Price, setPrice: setOrderBump3Price },
+                  { label: "Order Bump 4", name: orderBump4Name, setName: setOrderBump4Name, desc: orderBump4Description, setDesc: setOrderBump4Description, price: orderBump4Price, setPrice: setOrderBump4Price },
                 ].map((bump, idx) => (
                   <div key={idx} className="space-y-2 pt-3 border-t border-border first:border-t-0 first:pt-0">
                     <Label className="text-xs font-semibold text-muted-foreground">{bump.label}</Label>

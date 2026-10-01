@@ -341,6 +341,9 @@ export default function Dashboard() {
         order_bump_3_name: data.orderBump3Name || null,
         order_bump_3_description: data.orderBump3Description || null,
         order_bump_3_price: data.orderBump3Price ? parseFloat(data.orderBump3Price) : null,
+        order_bump_4_name: data.orderBump4Name || null,
+        order_bump_4_description: data.orderBump4Description || null,
+        order_bump_4_price: data.orderBump4Price ? parseFloat(data.orderBump4Price) : null,
         redirect_url: data.redirectUrl || null,
         currency: data.currency,
         checkout_language: data.checkoutLanguage,
@@ -387,7 +390,7 @@ export default function Dashboard() {
         }
 
         // Upload order bump images (up to 3)
-        const bumpImageColumns = ["order_bump_image_url", "order_bump_2_image_url", "order_bump_3_image_url"] as const;
+        const bumpImageColumns = ["order_bump_image_url", "order_bump_2_image_url", "order_bump_3_image_url", "order_bump_4_image_url"] as const;
         const bumpUpdates: Record<string, string> = {};
         for (let i = 0; i < (data.bumpImageFiles?.length || 0); i++) {
           const file = data.bumpImageFiles[i];

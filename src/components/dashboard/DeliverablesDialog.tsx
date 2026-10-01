@@ -22,7 +22,7 @@ import {
   Check,
 } from "lucide-react";
 
-type Destino = "main" | "bump1" | "bump2" | "bump3";
+type Destino = "main" | "bump1" | "bump2" | "bump3" | "bump4";
 
 interface Entregavel {
   id: string;
@@ -54,7 +54,7 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
   const [ocupado, setOcupado] = useState(false);
   const [itens, setItens] = useState<Entregavel[]>([]);
   const [entregaWhats, setEntregaWhats] = useState(true);
-  const [bumps, setBumps] = useState<(string | null)[]>([null, null, null]);
+  const [bumps, setBumps] = useState<(string | null)[]>([null, null, null, null]);
 
   const [destino, setDestino] = useState<Destino>("main");
   const [urlNova, setUrlNova] = useState("");
@@ -73,7 +73,7 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
       supabase
         .from("payment_links")
         .select(
-          "whatsapp_delivery_enabled, order_bump_name, order_bump_2_name, order_bump_3_name",
+          "whatsapp_delivery_enabled, order_bump_name, order_bump_2_name, order_bump_3_name, order_bump_4_name",
         )
         .eq("id", productId)
         .maybeSingle(),
@@ -85,6 +85,7 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
       produto?.order_bump_name ?? null,
       produto?.order_bump_2_name ?? null,
       produto?.order_bump_3_name ?? null,
+      produto?.order_bump_4_name ?? null,
     ]);
     setCarregando(false);
   };

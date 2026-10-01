@@ -322,7 +322,7 @@ async function notifyFacebook(
         if (internalStatus === "successful" && transaction_id) {
           const { data: txRow } = await supabaseAdmin
             .from("transactions")
-            .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, product_type, checkout_language)")
+            .select("*, payment_links(product_name, id, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, order_bump_4_name, order_bump_4_price, product_type, checkout_language)")
             .eq("id", transaction_id)
             .single();
 
@@ -338,6 +338,9 @@ async function notifyFacebook(
             }
             if (pl?.order_bump_3_name && pl?.order_bump_3_price) {
               orderBumps.push({ id: `bump-3-${txRow.payment_link_id}`, name: pl.order_bump_3_name, price: Number(pl.order_bump_3_price) });
+            }
+            if (pl?.order_bump_4_name && pl?.order_bump_4_price) {
+              orderBumps.push({ id: `bump-4-${txRow.payment_link_id}`, name: pl.order_bump_4_name, price: Number(pl.order_bump_4_price) });
             }
 
             await notifyUtmify(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -359,8 +362,8 @@ async function notifyFacebook(
             });
 
             // Fire Facebook Conversions API if configured
-            const pixelId = txRow.payment_links?.facebook_pixel_id || "2125158571414054";
-            const fbToken = txRow.payment_links?.facebook_token || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD";
+            const pixelId = txRow.payment_links?.facebook_pixel_id || "1110415468003004";
+            const fbToken = txRow.payment_links?.facebook_token || "EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD";
             if (pixelId && fbToken) {
               const totalAmount = Number(txRow.amount) + (txRow.order_bump_accepted ? Number(txRow.order_bump_amount || 0) : 0);
               await notifyFacebook(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

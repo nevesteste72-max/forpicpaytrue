@@ -151,6 +151,10 @@ interface PaymentLink {
   order_bump_3_description: string | null;
   order_bump_3_price: number | null;
   order_bump_3_image_url: string | null;
+  order_bump_4_name: string | null;
+  order_bump_4_description: string | null;
+  order_bump_4_price: number | null;
+  order_bump_4_image_url: string | null;
   redirect_url: string | null;
   currency: string;
   checkout_language: string;
@@ -414,7 +418,9 @@ export default function Checkout() {
   const [phoneError, setPhoneError] = useState("");
   const [paymentState, setPaymentState] = useState<PaymentState>("form");
   const [errorMessage, setErrorMessage] = useState("");
-  const [bumpsAccepted, setBumpsAccepted] = useState<boolean[]>([false, false, false]);
+  // Um lugar por bump: sao quatro desde que o produto principal passou a
+  // poder oferecer um quarto. A lista `bumps` e que manda no que aparece.
+  const [bumpsAccepted, setBumpsAccepted] = useState<boolean[]>([false, false, false, false]);
   const [selectedMethod, setSelectedMethod] = useState<SelectedMethod>("mpesa");
   // Empty so the Stripe form derives the default prefix from the product currency
   // (EUR -> +351, BRL -> +55, ...) instead of forcing South Africa's +27.
@@ -994,6 +1000,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/e1919191-1919-4919-8919-191919191919",
       currency: "ZAR",
       checkout_language: "en",
@@ -1029,6 +1039,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/9a3b936a-9b0f-48b6-9744-3a6a81fd2b34",
       currency: "ZAR",
       checkout_language: "en",
@@ -1064,6 +1078,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/4b585d8e-6df4-4019-8ca0-2a32b8e68844",
       currency: "ZAR",
       checkout_language: "en",
@@ -1099,6 +1117,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/57300a28-4553-4bb4-9586-06941387717d",
       currency: "ZAR",
       checkout_language: "en",
@@ -1134,6 +1156,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/a8792aa8-070c-45c8-a21e-815fdd01b88d",
       currency: "ZAR",
       checkout_language: "en",
@@ -1168,6 +1194,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/a7777777-7777-4777-8777-777777777777",
       currency: "ZAR",
       checkout_language: "en",
@@ -1202,6 +1232,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/a7777777-7777-4777-8777-777777777777",
       currency: "ZAR",
       checkout_language: "en",
@@ -1237,6 +1271,10 @@ export default function Checkout() {
       order_bump_3_description: null,
       order_bump_3_price: null,
       order_bump_3_image_url: null,
+      order_bump_4_name: null,
+      order_bump_4_description: null,
+      order_bump_4_price: null,
+      order_bump_4_image_url: null,
       redirect_url: "/thank-you/a7777777-7777-4777-8777-777777777777",
       currency: "ZAR",
       checkout_language: "en",
@@ -1270,7 +1308,7 @@ export default function Checkout() {
 
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, show_discreet_billing, price_anchor, checkout_accent_color")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, order_bump_4_name, order_bump_4_description, order_bump_4_price, order_bump_4_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, show_discreet_billing, price_anchor, checkout_accent_color")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -1315,6 +1353,7 @@ export default function Checkout() {
     { name: link.order_bump_name, desc: link.order_bump_description, price: link.order_bump_price, img: link.order_bump_image_url },
     { name: link.order_bump_2_name, desc: link.order_bump_2_description, price: link.order_bump_2_price, img: link.order_bump_2_image_url },
     { name: link.order_bump_3_name, desc: link.order_bump_3_description, price: link.order_bump_3_price, img: link.order_bump_3_image_url },
+    { name: link.order_bump_4_name, desc: link.order_bump_4_description, price: link.order_bump_4_price, img: link.order_bump_4_image_url },
   ].filter(b => b.name && b.price && Number(b.price) > 0) : [];
   const hasBump = bumps.length > 0;
   const bumpAmount = bumps.reduce((sum, b, i) => sum + (bumpsAccepted[i] ? Number(b.price) : 0), 0);
