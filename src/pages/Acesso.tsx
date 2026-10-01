@@ -37,7 +37,7 @@ function resolveItemImage(item: Item): string | null {
     return "/desafio-24-dias/assets/desafio-24-dias-hero.png";
   }
   if (t.includes("155 receitas") || t.includes("150 receitas fitness")) {
-    return "/produtos/155-receitas-fitness.png";
+    return "/produtos/155-receitas-fitness.webp";
   }
   return item.imagem;
 }
