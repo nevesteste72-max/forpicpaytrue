@@ -167,6 +167,7 @@ interface PaymentLink {
   recovery_cta_text?: string | null;
   recovery_redirect_url?: string | null;
   show_trust_badges?: boolean;
+  show_discreet_billing?: boolean;
 }
 
 type PaymentState = "form" | "processing" | "pending" | "success" | "failed";
@@ -479,6 +480,9 @@ export default function Checkout() {
       utm_medium: searchParams.get("utm_medium") || null,
       utm_content: searchParams.get("utm_content") || null,
       utm_term: searchParams.get("utm_term") || null,
+      ttclid: searchParams.get("ttclid") || null,
+      fbclid: searchParams.get("fbclid") || null,
+      gclid: searchParams.get("gclid") || null,
     };
     return {
       src: fromUrl.src || stored.src || null,
@@ -488,6 +492,9 @@ export default function Checkout() {
       utm_medium: fromUrl.utm_medium || stored.utm_medium || null,
       utm_content: fromUrl.utm_content || stored.utm_content || null,
       utm_term: fromUrl.utm_term || stored.utm_term || null,
+      ttclid: fromUrl.ttclid || stored.ttclid || null,
+      fbclid: fromUrl.fbclid || stored.fbclid || null,
+      gclid: fromUrl.gclid || stored.gclid || null,
     };
   }, [searchParams]);
 
@@ -1107,6 +1114,41 @@ export default function Checkout() {
       show_trust_badges: true,
       checkout_accent_color: "#10b981",
     },
+    // Milex 800W Carpet & Upholstery Deep Cleaner (Physical)
+    "a8792aa8-070c-45c8-a21e-815fdd01b88d": {
+      id: "a8792aa8-070c-45c8-a21e-815fdd01b88d",
+      product_name: "Milex 800W Carpet & Upholstery Deep Cleaner",
+      product_description: "800W High-Efficiency Motor • 16.5kPa Deep Extraction Suction • Dual Tank Clean & Dirty Water System • Pet Stain & Couch Upholstery Specialist.",
+      logo_url: "/images/cleaner_1.jpg",
+      amount: 897,
+      order_bump_name: "🧴 2x Milex Deep Clean Carpet & Pet Formula (1L) + Parcel Insurance",
+      order_bump_description: "Add 2x Concentrated Deep Clean antibacterial stain remover formula (1L) + VIP priority dispatch insurance directly to your parcel.",
+      order_bump_price: 149,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/a8792aa8-070c-45c8-a21e-815fdd01b88d",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1110415468003004",
+      checkout_banner_url: null,
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#10b981",
+    },
     "d2472472-2472-4472-8472-247247247247": {
       id: "d2472472-2472-4472-8472-247247247247",
       product_name: "Lifetime VIP Access Upgrade & 2026 Automation Pack",
@@ -1174,6 +1216,41 @@ export default function Checkout() {
       recovery_redirect_url: null,
       show_trust_badges: true,
       checkout_accent_color: "#10b981",
+    },
+    // SA Ecom Start 2.0 (Digital Reseller Blueprint)
+    "a7777777-7777-4777-8777-777777777777": {
+      id: "a7777777-7777-4777-8777-777777777777",
+      product_name: "SA Ecom Start 2.0 — South Africa WhatsApp & Reseller Web App Portal",
+      product_description: "Instant access to verified SA wholesale contacts (Joburg & Durban), dispatch guides & WhatsApp sales blueprint.",
+      logo_url: "/sa_vip_upsell.jpg",
+      amount: 197,
+      order_bump_name: null,
+      order_bump_description: null,
+      order_bump_price: null,
+      order_bump_image_url: null,
+      order_bump_2_name: null,
+      order_bump_2_description: null,
+      order_bump_2_price: null,
+      order_bump_2_image_url: null,
+      order_bump_3_name: null,
+      order_bump_3_description: null,
+      order_bump_3_price: null,
+      order_bump_3_image_url: null,
+      redirect_url: "/thank-you/a7777777-7777-4777-8777-777777777777",
+      currency: "ZAR",
+      checkout_language: "en",
+      stripe_payment_methods: ["card", "link", "google_pay", "apple_pay"],
+      facebook_pixel_id: "1110415468003004",
+      checkout_banner_url: "/sa_vip_upsell.jpg",
+      checkout_timer_minutes: 15,
+      recovery_enabled: false,
+      recovery_discount_percent: null,
+      recovery_headline: null,
+      recovery_message: null,
+      recovery_cta_text: null,
+      recovery_redirect_url: null,
+      show_trust_badges: true,
+      checkout_accent_color: "#10b981",
     }
   };
 
@@ -1192,7 +1269,7 @@ export default function Checkout() {
 
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, checkout_accent_color")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, show_discreet_billing, checkout_accent_color")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -1684,59 +1761,118 @@ export default function Checkout() {
             )}
 
             {/* Product Header — Rich personalized presentation */}
-            <div className="p-4 md:p-6 pb-0">
-              <div className="rounded-2xl border border-border bg-gradient-to-b from-card via-card to-muted/20 shadow-lg overflow-hidden">
-                <div className="p-4 md:p-5">
-                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                    {link.logo_url && (
-                      <div className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 relative rounded-xl overflow-hidden border border-border shadow-md bg-black/40 flex items-center justify-center">
-                        <img
-                          src={link.logo_url}
-                          alt={link.product_name}
-                          className="w-full h-full object-cover rounded-xl"
-                        />
-                        <span className="absolute bottom-1 right-1 text-[9px] font-bold bg-black/80 text-white px-1.5 py-0.5 rounded backdrop-blur-xs">
-                          VIP
-                        </span>
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1 text-center sm:text-left">
-                      <h2 className="text-base sm:text-lg font-bold text-foreground leading-snug">
-                        {link.product_name}
-                      </h2>
-                      {link.product_description && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {link.product_description}
-                        </p>
-                      )}
+            {(() => {
+              const isPhysical = Boolean(
+                link && (
+                  [
+                    "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34", // Smeg
+                    "4b585d8e-6df4-4019-8ca0-2a32b8e68844", // Airfryer
+                    "57300a28-4553-4bb4-9586-06941387717d", // Cookware
+                    "e1919191-1919-4919-8919-191919191919", // 19-Piece Chef Set
+                    "a8792aa8-070c-45c8-a21e-815fdd01b88d", // Milex Carpet Cleaner
+                  ].includes(link.id) ||
+                  link.product_type === "physical" ||
+                  link.title?.toLowerCase().includes("smeg") ||
+                  link.title?.toLowerCase().includes("air fryer") ||
+                  link.title?.toLowerCase().includes("airfryer") ||
+                  link.title?.toLowerCase().includes("cookware") ||
+                  link.title?.toLowerCase().includes("panela") ||
+                  link.title?.toLowerCase().includes("cleaner") ||
+                  link.title?.toLowerCase().includes("carpet") ||
+                  link.title?.toLowerCase().includes("milex") ||
+                  link.title?.toLowerCase().includes("chef knife") ||
+                  link.title?.toLowerCase().includes("19-piece") ||
+                  link.title?.toLowerCase().includes("breakfast set")
+                )
+              );
 
-                      {/* Price Anchoring */}
-                      <div className="mt-2.5 space-y-1">
-                        <div className="flex items-baseline justify-center sm:justify-start gap-2.5">
-                          <span className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                            {formatMoney(stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * Number(link.amount)) : Number(link.amount), stripeChargeCurrency || currencySymbol, locale)}
-                          </span>
-                          <span className="text-sm text-muted-foreground line-through decoration-destructive/60">
-                            {formatMoney((stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * Number(link.amount)) : Number(link.amount)) * 9.8, stripeChargeCurrency || currencySymbol, locale)}
-                          </span>
-                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-                            {lang === "en" ? "Save 89%" : lang === "fr" ? "Économisez 89%" : "Ahorro del 89%"}
-                          </span>
-                        </div>
-                        {localCurrency && (stripeChargeCurrency || link?.currency) !== localCurrency.code && (
-                          <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 text-center sm:text-left">
-                            ≈ {(Number(link.amount) * localCurrency.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {localCurrency.code}
-                            <span className="text-[10px] font-normal text-muted-foreground ml-1">
-                              ({lang === "en" ? "estimated in your currency" : lang === "fr" ? "estimé dans votre devise" : "estimado en tu moneda local"})
+              // Match landing page comparison price exactly:
+              // Milex Carpet Cleaner (R897) -> Was R1,799 (Save 50%)
+              // Air Fryer (R597) -> Was R1,199 (Save 50%)
+              // Cookware (R597) -> Was R1,199 (Save 50%)
+              // Smeg (R697) -> Was R1,399 (Save 50%)
+              let originalAnchor = Number(link.amount) * 9.8;
+              let discountPercent = 89;
+
+              if (isPhysical) {
+                if (link.id === "a8792aa8-070c-45c8-a21e-815fdd01b88d" || link.product_name?.toLowerCase().includes("cleaner") || link.product_name?.toLowerCase().includes("carpet")) {
+                  originalAnchor = 1799;
+                  discountPercent = 50;
+                } else if (link.id === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" || link.id === "57300a28-4553-4bb4-9586-06941387717d" || link.product_name?.toLowerCase().includes("air fryer") || link.product_name?.toLowerCase().includes("cookware")) {
+                  originalAnchor = 1199;
+                  discountPercent = 50;
+                } else if (link.id === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" || link.product_name?.toLowerCase().includes("smeg")) {
+                  originalAnchor = 1399;
+                  discountPercent = 50;
+                } else {
+                  originalAnchor = Math.round(Number(link.amount) * 2) - 1;
+                  discountPercent = 50;
+                }
+              }
+
+              // Fallback image if broken or not found
+              const fallbackImage = (link.product_name?.toLowerCase().includes("cleaner") || link.product_name?.toLowerCase().includes("carpet") || link.id === "a8792aa8-070c-45c8-a21e-815fdd01b88d")
+                ? "/images/cleaner_1.jpg"
+                : (link.product_name?.toLowerCase().includes("air fryer") || link.product_name?.toLowerCase().includes("airfryer") || link.id === "4b585d8e-6df4-4019-8ca0-2a32b8e68844")
+                ? "/images/air_1.png"
+                : (link.product_name?.toLowerCase().includes("cookware") || link.product_name?.toLowerCase().includes("panela") || link.id === "57300a28-4553-4bb4-9586-06941387717d")
+                ? "/images/panela_hero.png"
+                : (link.logo_url || "/images/p1.png");
+
+              const displayImage = link.logo_url || fallbackImage;
+
+              return (
+                <div className="p-4 md:p-6 pb-0">
+                  <div className="rounded-2xl border border-border bg-gradient-to-b from-card via-card to-muted/20 shadow-lg overflow-hidden">
+                    <div className="p-4 md:p-5">
+                      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                        {displayImage && (
+                          <div className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 relative rounded-xl overflow-hidden border border-border shadow-md bg-white dark:bg-black/40 flex items-center justify-center p-1">
+                            <img
+                              src={displayImage}
+                              alt={link.product_name}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = fallbackImage;
+                              }}
+                              className="w-full h-full object-contain rounded-xl"
+                            />
+                            <span className="absolute bottom-1 right-1 text-[9px] font-bold bg-black/80 text-white px-1.5 py-0.5 rounded backdrop-blur-xs">
+                              {isPhysical ? `-${discountPercent}%` : "VIP"}
                             </span>
-                          </p>
+                          </div>
                         )}
+                        <div className="min-w-0 flex-1 text-center sm:text-left">
+                          <h2 className="text-base sm:text-lg font-bold text-foreground leading-snug">
+                            {link.product_name}
+                          </h2>
+                          {link.product_description && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {link.product_description}
+                            </p>
+                          )}
+
+                          {/* Price Anchoring */}
+                          <div className="mt-2.5 space-y-1">
+                            <div className="flex items-baseline justify-center sm:justify-start gap-2.5">
+                              <span className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                                {formatMoney(stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * Number(link.amount)) : Number(link.amount), stripeChargeCurrency || currencySymbol, locale)}
+                              </span>
+                              <span className="text-sm text-muted-foreground line-through decoration-destructive/60">
+                                {formatMoney(stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * originalAnchor) : originalAnchor, stripeChargeCurrency || currencySymbol, locale)}
+                              </span>
+                              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                                {lang === "en" ? `Save ${discountPercent}%` : lang === "fr" ? `Économisez ${discountPercent}%` : lang === "es" ? `Ahorro del ${discountPercent}%` : `Poupa ${discountPercent}%`}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* Single-step form — reserve height so the Stripe form loading in
                 does not shift the layout (CLS was 0.33 at the payment moment). */}
@@ -1749,6 +1885,7 @@ export default function Checkout() {
                       "4b585d8e-6df4-4019-8ca0-2a32b8e68844", // Airfryer
                       "57300a28-4553-4bb4-9586-06941387717d", // Cookware
                       "e1919191-1919-4919-8919-191919191919", // 19-Piece Chef Set
+                      "a8792aa8-070c-45c8-a21e-815fdd01b88d", // Milex Carpet Cleaner
                     ].includes(link.id) ||
                     link.product_type === "physical" ||
                     link.title?.toLowerCase().includes("smeg") ||
@@ -1756,6 +1893,9 @@ export default function Checkout() {
                     link.title?.toLowerCase().includes("airfryer") ||
                     link.title?.toLowerCase().includes("cookware") ||
                     link.title?.toLowerCase().includes("panela") ||
+                    link.title?.toLowerCase().includes("cleaner") ||
+                    link.title?.toLowerCase().includes("carpet") ||
+                    link.title?.toLowerCase().includes("milex") ||
                     link.title?.toLowerCase().includes("chef knife") ||
                     link.title?.toLowerCase().includes("19-piece") ||
                     link.title?.toLowerCase().includes("breakfast set")
@@ -1781,6 +1921,7 @@ export default function Checkout() {
                     trackingParams={trackingParams}
                     localCurrency={localCurrency}
                     showTrustBadges={link.show_trust_badges !== false}
+                    showDiscreetBilling={link.show_discreet_billing === true}
                     isPhysical={isPhysicalProduct}
                     onInitiateCheckout={() => { if (!icAlreadyFiredExternally) fireInitiateCheckout(); }}
                     onSuccess={async () => {
