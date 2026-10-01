@@ -28,6 +28,7 @@ export default function Acesso() {
 
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [pago, setPago] = useState(false);
   const [nome, setNome] = useState<string | null>(null);
   const [itens, setItens] = useState<Item[]>([]);
 
@@ -43,8 +44,10 @@ export default function Acesso() {
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/meu-acesso?tx=${encodeURIComponent(tx)}`,
         );
         const d = await r.json();
-        if (d?.error) setErro(d.error);
-        else {
+        setPago(Boolean(d?.pago));
+        if (!d?.pago) {
+          setErro(d?.erro ?? "Não encontrámos um pagamento confirmado para esta compra.");
+        } else {
           setNome(d.nome ?? null);
           setItens(d.itens ?? []);
         }
@@ -68,12 +71,12 @@ export default function Acesso() {
     <div className="min-h-screen bg-[#f4f5f7] py-6 px-4">
       <div className="max-w-md mx-auto">
         {/* Cabeçalho */}
-        <div className="rounded-t-xl bg-emerald-600 text-white text-center py-4 px-4">
+        <div className={`rounded-t-xl text-white text-center py-4 px-4 ${pago ? "bg-emerald-600" : "bg-amber-500"}`}>
           <h1 className="text-lg font-bold">Conteúdos da sua compra</h1>
           <p className="text-xs text-emerald-50 mt-0.5">
-            {itens.length > 0
-              ? "Seleciona um item para aceder"
-              : "A tua compra está confirmada"}
+            {pago
+              ? (itens.length > 0 ? "Seleciona um item para aceder" : "A tua compra está confirmada")
+              : "Pagamento por confirmar"}
           </p>
         </div>
 
@@ -85,7 +88,7 @@ export default function Acesso() {
             </div>
           )}
 
-          {!erro && itens.length === 0 && (
+          {pago && itens.length === 0 && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
               <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-amber-900">
