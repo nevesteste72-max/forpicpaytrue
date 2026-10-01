@@ -19,7 +19,10 @@ import {
   FileText,
   MessageCircle,
   AlertTriangle,
+  Check,
 } from "lucide-react";
+
+type Destino = "main" | "bump1" | "bump2" | "bump3";
 
 interface Entregavel {
   id: string;
@@ -31,6 +34,7 @@ interface Entregavel {
   caption: string | null;
   position: number;
   is_active: boolean;
+  applies_to: Destino;
 }
 
 interface Props {
@@ -39,8 +43,7 @@ interface Props {
   onClose: () => void;
 }
 
-// 45 MB: acima disto o WhatsApp recusa o anexo, por isso travamos aqui
-// em vez de deixar a entrega falhar silenciosamente no cliente.
+// 45 MB: acima disto o WhatsApp recusa o anexo.
 const LIMITE_BYTES = 45 * 1024 * 1024;
 
 export function DeliverablesDialog({ productId, productName, onClose }: Props) {
@@ -51,7 +54,9 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
   const [ocupado, setOcupado] = useState(false);
   const [itens, setItens] = useState<Entregavel[]>([]);
   const [entregaWhats, setEntregaWhats] = useState(true);
+  const [bumps, setBumps] = useState<(string | null)[]>([null, null, null]);
 
+  const [destino, setDestino] = useState<Destino>("main");
   const [urlNova, setUrlNova] = useState("");
   const [legendaNova, setLegendaNova] = useState("");
 
@@ -67,20 +72,45 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
         .order("position", { ascending: true }),
       supabase
         .from("payment_links")
-        .select("whatsapp_delivery_enabled")
+        .select(
+          "whatsapp_delivery_enabled, order_bump_name, order_bump_2_name, order_bump_3_name",
+        )
         .eq("id", productId)
         .maybeSingle(),
     ]);
 
     setItens((entregaveis as Entregavel[]) ?? []);
     setEntregaWhats(produto?.whatsapp_delivery_enabled !== false);
+    setBumps([
+      produto?.order_bump_name ?? null,
+      produto?.order_bump_2_name ?? null,
+      produto?.order_bump_3_name ?? null,
+    ]);
     setCarregando(false);
   };
 
   useEffect(() => {
-    if (productId) carregar();
+    if (productId) {
+      setDestino("main");
+      carregar();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
+
+  const destinos: { valor: Destino; rotulo: string }[] = [
+    { valor: "main", rotulo: "Produto principal" },
+    ...bumps
+      .map((nome, i) =>
+        nome
+          ? { valor: `bump${i + 1}` as Destino, rotulo: `Order bump ${i + 1}: ${nome}` }
+          : null,
+      )
+      .filter(Boolean as unknown as (v: unknown) => v is { valor: Destino; rotulo: string }),
+  ];
+
+  const nomeDestino = (d: Destino) =>
+    destinos.find((x) => x.valor === d)?.rotulo ??
+    (d === "main" ? "Produto principal" : `Order bump ${d.slice(-1)} (já não existe)`);
 
   const proximaPosicao = () =>
     itens.length ? Math.max(...itens.map((i) => i.position)) + 1 : 1;
@@ -90,8 +120,7 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
     if (ficheiro.size > LIMITE_BYTES) {
       toast({
         title: "Ficheiro demasiado grande",
-        description:
-          "O WhatsApp não aceita anexos acima de ~45 MB. Para vídeos, usa antes um link.",
+        description: "O WhatsApp não aceita anexos acima de ~45 MB. Para vídeos, usa um link.",
         variant: "destructive",
       });
       return;
@@ -116,6 +145,7 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
       storage_path: caminho,
       filename: ficheiro.name,
       mimetype: ficheiro.type || "application/octet-stream",
+      applies_to: destino,
       position: proximaPosicao(),
     });
 
@@ -124,14 +154,18 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
       toast({ title: "Falha ao guardar", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Ficheiro adicionado", description: "Vai ser enviado no WhatsApp após o pagamento." });
+    toast({ title: "Guardado", description: `Vai para: ${nomeDestino(destino)}` });
     carregar();
   };
 
   const adicionarLink = async () => {
     if (!productId || !urlNova.trim()) return;
     if (!/^https?:\/\//i.test(urlNova.trim())) {
-      toast({ title: "Link inválido", description: "Tem de começar por http:// ou https://", variant: "destructive" });
+      toast({
+        title: "Link inválido",
+        description: "Tem de começar por http:// ou https://",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -141,6 +175,7 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
       kind: "link",
       external_url: urlNova.trim(),
       caption: legendaNova.trim() || null,
+      applies_to: destino,
       position: proximaPosicao(),
     });
     setOcupado(false);
@@ -151,7 +186,21 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
     }
     setUrlNova("");
     setLegendaNova("");
-    toast({ title: "Link adicionado" });
+    toast({ title: "Guardado", description: `Vai para: ${nomeDestino(destino)}` });
+    carregar();
+  };
+
+  const mudarDestino = async (item: Entregavel, novo: Destino) => {
+    setOcupado(true);
+    const { error } = await supabase
+      .from("product_deliverables")
+      .update({ applies_to: novo })
+      .eq("id", item.id);
+    setOcupado(false);
+    if (error) {
+      toast({ title: "Falha ao alterar", description: error.message, variant: "destructive" });
+      return;
+    }
     carregar();
   };
 
@@ -185,9 +234,6 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
     setEntregaWhats(novo);
     toast({
       title: novo ? "Entrega por WhatsApp ligada" : "Entrega por WhatsApp desligada",
-      description: novo
-        ? "Quem comprar recebe a mensagem e os ficheiros no WhatsApp."
-        : "Este produto deixa de ser entregue por WhatsApp.",
     });
   };
 
@@ -214,7 +260,7 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
                 <div>
                   <p className="text-sm font-medium">Entrega por WhatsApp</p>
                   <p className="text-xs text-muted-foreground">
-                    Envia mensagem, link e ficheiros assim que o pagamento é confirmado.
+                    Envia mensagem, links e ficheiros assim que o pagamento é confirmado.
                   </p>
                 </div>
               </div>
@@ -231,49 +277,97 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
             {/* Lista */}
             <div className="space-y-2">
               <Label className="text-sm">Itens a entregar ({itens.length})</Label>
+
               {itens.length === 0 ? (
                 <div className="flex items-start gap-2 rounded-lg border border-dashed border-border p-3">
                   <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-muted-foreground">
-                    Ainda não há nada. Quem comprar recebe só a mensagem de confirmação, sem material.
+                    Ainda não há nada. Quem comprar recebe só a mensagem, sem material.
                   </p>
                 </div>
               ) : (
                 itens.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-2 rounded-lg border border-border p-2.5"
-                  >
-                    {item.kind === "file" ? (
-                      <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    ) : (
-                      <LinkIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm truncate">
+                  <div key={item.id} className="rounded-lg border border-border p-2.5 space-y-2">
+                    <div className="flex items-center gap-2">
+                      {item.kind === "file" ? (
+                        <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      ) : (
+                        <LinkIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      )}
+                      <p className="text-sm truncate flex-1">
                         {item.kind === "file" ? item.filename : item.caption || item.external_url}
                       </p>
-                      {item.kind === "link" && item.caption && (
-                        <p className="text-xs text-muted-foreground truncate">{item.external_url}</p>
-                      )}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => remover(item)}
+                        disabled={ocupado}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      onClick={() => remover(item)}
-                      disabled={ocupado}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-muted-foreground flex-shrink-0">
+                        Entregar a quem comprou:
+                      </span>
+                      <select
+                        value={item.applies_to}
+                        onChange={(e) => mudarDestino(item, e.target.value as Destino)}
+                        disabled={ocupado}
+                        className="flex-1 h-7 text-xs rounded-md border border-border bg-background px-2"
+                      >
+                        {destinos.map((d) => (
+                          <option key={d.valor} value={d.valor}>
+                            {d.rotulo}
+                          </option>
+                        ))}
+                        {!destinos.some((d) => d.valor === item.applies_to) && (
+                          <option value={item.applies_to}>{nomeDestino(item.applies_to)}</option>
+                        )}
+                      </select>
+                    </div>
                   </div>
                 ))
               )}
             </div>
 
-            {/* Subir ficheiro */}
-            <div className="space-y-2">
-              <Label className="text-sm">Subir ficheiro</Label>
+            {/* Para quem é o proximo item */}
+            <div className="space-y-2 rounded-lg border border-border p-3">
+              <Label className="text-sm">Adicionar novo item — para quem é?</Label>
+              <select
+                value={destino}
+                onChange={(e) => setDestino(e.target.value as Destino)}
+                disabled={ocupado}
+                className="w-full h-9 text-sm rounded-md border border-border bg-background px-2"
+              >
+                {destinos.map((d) => (
+                  <option key={d.valor} value={d.valor}>
+                    {d.rotulo}
+                  </option>
+                ))}
+              </select>
+
+              {destino === "main" ? (
+                <p className="text-xs text-muted-foreground">
+                  Vai para <strong>toda a gente</strong> que comprar este produto.
+                </p>
+              ) : (
+                <p className="text-xs text-emerald-700 dark:text-emerald-400 flex items-start gap-1">
+                  <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  Só vai para quem <strong>pagou este order bump</strong>. Quem não pagou nunca o
+                  recebe.
+                </p>
+              )}
+
+              {destinos.length === 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Este produto ainda não tem order bumps. Cria um na edição do produto para poderes
+                  entregar material só a quem o pagar.
+                </p>
+              )}
+
               <input
                 ref={inputFicheiro}
                 type="file"
@@ -295,38 +389,40 @@ export function DeliverablesDialog({ productId, productName, onClose }: Props) {
                 ) : (
                   <Upload className="w-4 h-4 mr-2" />
                 )}
-                Escolher ficheiro
+                Subir ficheiro
               </Button>
               <p className="text-xs text-muted-foreground">
-                Até 45 MB. Para vídeos usa antes um link — ficheiros grandes não passam no WhatsApp.
+                Até 45 MB. Para vídeos usa antes um link.
               </p>
+
+              <div className="pt-1 space-y-2">
+                <Input
+                  value={urlNova}
+                  onChange={(e) => setUrlNova(e.target.value)}
+                  placeholder="https://... (link em alternativa)"
+                  className="h-9 text-sm"
+                />
+                <Input
+                  value={legendaNova}
+                  onChange={(e) => setLegendaNova(e.target.value)}
+                  placeholder="Descrição (opcional)"
+                  className="h-9 text-sm"
+                />
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={adicionarLink}
+                  disabled={ocupado || !urlNova.trim()}
+                >
+                  <LinkIcon className="w-4 h-4 mr-2" />
+                  Adicionar link
+                </Button>
+              </div>
             </div>
 
-            {/* Adicionar link */}
-            <div className="space-y-2">
-              <Label className="text-sm">Ou adicionar um link</Label>
-              <Input
-                value={urlNova}
-                onChange={(e) => setUrlNova(e.target.value)}
-                placeholder="https://..."
-                className="h-9 text-sm"
-              />
-              <Input
-                value={legendaNova}
-                onChange={(e) => setLegendaNova(e.target.value)}
-                placeholder="Descrição (opcional) — ex: Área de membros"
-                className="h-9 text-sm"
-              />
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={adicionarLink}
-                disabled={ocupado || !urlNova.trim()}
-              >
-                <LinkIcon className="w-4 h-4 mr-2" />
-                Adicionar link
-              </Button>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Guarda sozinho — não há botão de gravar.
+            </p>
           </div>
         )}
       </DialogContent>
