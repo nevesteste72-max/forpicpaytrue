@@ -17,6 +17,7 @@ import DownloadHubFR from "./pages/DownloadHubFR";
 import UpsellBoulangerie from "./pages/UpsellBoulangerie";
 import DownsellPainsExpress from "./pages/DownsellPainsExpress";
 import Vault from "./pages/Vault";
+import Acesso from "./pages/Acesso";
 import { TestModeBanner } from "./components/TestModeBanner";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,8 @@ const App = () => (
           <Route path="/telecharger/:linkId" element={<DownloadHubFR />} />
           <Route path="/offre-boulangerie" element={<UpsellBoulangerie />} />
           <Route path="/offre-pains-express" element={<DownsellPainsExpress />} />
+          <Route path="/acesso" element={<Acesso />} />
+          <Route path="/acesso/:transactionId" element={<Acesso />} />
           <Route path="/vault" element={<Vault />} />
           <Route path="/portal" element={<Vault />} />
           <Route path="*" element={<NotFound />} />
