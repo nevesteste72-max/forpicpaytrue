@@ -9,10 +9,12 @@ import {
   Plus,
   Zap,
   Pencil,
+  PackageOpen,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FlowBuilderDialog } from "./FlowBuilderDialog";
 import { EditProductDialog } from "./EditProductDialog";
+import { DeliverablesDialog } from "./DeliverablesDialog";
 
 interface Product {
   id: string;
@@ -43,6 +45,7 @@ interface ProductGridProps {
 export function ProductGrid({ products, allProducts, onDelete, onCreateClick, onProductUpdated }: ProductGridProps) {
   const { toast } = useToast();
   const [flowProductId, setFlowProductId] = useState<string | null>(null);
+  const [entregaveisProduto, setEntregaveisProduto] = useState<Product | null>(null);
   const [flowCurrency, setFlowCurrency] = useState("MZN");
   const [editProduct, setEditProduct] = useState<Product | null>(null);
 
@@ -161,6 +164,15 @@ export function ProductGrid({ products, allProducts, onDelete, onCreateClick, on
                 variant="outline"
                 size="sm"
                 className="rounded-lg h-8 w-8 p-0 border-border"
+                title="Entregáveis (o que o cliente recebe)"
+                onClick={() => setEntregaveisProduto(product)}
+              >
+                <PackageOpen className="w-3 h-3" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg h-8 w-8 p-0 border-border"
                 title="Fluxo Upsell/Downsell"
                 onClick={() => {
                   setFlowProductId(product.id);
@@ -190,6 +202,12 @@ export function ProductGrid({ products, allProducts, onDelete, onCreateClick, on
           </div>
         );
       })}
+
+      <DeliverablesDialog
+        productId={entregaveisProduto?.id ?? null}
+        productName={entregaveisProduto?.product_name}
+        onClose={() => setEntregaveisProduto(null)}
+      />
 
       {/* Edit Product Dialog */}
       <EditProductDialog
