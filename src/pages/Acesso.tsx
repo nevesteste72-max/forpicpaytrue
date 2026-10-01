@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import { guardarUltimaCompra, lerUltimaCompra } from "@/lib/ultimaCompra";
 import { Loader2, ArrowRight, Info, AlertCircle } from "lucide-react";
 
 interface Item {
@@ -52,11 +53,14 @@ export default function Acesso() {
   const { transactionId } = useParams<{ transactionId?: string }>();
   const [params] = useSearchParams();
 
-  const tx =
+  const txDoEndereco =
     transactionId ||
     params.get("cashpay_tx") ||
     params.get("tx") ||
     "";
+
+  // Sem referencia no endereco, usar a da ultima compra feita neste navegador.
+  const tx = txDoEndereco || lerUltimaCompra();
 
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -70,6 +74,7 @@ export default function Acesso() {
       setCarregando(false);
       return;
     }
+    guardarUltimaCompra(tx);
     (async () => {
       try {
         const r = await fetch(

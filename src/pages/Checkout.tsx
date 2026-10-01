@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { guardarUltimaCompra } from "@/lib/ultimaCompra";
 import { supabase } from "@/integrations/supabase/client";
 import SocialProofToast from "@/components/SocialProofToast";
 import { Button } from "@/components/ui/button";
@@ -572,6 +573,11 @@ export default function Checkout() {
 
   // Check if this product has upsell/downsell flow steps
   const checkAndRedirectToFlow = useCallback(async (transactionId: string) => {
+    // Guardar a referencia da compra no navegador. A pagina de acesso precisa
+    // dela, e ha caminhos pelo funil que a perdem; assim o cliente consegue
+    // sempre voltar a /acesso e encontrar o que comprou.
+    guardarUltimaCompra(transactionId);
+
     if (!link) return false;
 
     // Prevent loop if the user is purchasing the upsell directly

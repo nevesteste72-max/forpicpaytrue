@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { guardarUltimaCompra } from "@/lib/ultimaCompra";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -376,6 +377,8 @@ export default function UpsellPage() {
   const navigate = useNavigate();
 
   const txId = searchParams.get("tx");
+  // Guardar a referencia, para a pagina de acesso funcionar numa visita futura.
+  guardarUltimaCompra(txId);
   const linkId = searchParams.get("link");
   const isEmbed = searchParams.get("embed") === "true";
 
