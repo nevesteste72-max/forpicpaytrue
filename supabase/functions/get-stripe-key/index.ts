@@ -16,30 +16,52 @@ serve(async (req) => {
     Deno.env.get("STRIPE_PUBLISHABLE_KEY") ||
     Deno.env.get("VITE_STRIPE_PUBLISHABLE_KEY") ||
     "";
+  let mode = "live";
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const envPk = Deno.env.get("STRIPE_PUBLISHABLE_KEY");
-    const envSk = Deno.env.get("STRIPE_SECRET_KEY");
 
-    if (envPk && envPk.startsWith("pk_live_")) {
-      await supabaseAdmin.from("app_settings").upsert({
-        id: 1,
-        stripe_publishable_key: envPk,
-        stripe_secret_key: envSk || undefined,
-        updated_at: new Date().toISOString(),
-      });
-      publishableKey = envPk;
+    const { data: appSettings } = await supabaseAdmin
+      .from("app_settings")
+      .select("stripe_publishable_key, stripe_publishable_key_test, stripe_mode")
+      .eq("id", 1)
+      .maybeSingle();
+
+    mode = (appSettings?.stripe_mode || "live").toLowerCase();
+
+    if (mode === "test") {
+      // Em modo de teste NUNCA devolver a chave real: o checkout passaria a
+      // cobrar a serio a pensar que estava a testar.
+      const testPk = appSettings?.stripe_publishable_key_test || "";
+      if (!testPk) {
+        return new Response(
+          JSON.stringify({ error: "Modo de teste ativo mas nao ha chave publicavel de teste configurada" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      publishableKey = testPk;
     } else {
-      const { data: appSettings } = await supabaseAdmin
-        .from("app_settings")
-        .select("stripe_publishable_key")
-        .eq("id", 1)
-        .maybeSingle();
-      if (appSettings?.stripe_publishable_key) {
+      // Modo live: a variavel de ambiente (quando e live) continua a ter
+      // prioridade e a sincronizar app_settings, como antes.
+      const envPk = Deno.env.get("STRIPE_PUBLISHABLE_KEY");
+      const envSk = Deno.env.get("STRIPE_SECRET_KEY");
+
+      if (envPk && envPk.startsWith("pk_live_")) {
+        await supabaseAdmin.from("app_settings").upsert({
+          id: 1,
+          stripe_publishable_key: envPk,
+          stripe_secret_key: envSk || undefined,
+          updated_at: new Date().toISOString(),
+        });
+        publishableKey = envPk;
+      } else if (appSettings?.stripe_publishable_key) {
         publishableKey = appSettings.stripe_publishable_key;
+      } else if (appSettings?.stripe_publishable_key_test) {
+        // So ha chaves de teste configuradas: usa-as, nao ha dinheiro em risco.
+        publishableKey = appSettings.stripe_publishable_key_test;
+        mode = "test";
       }
     }
   }
@@ -52,7 +74,7 @@ serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ publishable_key: publishableKey }),
+    JSON.stringify({ publishable_key: publishableKey, mode }),
     {
       status: 200,
       headers: {

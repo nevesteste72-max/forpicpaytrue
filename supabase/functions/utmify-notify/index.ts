@@ -177,6 +177,9 @@ serve(async (req) => {
         utm_medium: tracking_params?.utm_medium || null,
         utm_content: tracking_params?.utm_content || null,
         utm_term: tracking_params?.utm_term || null,
+        ttclid: tracking_params?.ttclid || null,
+        fbclid: tracking_params?.fbclid || null,
+        gclid: tracking_params?.gclid || null,
       },
       commission: {
         totalPriceInCents: totalCents,

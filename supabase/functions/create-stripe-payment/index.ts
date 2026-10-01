@@ -23,12 +23,18 @@ serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Prefer the key configured in Settings (app_settings), fall back to the env secret.
+    // A chave secreta tem de ser do MESMO modo da chave publicavel que o
+    // browser recebeu. Misturar as duas faz o Stripe recusar-se a desenhar o
+    // formulario: o cliente fica sem onde escrever o cartao e a venda perde-se.
     const { data: appSettings } = await supabaseAdmin
       .from("app_settings")
-      .select("stripe_secret_key")
+      .select("stripe_secret_key, stripe_secret_key_test, stripe_mode")
       .eq("id", 1)
       .maybeSingle();
-    const STRIPE_SECRET_KEY = appSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY");
+    const emModoTeste = appSettings?.stripe_mode === "test";
+    const STRIPE_SECRET_KEY = emModoTeste
+      ? appSettings?.stripe_secret_key_test
+      : (appSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY"));
     if (!STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is not configured");
 
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });

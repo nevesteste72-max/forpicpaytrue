@@ -25,12 +25,18 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // A chave secreta tem de ser do MESMO modo da chave publicavel que o
+    // browser recebeu. Misturar as duas faz o Stripe recusar-se a desenhar o
+    // formulario: o cliente fica sem onde escrever o cartao e a venda perde-se.
     const { data: appSettings } = await supabaseAdmin
       .from("app_settings")
-      .select("stripe_secret_key")
+      .select("stripe_secret_key, stripe_secret_key_test, stripe_mode")
       .eq("id", 1)
       .maybeSingle();
-    const STRIPE_SECRET_KEY = appSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY");
+    const emModoTeste = appSettings?.stripe_mode === "test";
+    const STRIPE_SECRET_KEY = emModoTeste
+      ? appSettings?.stripe_secret_key_test
+      : (appSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY"));
     if (!STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is not configured");
 
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
@@ -56,8 +62,8 @@ serve(async (req) => {
       const auth = { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json" };
       try { await fetch(`${base}/send-purchase-email`, { method: "POST", headers: auth, body: JSON.stringify({ customer_email: parentTx.customer_email, customer_name: parentTx.customer_name || "", product_name: upsell.product_name, amount, currency: currency.toUpperCase(), transaction_id: newTxId }) }); } catch (_) { /* ignore */ }
       try { await fetch(`${base}/utmify-notify`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTxId, product_name: `Upsell: ${upsell.product_name}`, product_id: upsellPaymentLinkId, customer_name: parentTx.customer_name || "", customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "", amount, currency: currency.toUpperCase(), order_bump_accepted: false, order_bump_amount: 0, payment_method: "stripe", status: "successful", created_at: new Date().toISOString(), approved_at: new Date().toISOString(), tracking_params: trackingParams || undefined }) }); } catch (_) { /* ignore */ }
-      const fbPixel = upsell.facebook_pixel_id || "2125158571414054";
-      const fbTok = upsell.facebook_token || "EAAeTysuB0T0BSXwVTZBBc9WmZBcKR20BrFraIzxWPiiUXYRM06qZBHDDFgNshzB9gSm6ZCNFxSHROw6fZB4CMFFlZCvcZCFGAjm9zkYIYYcQ6FQd3HHChrwQelR8cAQog0DtdLzhRlX10BNxued9UvE4X09zX4j4GkO4W4Ky7NVzy7AR6crLBpL53Ehpt1rjzzYAP5pRBqiceCtU5V6QyJntt6ZAoDjcEIQUGfhH0AZDZD";
+      const fbPixel = upsell.facebook_pixel_id || "1110415468003004";
+      const fbTok = upsell.facebook_token || "EAAeTysuB0T0BSuzUxqhXNGQF9dNSHaH2SYbWzhFBGDkAhfmHgB1lNdnmbJVA7wJ5H6pCiC1BvAdRVUl125wlkHHyj2OUnAw6hZBL7I4aTD0J6HDfrA6Hkl4NbYtgStMwZCdx0lZCEl6SxtbPzMFRnyEExufsoCcZBUSFEnIh4D0TAlMqrdtKbk42jMpiQmJS3UAKWpHyqZAg4KcG75B84eqMl4NcwM6a6eqlgqAZDZD";
       try { if (fbPixel && fbTok) await fetch(`${base}/facebook-conversion`, { method: "POST", headers: auth, body: JSON.stringify({ transaction_id: newTxId, pixel_id: fbPixel, access_token: fbTok, event_name: "Purchase", value: amount, currency: currency.toUpperCase(), customer_email: parentTx.customer_email, customer_phone: parentTx.customer_phone || "" }) }); } catch (_) { /* ignore */ }
     }
 

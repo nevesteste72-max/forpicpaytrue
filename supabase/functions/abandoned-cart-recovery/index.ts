@@ -13,7 +13,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  */
 
 const CRON_KEY = "cron_9f2b7a13e6c84d5f0a1bd7e4";
-const PAY_BASE = "https://www.tecnhogar.store/pay/";
+const PAY_BASE = "https://paymhddigital.vercel.app/pay/";
 
 const SKIP_EMAILS = new Set([
   "ivanilsondagraca40@gmail.com",
@@ -283,10 +283,14 @@ serve(async (req) => {
 
     // Used only to tell "waiting on a Multibanco reference" apart from "gone".
     const { data: settings } = await supabase
-      .from("app_settings").select("stripe_secret_key").eq("id", 1).maybeSingle();
-    // The column is empty in this project; the live key lives in the env var.
+      .from("app_settings")
+      .select("stripe_secret_key, stripe_secret_key_test, stripe_mode")
+      .eq("id", 1).maybeSingle();
+    // Segue o modo escolhido nas definicoes, como o checkout.
     const stripeKey: string | null =
-      settings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY") || null;
+      (settings?.stripe_mode === "test"
+        ? settings?.stripe_secret_key_test
+        : settings?.stripe_secret_key) || Deno.env.get("STRIPE_SECRET_KEY") || null;
     if (!stripeKey) console.warn("[RECOVERY] no Stripe key - Multibanco vouchers cannot be detected");
 
     const now = Date.now();

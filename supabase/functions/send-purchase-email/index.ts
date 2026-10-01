@@ -205,7 +205,7 @@ serve(async (req) => {
       `;
     }
 
-    const origin = req.headers.get("origin") || "https://www.tecnhogar.store";
+    const origin = req.headers.get("origin") || "https://paymhddigital.vercel.app";
     const trackingParams = new URLSearchParams({
       product: product_name,
       amount: amount.toLocaleString(t.locale, { minimumFractionDigits: 2 }),

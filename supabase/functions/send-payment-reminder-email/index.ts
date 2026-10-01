@@ -112,7 +112,7 @@ serve(async (req) => {
     const displayName = customer_name || customer_email.split("@")[0];
     const formattedAmount = `${currency} ${amount.toLocaleString(t.locale, { minimumFractionDigits: 2 })}`;
 
-    const origin = req.headers.get("origin") || "https://www.tecnhogar.store";
+    const origin = req.headers.get("origin") || "https://paymhddigital.vercel.app";
     const payUrl = `${origin}/pay/${payment_link_id}`;
 
     const productImageRow = product_image_url

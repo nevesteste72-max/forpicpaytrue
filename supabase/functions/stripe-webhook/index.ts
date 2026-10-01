@@ -45,12 +45,16 @@ serve(async (req) => {
 
   // The Stripe secret key is only needed to build a client for signature
   // verification helpers; the value itself is not used to construct the event.
+  // A chave secreta segue o modo escolhido nas definicoes, como no checkout.
   const { data: appSettings } = await supabaseAdmin
     .from("app_settings")
-    .select("stripe_secret_key")
+    .select("stripe_secret_key, stripe_secret_key_test, stripe_mode")
     .eq("id", 1)
     .maybeSingle();
-  const STRIPE_SECRET_KEY = appSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY");
+  const emModoTeste = appSettings?.stripe_mode === "test";
+  const STRIPE_SECRET_KEY = emModoTeste
+    ? appSettings?.stripe_secret_key_test
+    : (appSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY"));
   if (!STRIPE_SECRET_KEY) {
     console.error("[STRIPE-WEBHOOK] Stripe secret key not configured");
     return new Response("Stripe not configured", { status: 500 });
