@@ -580,6 +580,38 @@ export default function Checkout() {
 
     if (!link) return false;
 
+    // Upsell pago aqui, neste checkout, em vez de em 1 clique — e o que
+    // acontece com MB Way e os outros metodos que saem do site. O funil a
+    // seguir nao e o deste produto (um upsell nao tem funil proprio): e o da
+    // compra principal. Sem isto o cliente caia na pagina de obrigado a meio
+    // do funil. Segue-se com a compra principal como referencia, que e a que
+    // tem o cartao guardado para os passos seguintes.
+    const passoPago = searchParams.get("step");
+    const funilPai = searchParams.get("parent_link");
+    const txRaiz = searchParams.get("parent_tx") || transactionId;
+    if (passoPago && funilPai) {
+      try {
+        const { data: passo } = await supabase
+          .from("flow_steps")
+          .select("accept_step_id, accept_redirect_url")
+          .eq("id", passoPago)
+          .maybeSingle();
+        const destino = (passo as { accept_redirect_url?: string | null } | null)?.accept_redirect_url;
+        const proximo = (passo as { accept_step_id?: string | null } | null)?.accept_step_id;
+        if (destino) {
+          const sep = destino.includes("?") ? "&" : "?";
+          window.location.href = `${destino}${sep}cashpay_tx=${txRaiz}&cashpay_link=${funilPai}`;
+          return true;
+        }
+        if (proximo) {
+          navigate(`/upsell/${proximo}?tx=${txRaiz}&link=${funilPai}`);
+          return true;
+        }
+      } catch (err) {
+        console.error("Falhou a continuacao do funil depois do upsell:", err);
+      }
+    }
+
     // Prevent loop if the user is purchasing the upsell directly
     if (link.id === "e1919191-1919-4919-8919-191919191919" || link.id.startsWith("e1919191")) {
       return false;
@@ -640,7 +672,7 @@ export default function Checkout() {
       console.error("Failed to check flow steps:", err);
     }
     return false;
-  }, [link, navigate, customerName, email, phone]);
+  }, [link, navigate, customerName, email, phone, searchParams]);
 
   useEffect(() => {
     if (linkId) fetchLink();
@@ -717,6 +749,13 @@ export default function Checkout() {
             bumps_accepted: bumpsAccepted,
             order_bump_amount: bumpAmount,
             buyer_country: buyerCountry || undefined,
+            // Se chegamos aqui a partir de um passo do funil (porque o cliente
+            // escolheu MB Way ou outro metodo que sai do site, e nao da para
+            // cobrar em 1 clique), levar a ligacao a compra principal e ao
+            // passo. Sem isto a compra nasce solta: a entrega so mostra este
+            // produto e o funil para aqui.
+            parent_transaction_id: searchParams.get("parent_tx") || undefined,
+            flow_step_id: searchParams.get("step") || undefined,
           }),
         }
       );

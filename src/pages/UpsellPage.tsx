@@ -632,6 +632,11 @@ export default function UpsellPage() {
     if (qEmail) qParams.set("email", qEmail);
     if (qPhone) qParams.set("phone", qPhone);
     if (txId && txId !== "preview") qParams.set("parent_tx", txId);
+    // O passo que esta a ser pago. Sem ele a compra nasce sem ligacao ao funil
+    // e o checkout nao sabe para onde seguir depois — o cliente caia na pagina
+    // de obrigado a meio do funil. Este caminho e o que todos os clientes de
+    // MB Way percorrem: sem cartao guardado, o 1 clique nunca pode cobrar.
+    qParams.set("step", step.id);
     const parentLink = linkId || step.payment_link_id;
     if (parentLink) qParams.set("parent_link", parentLink);
     if (trackingParams.utm_source) qParams.set("utm_source", trackingParams.utm_source);
@@ -786,6 +791,11 @@ export default function UpsellPage() {
     if (qEmail) qParams.set("email", qEmail);
     if (qPhone) qParams.set("phone", qPhone);
     if (txId && txId !== "preview") qParams.set("parent_tx", txId);
+    // Levar tambem o passo e o funil. Sem isto a compra feita no checkout
+    // (MB Way e os outros metodos que saem do site) nasce solta: a entrega so
+    // mostra este produto e o funil nao sabe para onde seguir depois.
+    if (stepId) qParams.set("step", stepId);
+    if (linkId) qParams.set("parent_link", linkId);
     const queryStr = qParams.toString() ? `?${qParams.toString()}` : "";
     window.location.href = buildInternalPath(`/pay/${upsellCheckoutLink}${queryStr}`);
   };

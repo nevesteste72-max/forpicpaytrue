@@ -179,6 +179,13 @@ serve(async (req) => {
       payment_methods,
       order_bump_accepted,
       buyer_country,
+      // Quando um upsell e pago num checkout normal (e o que acontece com MB
+      // Way e os outros metodos que saem do site, porque nao ha cartao
+      // guardado para cobrar em 1 clique), a compra nascia solta: sem ligacao
+      // a compra principal nem ao passo do funil. A entrega so via esse
+      // produto e o funil nao sabia onde continuar.
+      parent_transaction_id,
+      flow_step_id,
     } = body;
 
     if (!payment_link_id || !currency || !customer_email) {
@@ -186,6 +193,33 @@ serve(async (req) => {
         JSON.stringify({ success: false, error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // A ligacao vem do navegador, por isso confirma-se aqui: a compra-mae tem
+    // de existir e estar paga, e o passo tem de existir no funil. Se nao
+    // conferir, grava-se sem ligacao em vez de apontar para o lado errado.
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    let paiValidado: string | null = null;
+    let passoValidado: string | null = null;
+
+    if (typeof parent_transaction_id === "string" && UUID.test(parent_transaction_id)) {
+      const { data: pai } = await supabaseAdmin
+        .from("transactions")
+        .select("id, status")
+        .eq("id", parent_transaction_id)
+        .maybeSingle();
+      if (pai && pai.status === "successful") paiValidado = pai.id;
+      else console.log("parent_transaction_id ignorado (inexistente ou nao pago):", parent_transaction_id);
+    }
+
+    if (typeof flow_step_id === "string" && UUID.test(flow_step_id)) {
+      const { data: passo } = await supabaseAdmin
+        .from("flow_steps")
+        .select("id")
+        .eq("id", flow_step_id)
+        .maybeSingle();
+      if (passo) passoValidado = passo.id;
+      else console.log("flow_step_id ignorado (inexistente):", flow_step_id);
     }
 
     // Fetch authoritative prices from database (never trust client amounts)
@@ -290,6 +324,8 @@ serve(async (req) => {
         bumps_accepted: bumpsAccepted,
         status: "pending",
         stripe_customer_id: stripeCustomerId || null,
+        parent_transaction_id: paiValidado,
+        flow_step_id: passoValidado,
       })
       .select("id")
       .single();

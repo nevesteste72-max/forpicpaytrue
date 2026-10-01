@@ -42,27 +42,86 @@ Deno.serve(async (req) => {
 
   const { data: tx } = await supabase
     .from("transactions")
-    .select("id, parent_transaction_id, status, customer_name")
+    .select("id, parent_transaction_id, status, customer_name, customer_email, customer_phone")
     .eq("id", txId)
     .maybeSingle();
 
   if (!tx) return json({ pago: false, erro: "compra nao encontrada" }, 404);
 
   const raiz = (tx as any).parent_transaction_id ?? (tx as any).id;
+  const COLUNAS = "id, payment_link_id, flow_step_id, bumps_accepted, status, created_at, access_revoked";
 
   const { data: cadeia } = await supabase
     .from("transactions")
-    .select("id, payment_link_id, flow_step_id, bumps_accepted, status, created_at")
+    .select(COLUNAS)
     .or(`id.eq.${raiz},parent_transaction_id.eq.${raiz}`)
     .eq("status", "successful")
     .order("created_at", { ascending: true });
 
-  if (!cadeia || cadeia.length === 0) {
+  // Rede de seguranca: juntar tambem o que este cliente pagou em compras que
+  // ficaram soltas. Um upsell pago por MB Way (ou outro metodo que sai do
+  // site) nasce sem ligacao a compra principal, e sem isto a pagina mostrava
+  // so esse produto — o cliente ficava sem o que ja tinha pago.
+  //
+  // Procura-se pelo email e pelo telefone. Os emails temporarios que o
+  // checkout cria antes de o cliente escrever o seu ficam de fora: sao
+  // partilhados e juntariam compras de pessoas diferentes.
+  const email = String((tx as any).customer_email ?? "").trim().toLowerCase();
+  const telefone = String((tx as any).customer_phone ?? "").replace(/\D/g, "");
+  const emailServe = email.includes("@") && !email.endsWith("@checkout.cashpay.co");
+  const telefoneServe = telefone.length >= 9;
+
+  const porCliente: unknown[] = [];
+
+  // O email identifica uma pessoa, por isso vale para todo o historico: quem
+  // comprou com este email tem direito a tudo o que comprou.
+  if (emailServe) {
+    const { data: outras } = await supabase
+      .from("transactions")
+      .select(COLUNAS)
+      .ilike("customer_email", email)
+      .eq("status", "successful")
+      .order("created_at", { ascending: true });
+    porCliente.push(...(outras ?? []));
+  }
+
+  // O telefone e um identificador mais fraco: ha numeros de casa partilhados e
+  // ha digitos trocados ao escrever. Por isso só vale dentro da mesma ida ao
+  // funil, que e o que precisamos para apanhar a compra solta do MB Way — um
+  // funil completa-se em minutos, nao em dias.
+  if (telefoneServe) {
+    const { data: ref } = await supabase
+      .from("transactions").select("created_at").eq("id", raiz).maybeSingle();
+    const base = new Date(String((ref as any)?.created_at ?? (tx as any).created_at ?? Date.now()));
+    const desde = new Date(base.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    const ate = new Date(base.getTime() + 24 * 60 * 60 * 1000).toISOString();
+    const { data: outras } = await supabase
+      .from("transactions")
+      .select(COLUNAS)
+      .ilike("customer_phone", `%${telefone.slice(-9)}`)
+      .eq("status", "successful")
+      .gte("created_at", desde)
+      .lte("created_at", ate)
+      .order("created_at", { ascending: true });
+    porCliente.push(...(outras ?? []));
+  }
+
+  // Uma compra por identificador, pela ordem em que foram feitas. Compras com
+  // o acesso retirado (devolucoes) ficam de fora.
+  const porId = new Map<string, any>();
+  for (const t of [...(cadeia ?? []), ...porCliente] as any[]) {
+    if (t?.access_revoked === true) continue;
+    porId.set(t.id, t);
+  }
+  const compras = [...porId.values()].sort((a, b) =>
+    String(a.created_at).localeCompare(String(b.created_at)));
+
+  if (compras.length === 0) {
     return json({ pago: false, erro: "ainda nao ha um pagamento confirmado para esta compra" }, 200);
   }
 
   // Qual o produto de cada transacao: num upsell e o checkout do passo do funil.
-  const passos = [...new Set(cadeia.map((c: any) => c.flow_step_id).filter(Boolean))];
+  const passos = [...new Set(compras.map((c: any) => c.flow_step_id).filter(Boolean))];
   const produtoDoPasso = new Map<string, string>();
   if (passos.length) {
     const { data: fs } = await supabase
@@ -76,7 +135,7 @@ Deno.serve(async (req) => {
     (t.flow_step_id && produtoDoPasso.get(t.flow_step_id)) || t.payment_link_id;
 
   // Dados dos produtos envolvidos (nome, capa e os bumps de cada um).
-  const idsProdutos = [...new Set(cadeia.map(produtoDe).filter(Boolean))];
+  const idsProdutos = [...new Set(compras.map(produtoDe).filter(Boolean))];
   const { data: produtos } = await supabase
     .from("payment_links")
     .select("id, product_name, logo_url, " +
@@ -104,7 +163,7 @@ Deno.serve(async (req) => {
   const itens: unknown[] = [];
   const vistos = new Set<string>();
 
-  for (const c of cadeia) {
+  for (const c of compras) {
     const t = c as any;
     const idProduto = produtoDe(t);
     const pl = produto.get(idProduto) ?? {};
@@ -134,8 +193,16 @@ Deno.serve(async (req) => {
 
     for (const d of ds ?? []) {
       const dd = d as any;
-      let href: string | null = null;
 
+      // Comparar pelo DESTINO do conteudo, e antes de assinar. Pelo endereco
+      // final nao dava: cada assinatura de um ficheiro gera um endereco novo,
+      // e o mesmo produto vendido a dois precos traz o mesmo conteudo com
+      // titulos diferentes — o cliente via o mesmo item duas vezes.
+      const destino = dd.storage_path || dd.external_url || "";
+      if (!destino || vistos.has(destino)) continue;
+      vistos.add(destino);
+
+      let href: string | null = null;
       if (dd.kind === "link" && dd.external_url) {
         href = dd.external_url;
       } else if (dd.kind === "file" && dd.storage_path) {
@@ -146,9 +213,6 @@ Deno.serve(async (req) => {
       if (!href) continue;
 
       const titulo = dd.caption || dd.filename || pl.product_name || "Conteúdo";
-      const chave = `${titulo}|${href}`;
-      if (vistos.has(chave)) continue;
-      vistos.add(chave);
 
       itens.push({
         titulo,
