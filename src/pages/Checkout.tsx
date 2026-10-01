@@ -984,7 +984,7 @@ export default function Checkout() {
     // PT Offer: +170 Planos de Refeições Flexíveis (Principal - 9,90 €)
     "d1700000-0000-4000-8000-000000000790": {
       id: "d1700000-0000-4000-8000-000000000790",
-      product_name: "+170 Planos de Refeições Flexíveis",
+      product_name: "Mais de 170 Planos de Refeições Flexíveis",
       product_description: "Mais de 170 opções de planos de refeições prontos, organizados por calorias. Fichas ilustradas para todas as refeições do dia e calculadora de IMC.",
       logo_url: "/produtos/170-cardapios.webp",
       amount: 9.90,
@@ -993,7 +993,7 @@ export default function Checkout() {
       redirect_url: "/desafio-24-dias/?link=d1700000-0000-4000-8000-000000000790",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay", "multibanco", "mbway"],
       facebook_pixel_id: "2125158571414054",
-      checkout_banner_url: "/produtos/170-cardapios.webp",
+      checkout_banner_url: "https://gbtlzwzmbgkcdkdnnbxg.supabase.co/storage/v1/object/public/payment-images/ab7b6d79-cce8-4539-9020-aa329abd1e9e/d1700000-0000-4000-8000-000000000790-banner-1790875024320-e9071f72-5748-4953-9baa-cfc7d078a19d.jpg",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,
@@ -1023,7 +1023,7 @@ export default function Checkout() {
     // PT Offer: +170 Planos de Refeições Flexíveis (Oferta de Saída / Back - 6,90 €)
     "d1700000-0000-4000-8000-000000000490": {
       id: "d1700000-0000-4000-8000-000000000490",
-      product_name: "+170 Planos de Refeições Flexíveis — Oferta Especial",
+      product_name: "Mais de 170 Planos de Refeições Flexíveis",
       product_description: "Desconto especial de saída. Leva o pack completo de +170 planos de refeições com 88% OFF.",
       logo_url: "/produtos/170-cardapios.webp",
       amount: 6.90,
@@ -1032,7 +1032,7 @@ export default function Checkout() {
       redirect_url: "/desafio-24-dias/?link=d1700000-0000-4000-8000-000000000490",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay", "multibanco", "mbway"],
       facebook_pixel_id: "2125158571414054",
-      checkout_banner_url: "/produtos/170-cardapios.webp",
+      checkout_banner_url: "https://gbtlzwzmbgkcdkdnnbxg.supabase.co/storage/v1/object/public/payment-images/ab7b6d79-cce8-4539-9020-aa329abd1e9e/d1700000-0000-4000-8000-000000000790-banner-1790875024320-e9071f72-5748-4953-9baa-cfc7d078a19d.jpg",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,
@@ -1140,10 +1140,10 @@ export default function Checkout() {
     // PT Checkout: 155 Receitas Fitness (Principal - 9,90 €)
     "d1700000-0000-4000-8000-000000000f17": {
       id: "d1700000-0000-4000-8000-000000000f17",
-      product_name: "155 Receitas Fitness Práticas",
+      product_name: "155 Receitas Fitness",
       product_description: "155 receitas fitness organizadas por refeição com valores nutricionais calculados.",
       logo_url: "/produtos/155-receitas-fitness.png",
-      amount: 9.90,
+      amount: 17.90,
       currency: "EUR",
       checkout_language: "pt",
       redirect_url: "/exercicios-de-treinos-em-casa/",
@@ -1179,10 +1179,10 @@ export default function Checkout() {
     // PT Checkout: 155 Receitas Fitness (Oferta de Saída / Back - 6,90 €)
     "d1700000-0000-4000-8000-000000000f11": {
       id: "d1700000-0000-4000-8000-000000000f11",
-      product_name: "155 Receitas Fitness Práticas — Oferta de Saída",
+      product_name: "155 Receitas Fitness (com desconto)",
       product_description: "155 receitas fitness com desconto especial de saída por 6,90 €.",
       logo_url: "/produtos/155-receitas-fitness.png",
-      amount: 6.90,
+      amount: 11.90,
       currency: "EUR",
       checkout_language: "pt",
       redirect_url: "/exercicios-de-treinos-em-casa/",
@@ -1530,16 +1530,6 @@ export default function Checkout() {
   const fetchLink = async (attempt = 0) => {
     try {
       const parentLink = searchParams.get("parent_link");
-      if (linkId && FALLBACK_PAYMENT_LINKS[linkId]) {
-        const fallback = { ...FALLBACK_PAYMENT_LINKS[linkId] };
-        if ((linkId === "e1919191-1919-4919-8919-191919191919" || linkId.startsWith("e1919191")) && parentLink) {
-          fallback.redirect_url = `/thank-you/${parentLink}`;
-        }
-        setLink(fallback);
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase
         .from("payment_links")
         .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, order_bump_4_name, order_bump_4_description, order_bump_4_price, order_bump_4_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, show_discreet_billing, price_anchor, checkout_accent_color")
