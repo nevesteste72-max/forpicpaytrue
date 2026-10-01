@@ -1843,10 +1843,10 @@ export default function Checkout() {
                           <div className="mt-2.5 space-y-1">
                             <div className="flex items-baseline justify-center sm:justify-start gap-2.5">
                               <span className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                                {formatMoney(stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * Number(link.amount)) : Number(link.amount), stripeChargeCurrency || currencySymbol, locale)}
+                                {formatMoney(Number(link.amount), stripeChargeCurrency || currencySymbol, locale)}
                               </span>
                               <span className="text-sm text-muted-foreground line-through decoration-destructive/60">
-                                {formatMoney(stripeChargeAmount ? (stripeChargeAmount / (totalAmount > 0 ? totalAmount : 1) * originalAnchor) : originalAnchor, stripeChargeCurrency || currencySymbol, locale)}
+                                {formatMoney(originalAnchor, stripeChargeCurrency || currencySymbol, locale)}
                               </span>
                               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
                                 {lang === "en" ? `Save ${discountPercent}%` : lang === "fr" ? `Économisez ${discountPercent}%` : lang === "es" ? `Ahorro del ${discountPercent}%` : `Poupa ${discountPercent}%`}
