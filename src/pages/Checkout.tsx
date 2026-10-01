@@ -168,6 +168,7 @@ interface PaymentLink {
   recovery_redirect_url?: string | null;
   show_trust_badges?: boolean;
   show_discreet_billing?: boolean;
+  price_anchor?: number | null;
 }
 
 type PaymentState = "form" | "processing" | "pending" | "success" | "failed";
@@ -1269,7 +1270,7 @@ export default function Checkout() {
 
       const { data, error } = await supabase
         .from("payment_links")
-        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, show_discreet_billing, checkout_accent_color")
+        .select("id, product_name, product_description, logo_url, amount, order_bump_name, order_bump_description, order_bump_price, order_bump_image_url, order_bump_2_name, order_bump_2_description, order_bump_2_price, order_bump_2_image_url, order_bump_3_name, order_bump_3_description, order_bump_3_price, order_bump_3_image_url, redirect_url, currency, checkout_language, stripe_payment_methods, facebook_pixel_id, checkout_banner_url, checkout_timer_minutes, recovery_enabled, recovery_discount_percent, recovery_headline, recovery_message, recovery_cta_text, recovery_redirect_url, show_trust_badges, show_discreet_billing, price_anchor, checkout_accent_color")
         .eq("id", linkId)
         .eq("is_active", true)
         .maybeSingle();
@@ -1781,8 +1782,13 @@ export default function Checkout() {
               // Air Fryer (R597) -> Was R1,199 (Save 50%)
               // Cookware (R597) -> Was R1,199 (Save 50%)
               // Smeg (R697) -> Was R1,399 (Save 50%)
-              let originalAnchor = Number(link.amount) * 9.8;
-              let discountPercent = 89;
+              // Ancora definida no produto. Sem ela, mantem-se o calculo antigo.
+              let originalAnchor = link.price_anchor
+                ? Number(link.price_anchor)
+                : Number(link.amount) * 9.8;
+              let discountPercent = originalAnchor > Number(link.amount)
+                ? Math.round((originalAnchor - Number(link.amount)) / originalAnchor * 100)
+                : 0;
 
               if (isPhysical) {
                 if (link.id === "a8792aa8-070c-45c8-a21e-815fdd01b88d" || link.product_name?.toLowerCase().includes("cleaner") || link.product_name?.toLowerCase().includes("carpet")) {
