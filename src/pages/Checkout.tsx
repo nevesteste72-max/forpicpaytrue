@@ -1897,7 +1897,7 @@ export default function Checkout() {
                 return (
                 <Elements stripe={stripeInstance} options={stripeOptions}>
                   <StripeCheckoutForm
-                    totalAmount={stripeChargeAmount || totalAmount}
+                    totalAmount={totalAmount}
                     currency={stripeChargeCurrency || currencySymbol}
                     lang={lang}
                     transactionId={stripeTransactionId || ""}
