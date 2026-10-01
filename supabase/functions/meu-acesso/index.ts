@@ -223,9 +223,21 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Referencia curta da compra, para o cliente a poder citar no apoio.
+  const referencia = BigInt("0x" + String(txId).replace(/-/g, "").slice(0, 16))
+    .toString(36).toUpperCase().slice(0, 12);
+
+  // O telefone e obrigatorio no checkout; o email e o que a pessoa escreveu.
+  // Os emails temporarios que o checkout cria antes de ela escrever o seu nao
+  // sao para mostrar.
+  const emailMostravel = emailServe ? (tx as any).customer_email : null;
+
   return json({
     pago: true,
     nome: (tx as any).customer_name ?? null,
+    email: emailMostravel,
+    telefone: (tx as any).customer_phone || null,
+    referencia,
     total: itens.length,
     itens,
   });

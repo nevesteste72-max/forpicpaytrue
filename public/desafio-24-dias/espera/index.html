@@ -333,7 +333,7 @@
       });
       var decline = document.querySelector("[data-decline]");
       // Levar a referencia da compra, senao a pagina de acesso abre vazia.
-      if (decline) decline.href = tx ? "/acesso?cashpay_tx=" + encodeURIComponent(tx) : "/acesso";
+      if (decline) decline.href = tx ? "/obrigado?cashpay_tx=" + encodeURIComponent(tx) : "/obrigado";
     })();
   </script>
 </body>

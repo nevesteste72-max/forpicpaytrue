@@ -432,7 +432,7 @@
         a.href = tx ? "/upsell/" + step + "?tx=" + encodeURIComponent(tx) + "&link=" + encodeURIComponent(link || (exitFlow ? "d1700000-0000-4000-8000-000000000490" : "d1700000-0000-4000-8000-000000000790")) + "&auto=1" : "/pay/" + checkout;
       });
       var decline = document.querySelector("[data-decline]");
-      if (decline) decline.href = tx ? "/desafio-24-dias/espera/" + params : "/acesso";
+      if (decline) decline.href = tx ? "/desafio-24-dias/espera/" + params : "/obrigado";
     })();
   </script>
 </body>

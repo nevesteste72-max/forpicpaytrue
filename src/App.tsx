@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Checkout from "./pages/Checkout";
 import UpsellPage from "./pages/UpsellPage";
 import ThankYouPage from "./pages/ThankYouPage";
+import Obrigado from "./pages/Obrigado";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import NotFound from "./pages/NotFound";
 import RefundRequest from "./pages/RefundRequest";
@@ -42,6 +43,10 @@ const App = () => (
           <Route path="/telecharger/:linkId" element={<DownloadHubFR />} />
           <Route path="/offre-boulangerie" element={<UpsellBoulangerie />} />
           <Route path="/offre-pains-express" element={<DownsellPainsExpress />} />
+          {/* Fim do funil portugues: confirma a compra e encaminha para os
+              conteudos. A /thank-you e a dos produtos fisicos da Africa do Sul. */}
+          <Route path="/obrigado" element={<Obrigado />} />
+          <Route path="/obrigado/:transactionId" element={<Obrigado />} />
           <Route path="/acesso" element={<Acesso />} />
           <Route path="/acesso/:transactionId" element={<Acesso />} />
           <Route path="/vault" element={<Vault />} />
