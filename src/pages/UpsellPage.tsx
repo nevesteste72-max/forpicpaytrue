@@ -57,7 +57,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/receitas-fitness/?link=d1700000-0000-4000-8000-000000000790",
+    accept_redirect_url: "/acesso",
     decline_redirect_url: "/desafio-24-dias/espera/?link=d1700000-0000-4000-8000-000000000790",
     payment_link_id: "d1700000-0000-4000-8000-000000000790",
     checkout_link_id: "d1700000-0000-4000-8000-000000000024",
@@ -80,7 +80,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "downsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/receitas-fitness/?link=d1700000-0000-4000-8000-000000000790",
+    accept_redirect_url: "/acesso",
     decline_redirect_url: "/acesso",
     payment_link_id: "d1700000-0000-4000-8000-000000000790",
     checkout_link_id: "d1700000-0000-4000-8000-000000000624",
@@ -103,7 +103,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/receitas-fitness/?link=d1700000-0000-4000-8000-000000000490",
+    accept_redirect_url: "/acesso",
     decline_redirect_url: "/desafio-24-dias/espera/?link=d1700000-0000-4000-8000-000000000490",
     payment_link_id: "d1700000-0000-4000-8000-000000000490",
     checkout_link_id: "d1700000-0000-4000-8000-000000000024",
@@ -126,7 +126,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "downsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/receitas-fitness/?link=d1700000-0000-4000-8000-000000000490",
+    accept_redirect_url: "/acesso",
     decline_redirect_url: "/acesso",
     payment_link_id: "d1700000-0000-4000-8000-000000000490",
     checkout_link_id: "d1700000-0000-4000-8000-000000000624",
@@ -149,7 +149,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/exercicios-de-treinos-em-casa/",
+    accept_redirect_url: "/desafio-24-dias/",
     decline_redirect_url: "/receitas-fitness/espera/?link=d1700000-0000-4000-8000-000000000790",
     payment_link_id: "d1700000-0000-4000-8000-000000000790",
     checkout_link_id: "d1700000-0000-4000-8000-000000000f17",
@@ -172,7 +172,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "downsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/exercicios-de-treinos-em-casa/",
+    accept_redirect_url: "/desafio-24-dias/",
     decline_redirect_url: "/acesso",
     payment_link_id: "d1700000-0000-4000-8000-000000000790",
     checkout_link_id: "d1700000-0000-4000-8000-000000000f11",
@@ -195,7 +195,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "upsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/exercicios-de-treinos-em-casa/",
+    accept_redirect_url: "/desafio-24-dias/",
     decline_redirect_url: "/receitas-fitness/espera/?link=d1700000-0000-4000-8000-000000000490",
     payment_link_id: "d1700000-0000-4000-8000-000000000490",
     checkout_link_id: "d1700000-0000-4000-8000-000000000f17",
@@ -218,7 +218,7 @@ const FALLBACK_STEPS: Record<string, FlowStep> = {
     step_type: "downsell",
     accept_step_id: null,
     decline_step_id: null,
-    accept_redirect_url: "/exercicios-de-treinos-em-casa/",
+    accept_redirect_url: "/desafio-24-dias/",
     decline_redirect_url: "/acesso",
     payment_link_id: "d1700000-0000-4000-8000-000000000490",
     checkout_link_id: "d1700000-0000-4000-8000-000000000f11",
@@ -465,13 +465,6 @@ export default function UpsellPage() {
 
   const fetchStep = async () => {
     try {
-      if (stepId && FALLBACK_STEPS[stepId]) {
-        setStep(FALLBACK_STEPS[stepId]);
-        setCurrency("ZAR");
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase
         .from("flow_steps")
         .select("*")
@@ -479,6 +472,17 @@ export default function UpsellPage() {
         .maybeSingle();
 
       if (error || !data) {
+        // Sem registo na base de dados: usar a copia local deste passo.
+        // Os passos portugueses comecam por e1700000 e sao em euros; os
+        // restantes sao do funil da Africa do Sul, em rands.
+        if (stepId && FALLBACK_STEPS[stepId]) {
+          const ePortugues = stepId.startsWith("e1700000");
+          setStep(FALLBACK_STEPS[stepId]);
+          setCurrency(ePortugues ? "EUR" : "ZAR");
+          setIdioma(ePortugues ? "pt" : "en");
+          return;
+        }
+
         const isPhysicalLink = (linkId && (
           linkId === "9a3b936a-9b0f-48b6-9744-3a6a81fd2b34" ||
           linkId === "4b585d8e-6df4-4019-8ca0-2a32b8e68844" ||
