@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderBump } from "@/components/checkout/OrderBump";
 import { RecoveryPopup, useExitIntent } from "@/components/checkout/RecoveryPopup";
 import { StripeCheckoutForm } from "@/components/checkout/StripeCheckoutForm";
+import { PHONE_PREFIXES } from "@/components/checkout/StripeCheckoutForm";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { useUtmifyScript, getStoredTracking } from "@/hooks/useUtmifyScript";
 import {
@@ -382,6 +383,28 @@ const COUNTRY_CODE_TO_PREFIX: Record<string, string> = {
   ZA: "+27",
 };
 
+/**
+ * Um telefone guardado vem completo ("+351935997415"), mas o campo do checkout
+ * tem o indicativo num seletor a parte. Metido inteiro, ficava o "+351" duas
+ * vezes e o numero saia invalido — o pagamento falhava e a pessoa nao percebia
+ * porque. Aqui separa-se o indicativo do resto.
+ */
+function separarIndicativo(completo: string): { indicativo: string | null; numero: string } {
+  const limpo = String(completo || "").replace(/[^\d+]/g, "");
+  if (!limpo) return { indicativo: null, numero: "" };
+  const comMais = limpo.startsWith("+") ? limpo : "+" + limpo;
+  // Do indicativo mais longo para o mais curto: senao o "+2" apanhava o "+258".
+  const ordenados = [...PHONE_PREFIXES].sort((a, b) => b.code.length - a.code.length);
+  for (const p of ordenados) {
+    if (comMais.startsWith(p.code)) {
+      const resto = comMais.slice(p.code.length);
+      // So vale se sobrar um numero de telefone plausivel.
+      if (resto.length >= 6) return { indicativo: p.code, numero: resto };
+    }
+  }
+  return { indicativo: null, numero: limpo.replace(/^\+/, "") };
+}
+
 export default function Checkout() {
   const { linkId } = useParams<{ linkId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -414,7 +437,11 @@ export default function Checkout() {
     const qPhone = searchParams.get("phone");
     if (qName) setCustomerName(prev => prev || qName);
     if (qEmail) setEmail(prev => prev || qEmail);
-    if (qPhone) setPhone(prev => prev || qPhone);
+    if (qPhone) {
+      const { indicativo, numero } = separarIndicativo(qPhone);
+      if (indicativo) setPhonePrefix(indicativo);
+      setPhone(prev => prev || numero);
+    }
   }, [searchParams]);
 
   // Quem ja comprou nao devia ter de escrever tudo outra vez. Sem cartao
@@ -436,7 +463,11 @@ export default function Checkout() {
         if (cancelado) return;
         if (d?.nome) setCustomerName(prev => prev || d.nome);
         if (d?.email) setEmail(prev => prev || d.email);
-        if (d?.telefone) setPhone(prev => prev || d.telefone);
+        if (d?.telefone) {
+          const { indicativo, numero } = separarIndicativo(d.telefone);
+          if (indicativo) setPhonePrefix(indicativo);
+          setPhone(prev => prev || numero);
+        }
       } catch {
         // Sem isto o checkout continua a funcionar, so vazio.
       }

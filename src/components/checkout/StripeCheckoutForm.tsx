@@ -21,7 +21,7 @@ interface TrackingParams {
   utm_term?: string | null;
 }
 
-const PHONE_PREFIXES = [
+export const PHONE_PREFIXES = [
   // África do Sul / Moçambique (ZAR)
   { code: "+27", country: "🇿🇦 ZA", maxLen: 9 },
   { code: "+258", country: "🇲🇿 MZ", maxLen: 9 },
