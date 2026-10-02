@@ -437,15 +437,25 @@ export function StripeCheckoutForm({
               name: "Reconquista Inversa",
             },
             wallets: { applePay: "never", googlePay: "never", link: "never" },
+            // Ordem pensada para Portugal, que e o mercado activo. O Stripe
+            // mostra so os metodos que a conta tem activos e que servem para a
+            // moeda e o valor; os que nao servem sao saltados em silencio, por
+            // isso ter aqui o bizum (Espanha) ou o oxxo (Mexico) nao atrapalha
+            // um comprador portugues — so nao devem vir a frente dos locais.
+            //
+            // Primeiro os imediatos: cartao, MB Way e Revolut. O multibanco
+            // vem depois de proposito: gera uma referencia para pagar mais
+            // tarde, e ate ela ser paga nao ha entrega nenhuma.
             paymentMethodOrder: [
               "card",
               "mb_way",
+              "revolut_pay",
+              "multibanco",
               "bizum",
               "oxxo",
               "amazon_pay",
               "klarna",
               "paypal",
-              "multibanco",
             ],
             // We already collect name/email/phone above and pass them in confirmParams,
             // so don't re-ask those. Address stays "auto" so methods that require it
