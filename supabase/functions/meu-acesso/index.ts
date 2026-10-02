@@ -121,11 +121,15 @@ Deno.serve(async (req) => {
     porCliente.push(...(outras ?? []));
   }
 
-  // Uma compra por identificador, pela ordem em que foram feitas. Compras com
-  // o acesso retirado (devolucoes) ficam de fora.
+  // Uma compra por identificador, pela ordem em que foram feitas.
+  //
+  // NAO se filtra aqui por access_revoked. Essa marca existe na tabela e tem um
+  // botao no painel, mas nunca foi respeitada na entrega — e 51 das 60 compras
+  // pagas estao marcadas, incluindo compras de teste feitas minutos antes. Pos-
+  // la a valer cortou o acesso a toda a gente de uma vez. Enquanto nao se souber
+  // quais sao devolucoes a serio, a entrega nao se guia por ela.
   const porId = new Map<string, any>();
   for (const t of [...(cadeia ?? []), ...porCliente] as any[]) {
-    if (t?.access_revoked === true) continue;
     porId.set(t.id, t);
   }
   const compras = [...porId.values()].sort((a, b) =>
