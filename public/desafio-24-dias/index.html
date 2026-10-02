@@ -366,6 +366,11 @@ n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,
 'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init','1110415468003004');fbq('track','PageView');</script>
+<!-- UTMify: tem de arrancar na pagina onde o anuncio aterra. Estava so nas
+     paginas feitas em React (checkout, upsell, obrigado), por isso a visita so
+     comecava a ser medida a partir do checkout e perdia-se a origem do clique. -->
+<script src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+        data-utmify-prevent-xcod-sck data-utmify-prevent-subids async defer></script>
 </head>
 <body>
   <div class="top">OFERTA COMPLEMENTAR À TUA COMPRA</div>

@@ -12,6 +12,11 @@ n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,
 'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init','1110415468003004');fbq('track','PageView');</script>
+<!-- UTMify: tem de arrancar na pagina onde o anuncio aterra. Estava so nas
+     paginas feitas em React (checkout, upsell, obrigado), por isso a visita so
+     comecava a ser medida a partir do checkout e perdia-se a origem do clique. -->
+<script src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+        data-utmify-prevent-xcod-sck data-utmify-prevent-subids async defer></script>
 </head> <body> <div class="text-foreground min-h-screen">  <section class="odd:bg-surface-alt even:bg-surface pt-4 pb-4"> <div class="mx-auto w-full max-w-7xl flex flex-col lg:flex-row items-center justify-between gap-4 p-4"> <div class="lg:w-1/2"> <div class="flex items-center justify-center"> <div class="bg-primary text-surface px-6 py-2 rounded-full text-sm font-semibold mb-6 inline-block">
 OFERTA ESPECIAL - 83% DE DESCONTO
 </div> </div> <!-- Main heading --> <h1 class="text-2xl lg:text-3xl font-bold mb-6 text-center">
