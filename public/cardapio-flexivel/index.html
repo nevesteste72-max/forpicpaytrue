@@ -126,4 +126,17 @@ Tira as tuas dúvidas sobre o produto
 })();
 </script>
 
+<script>
+/* O anuncio traz a marcacao no endereco (utm_*, fbclid, src, sck). O botao de
+   compra e um link fixo para o checkout, por isso essa marcacao perdia-se no
+   clique: a venda chegava sem se saber que criativo a trouxe. Aqui segue para
+   o checkout, que ja a sabe ler e guardar na compra. */
+(function () {
+  var q = location.search;
+  if (!q || q.length < 2) return;
+  Array.prototype.forEach.call(document.querySelectorAll('a[href*="/pay/"]'), function (a) {
+    a.href += (a.href.indexOf("?") === -1 ? "?" : "&") + q.slice(1);
+  });
+})();
+</script>
 </body> </html>
