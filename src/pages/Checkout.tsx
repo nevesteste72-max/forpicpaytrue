@@ -799,7 +799,7 @@ export default function Checkout() {
         try {
           localStorage.setItem(
             "pending_purchase",
-            JSON.stringify({ txid: result.transaction_id, value: totalAmount, currency: link.currency })
+            JSON.stringify({ txid: result.transaction_id, pi: piId, value: totalAmount, currency: link.currency })
           );
         } catch { /* ignore */ }
       } else {
@@ -901,17 +901,26 @@ export default function Checkout() {
     if (!redirectStatus) return;
 
     let txid: string | undefined;
+    let pendingPi: string | undefined;
     let pendingValue: number | undefined;
     let pendingCurrency: string | undefined;
     try {
       const raw = localStorage.getItem("pending_purchase");
       if (raw) {
-        const p = JSON.parse(raw) as { txid?: string; value?: number; currency?: string };
+        const p = JSON.parse(raw) as { txid?: string; pi?: string; value?: number; currency?: string };
         txid = p.txid;
+        pendingPi = p.pi;
         pendingValue = p.value;
         pendingCurrency = p.currency;
       }
     } catch { /* ignore */ }
+
+    // O pagamento que vem no endereco tem de ser o desta compra. Se for outro,
+    // e um restante de um passo anterior do funil: nao se confirma nada com ele.
+    if (pendingPi && paymentIntentId && paymentIntentId !== pendingPi) {
+      console.warn("Pagamento no endereco nao e o desta compra; ignorado.", paymentIntentId);
+      return;
+    }
 
     if (!txid) {
       // No transaction to verify against — do not assume success.
@@ -1143,7 +1152,7 @@ export default function Checkout() {
       redirect_url: "/receitas-fitness/?link=d1700000-0000-4000-8000-000000000790",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay", "multibanco", "mbway"],
       facebook_pixel_id: "2125158571414054",
-      checkout_banner_url: "/desafio-24-dias/assets/desafio-24-dias-hero.png",
+      checkout_banner_url: "/produtos/banner-desafio-24-dias.webp",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,
@@ -1182,7 +1191,7 @@ export default function Checkout() {
       redirect_url: "/receitas-fitness/?link=d1700000-0000-4000-8000-000000000490",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay", "multibanco", "mbway"],
       facebook_pixel_id: "2125158571414054",
-      checkout_banner_url: "/desafio-24-dias/assets/desafio-24-dias-hero.png",
+      checkout_banner_url: "/produtos/banner-desafio-24-dias.webp",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,
@@ -1221,7 +1230,7 @@ export default function Checkout() {
       redirect_url: "/exercicios-de-treinos-em-casa/",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay", "multibanco", "mbway"],
       facebook_pixel_id: "2125158571414054",
-      checkout_banner_url: "/produtos/155-receitas-fitness.webp",
+      checkout_banner_url: "/produtos/banner-155-receitas.webp",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,
@@ -1260,7 +1269,7 @@ export default function Checkout() {
       redirect_url: "/exercicios-de-treinos-em-casa/",
       stripe_payment_methods: ["card", "link", "google_pay", "apple_pay", "multibanco", "mbway"],
       facebook_pixel_id: "2125158571414054",
-      checkout_banner_url: "/produtos/155-receitas-fitness.webp",
+      checkout_banner_url: "/produtos/banner-155-receitas.webp",
       checkout_timer_minutes: 15,
       recovery_enabled: false,
       recovery_discount_percent: null,
@@ -2082,7 +2091,7 @@ export default function Checkout() {
              <img
                 src={link.checkout_banner_url}
                 alt="Banner"
-                className="w-full"
+                className="w-full max-h-[220px] object-cover"
               />
             )}
 
@@ -2334,7 +2343,7 @@ export default function Checkout() {
              <img
                 src={link.checkout_banner_url}
                 alt="Banner"
-                className="w-full"
+                className="w-full max-h-[220px] object-cover"
               />
             )}
 

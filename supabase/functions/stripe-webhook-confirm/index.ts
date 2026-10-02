@@ -365,6 +365,27 @@ serve(async (req) => {
         const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
         const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
 
+        // O pagamento tem de ser DESTA compra. Sem esta verificacao bastava um
+        // pagamento bem sucedido para dar por paga qualquer outra compra: quem
+        // pagasse o produto mais barato reaproveitava o mesmo pagamento e
+        // levava o resto de graca. Aconteceu num teste real — uma compra de
+        // 6,90 EUR marcou tambem como paga uma de 17,90 EUR, pelo mesmo
+        // PaymentIntent.
+        //
+        // Quem cria o pagamento grava sempre o identificador da compra na
+        // metadata (create-stripe-payment e one-click-upsell), e a atualizacao
+        // do valor preserva-o. Se nao corresponder, nao se confirma nada.
+        const compraDoPagamento = pi.metadata?.transaction_id;
+        if (compraDoPagamento && compraDoPagamento !== transaction_id) {
+          console.error(
+            `[CONFIRM] recusado: o pagamento ${payment_intent_id} pertence a ${compraDoPagamento}, nao a ${transaction_id}`,
+          );
+          return new Response(
+            JSON.stringify({ success: false, error: "payment does not belong to this transaction" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
         // Derive status ONLY from Stripe's authoritative PaymentIntent state.
         if (pi.status === "succeeded") resolvedStatus = "successful";
         else if (pi.status === "canceled" || pi.status === "requires_payment_method") resolvedStatus = "failed";
