@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Loader2, CheckCircle2, Phone, Mail, Receipt, ArrowRight, AlertCircle } from "lucide-react";
-import { guardarUltimaCompra, lerUltimaCompra } from "@/lib/ultimaCompra";
+import { guardarUltimaCompra } from "@/lib/ultimaCompra";
 
 /**
  * Fim do funil: confirma a compra e encaminha para os conteúdos.
@@ -36,7 +36,14 @@ export default function Obrigado() {
     params.get("tx") ||
     "";
 
-  const tx = txDoEndereco || lerUltimaCompra();
+  // SO a referencia que vem no endereco. Esta pagina confirma uma compra que
+  // acabou de acontecer; se nao ha referencia, nao ha nada a confirmar.
+  //
+  // Havia aqui a compra guardada no navegador, como na pagina de acesso. Mas
+  // ali faz sentido — serve para o cliente voltar ao que comprou — e aqui nao:
+  // mostrava os dados de uma compra antiga a quem acabou de chegar, e num
+  // computador partilhado a pessoa seguinte via o email da anterior.
+  const tx = txDoEndereco;
 
   const [carregando, setCarregando] = useState(true);
   const [dados, setDados] = useState<Dados | null>(null);
