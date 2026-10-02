@@ -384,7 +384,7 @@ const COUNTRY_CODE_TO_PREFIX: Record<string, string> = {
 
 export default function Checkout() {
   const { linkId } = useParams<{ linkId: string }>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -740,6 +740,14 @@ export default function Checkout() {
   // (geoChecked) on USD products so the intent is created with the right
   // currency from the start, instead of in USD and switched later.
   useEffect(() => {
+    // A voltar de um pagamento que saiu do site (Revolut, MB Way, Multibanco),
+    // o Stripe devolve o pagamento no endereco. Nao se cria outro: criava-se
+    // uma compra nova, por pagar, e era dessa que o ecra passava a falar —
+    // ficava em "pendente" ao lado da venda que ja tinha entrado. Era tambem a
+    // origem das compras pendentes com email temporario que se iam somando.
+    const aVoltarDeUmPagamento = Boolean(searchParams.get("redirect_status"));
+    if (aVoltarDeUmPagamento) return;
+
     if (isStripe && link && !clientSecret && !stripeLoading && stripeInstance && geoChecked) {
       createStripePaymentIntent();
     }
@@ -1845,7 +1853,18 @@ export default function Checkout() {
   const resetForm = async () => {
     setPhoneError("");
     setErrorMessage("");
-    setBumpsAccepted([false, false, false]);
+    // Sao quatro lugares de bump desde que o produto principal passou a poder
+    // oferecer um quarto; com tres, o quarto ficava por definir depois de uma
+    // tentativa falhada.
+    setBumpsAccepted([false, false, false, false]);
+
+    // Limpar o que o Stripe deixou no endereco ao voltar do pagamento. Enquanto
+    // la estiver, a pagina nao cria outro pagamento — e sem isso o botao de
+    // tentar novamente ficava sem forma de pagar.
+    const limpos = new URLSearchParams(searchParams);
+    ["redirect_status", "payment_intent", "payment_intent_client_secret", "source_redirect_slug"]
+      .forEach((k) => limpos.delete(k));
+    setSearchParams(limpos, { replace: true });
     setDebitoReference(null);
     setInternalTxId(null);
     setCheckoutStep(1);
