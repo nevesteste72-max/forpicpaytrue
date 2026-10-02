@@ -928,6 +928,7 @@ export default function Checkout() {
     }
 
     setPaymentState("processing");
+    let cancelarEspera = () => {};
 
     // A Revolut e o MB Way liquidam de forma assincrona: quando o navegador
     // volta, o Stripe muitas vezes ainda nao tem o pagamento fechado, e o
@@ -959,13 +960,33 @@ export default function Checkout() {
       return await res.json();
     };
 
+    // Enquanto nao houver resposta definitiva, continua a perguntar sozinho.
+    // A Revolut pode demorar minutos a fechar o pagamento do lado dela; sem
+    // isto o cliente ficava num ecra de espera e so sabia se actualizasse a
+    // pagina. Assim, mal o pagamento entre, o funil avanca por si.
+    let parado = false;
+    cancelarEspera = () => { parado = true; };
+
+    const PASSOS_RAPIDOS = 5;      // 5 x 3s  — cobre o caso normal
+    const PASSOS_LENTOS = 36;      // 36 x 5s — cobre ate 3 minutos de Revolut
+
     (async () => {
       try {
         let result = await perguntarAoServidor();
-        for (let tentativa = 0; tentativa < 5 && result?.status !== "successful"; tentativa++) {
+        for (let i = 0; i < PASSOS_RAPIDOS && !parado && result?.status !== "successful" && result?.status !== "failed"; i++) {
           await new Promise((r) => setTimeout(r, 3000));
           result = await perguntarAoServidor();
         }
+        // Ainda sem resposta: mostrar "por confirmar" e continuar a tentar em
+        // segundo plano, em vez de deixar a pessoa a olhar para o ecra.
+        if (!parado && result?.status !== "successful" && result?.status !== "failed") {
+          setPaymentState("pending");
+          for (let i = 0; i < PASSOS_LENTOS && !parado && result?.status !== "successful" && result?.status !== "failed"; i++) {
+            await new Promise((r) => setTimeout(r, 5000));
+            result = await perguntarAoServidor();
+          }
+        }
+        if (parado) return;
         if (result.status === "successful") {
           try { localStorage.removeItem("pending_purchase"); } catch { /* ignore */ }
           // Fire the browser Purchase now — the browser carries fbc/fbp
@@ -1005,6 +1026,8 @@ export default function Checkout() {
         setPaymentState("pending");
       }
     })();
+
+    return () => { cancelarEspera(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
