@@ -31,13 +31,13 @@ function resolveItemImage(item: Item): string | null {
     return "/produtos/receitas-de-bolos-sem-acucar.webp";
   }
   if (t.includes("170 planos")) {
-    return "/produtos/170-cardapios.webp";
+    return "/produtos/capa-170-planos.webp";
   }
   if (t.includes("desafio 24 dias")) {
-    return "/desafio-24-dias/assets/desafio-24-dias-hero.png";
+    return "/produtos/capa-desafio-24-dias.webp";
   }
   if (t.includes("155 receitas") || t.includes("150 receitas fitness")) {
-    return "/produtos/155-receitas-fitness.webp";
+    return "/produtos/capa-155-receitas.webp";
   }
   return item.imagem;
 }
