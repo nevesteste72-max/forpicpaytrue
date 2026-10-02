@@ -757,7 +757,7 @@ export default function Checkout() {
     // again and the retry button hangs forever waiting for a clientSecret that
     // is never (re)created.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isStripe, link?.id, stripeInstance, geoChecked, clientSecret]);
+  }, [isStripe, link?.id, stripeInstance, geoChecked, clientSecret, searchParams]);
 
   // Create PaymentIntent
   const createStripePaymentIntent = async () => {
