@@ -416,6 +416,33 @@ export default function Checkout() {
     if (qEmail) setEmail(prev => prev || qEmail);
     if (qPhone) setPhone(prev => prev || qPhone);
   }, [searchParams]);
+
+  // Quem ja comprou nao devia ter de escrever tudo outra vez. Sem cartao
+  // guardado — MB Way e os outros metodos que saem do site — o upsell e pago
+  // num checkout normal, e os dados nem sempre viajam no endereco: quando se
+  // vem de uma pagina de vendas so viaja a referencia da compra. Entao vai-se
+  // busca-los a essa compra. So preenche campos vazios, para nunca apagar o
+  // que a pessoa ja escreveu.
+  useEffect(() => {
+    const parentTx = searchParams.get("parent_tx");
+    if (!parentTx) return;
+    let cancelado = false;
+    (async () => {
+      try {
+        const r = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/meu-acesso?contacto=1&tx=${encodeURIComponent(parentTx)}`,
+        );
+        const d = await r.json();
+        if (cancelado) return;
+        if (d?.nome) setCustomerName(prev => prev || d.nome);
+        if (d?.email) setEmail(prev => prev || d.email);
+        if (d?.telefone) setPhone(prev => prev || d.telefone);
+      } catch {
+        // Sem isto o checkout continua a funcionar, so vazio.
+      }
+    })();
+    return () => { cancelado = true; };
+  }, [searchParams]);
   const [phoneError, setPhoneError] = useState("");
   const [paymentState, setPaymentState] = useState<PaymentState>("form");
   const [errorMessage, setErrorMessage] = useState("");

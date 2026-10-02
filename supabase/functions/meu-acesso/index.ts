@@ -48,6 +48,26 @@ Deno.serve(async (req) => {
 
   if (!tx) return json({ pago: false, erro: "compra nao encontrada" }, 404);
 
+  const email = String((tx as any).customer_email ?? "").trim().toLowerCase();
+  const telefone = String((tx as any).customer_phone ?? "").replace(/\D/g, "");
+  // Os emails temporarios que o checkout cria antes de o cliente escrever o
+  // seu nao sao dele: nao se mostram nem se reaproveitam.
+  const emailServe = email.includes("@") && !email.endsWith("@checkout.cashpay.co");
+  const telefoneServe = telefone.length >= 9;
+
+  // Pedido leve, so com os dados de contacto. Serve para o checkout de um
+  // upsell ja aparecer preenchido a quem acabou de comprar: sem cartao
+  // guardado (MB Way e os outros metodos que saem do site) a pessoa cai num
+  // checkout normal, e obriga-la a escrever tudo outra vez perde vendas.
+  // Nao se devolve nada da compra em si, so o que ela ja escreveu.
+  if (url.searchParams.get("contacto") === "1") {
+    return json({
+      nome: (tx as any).customer_name ?? null,
+      email: emailServe ? (tx as any).customer_email : null,
+      telefone: (tx as any).customer_phone || null,
+    });
+  }
+
   const raiz = (tx as any).parent_transaction_id ?? (tx as any).id;
   const COLUNAS = "id, payment_link_id, flow_step_id, bumps_accepted, status, created_at, access_revoked";
 
@@ -66,11 +86,6 @@ Deno.serve(async (req) => {
   // Procura-se pelo email e pelo telefone. Os emails temporarios que o
   // checkout cria antes de o cliente escrever o seu ficam de fora: sao
   // partilhados e juntariam compras de pessoas diferentes.
-  const email = String((tx as any).customer_email ?? "").trim().toLowerCase();
-  const telefone = String((tx as any).customer_phone ?? "").replace(/\D/g, "");
-  const emailServe = email.includes("@") && !email.endsWith("@checkout.cashpay.co");
-  const telefoneServe = telefone.length >= 9;
-
   const porCliente: unknown[] = [];
 
   // O email identifica uma pessoa, por isso vale para todo o historico: quem
