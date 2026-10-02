@@ -31,10 +31,10 @@ serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const configuredSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-  const KNOWN_SECRETS = [
-    configuredSecret,
-    "whsec_ezh5v6Nnm4GKHX6DVOBimYrfiswuzpJF", // José Nico (acct_1TVV6AK3Fj90cME4)
-  ].filter(Boolean) as string[];
+  // O segredo vem SO do ambiente. Esteve aqui um whsec_ escrito a mao, de
+  // outra conta, e este repositorio e publico: quem o lesse podia assinar um
+  // payment_intent.succeeded falso e receber os produtos sem pagar nada.
+  const KNOWN_SECRETS = [configuredSecret].filter(Boolean) as string[];
 
   if (KNOWN_SECRETS.length === 0) {
     console.error("[STRIPE-WEBHOOK] STRIPE_WEBHOOK_SECRET not configured");
