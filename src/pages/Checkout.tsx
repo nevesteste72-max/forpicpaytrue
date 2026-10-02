@@ -927,25 +927,45 @@ export default function Checkout() {
       return;
     }
 
+    setPaymentState("processing");
+
+    // A Revolut e o MB Way liquidam de forma assincrona: quando o navegador
+    // volta, o Stripe muitas vezes ainda nao tem o pagamento fechado, e o
+    // primeiro pedido responde "nao pago". Declarar falha nesse instante dizia
+    // a quem tinha mesmo pago que o pagamento falhara — e levava a pessoa a
+    // pagar outra vez. Aconteceu a serio: o ecra deu falha e a compra ficou
+    // paga 60 segundos depois.
+    //
+    // Por isso insiste-se durante uns segundos antes de decidir. So se o
+    // servidor disser mesmo "failed" e que se mostra falha; nao conseguir
+    // confirmar nao e o mesmo que ter falhado.
+    const perguntarAoServidor = async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-webhook-confirm`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            apikey: `${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            transaction_id: txid,
+            payment_intent_id: paymentIntentId || undefined,
+            payment_status: paymentIntentId ? undefined : "failed",
+          }),
+        }
+      );
+      return await res.json();
+    };
+
     (async () => {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-webhook-confirm`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-              apikey: `${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              transaction_id: txid,
-              payment_intent_id: paymentIntentId || undefined,
-              payment_status: paymentIntentId ? undefined : "failed",
-            }),
-          }
-        );
-        const result = await res.json();
+        let result = await perguntarAoServidor();
+        for (let tentativa = 0; tentativa < 5 && result?.status !== "successful"; tentativa++) {
+          await new Promise((r) => setTimeout(r, 3000));
+          result = await perguntarAoServidor();
+        }
         if (result.status === "successful") {
           try { localStorage.removeItem("pending_purchase"); } catch { /* ignore */ }
           // Fire the browser Purchase now — the browser carries fbc/fbp
@@ -971,15 +991,18 @@ export default function Checkout() {
           // decline; showing failure here would scare off someone who did
           // everything right and just hasn't paid the voucher yet.
           setPaymentState("pending");
-        } else {
-          // Canceled on the bank's page or actually declined — never show
-          // success or advance into the paid funnel for this.
+        } else if (result.status === "failed") {
+          // Cancelado na pagina do banco ou mesmo recusado.
           setPaymentState("failed");
           setErrorMessage(t.paymentDeclined);
+        } else {
+          // Nao conseguimos confirmar. Pode ter sido pago a mesma: o webhook do
+          // Stripe fecha a compra e a entrega segue. Nunca dizer que falhou.
+          setPaymentState("pending");
         }
       } catch (err) {
         console.error("Failed to verify redirect payment status:", err);
-        setPaymentState("failed");
+        setPaymentState("pending");
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
