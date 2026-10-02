@@ -718,16 +718,18 @@ export default function UpsellPage() {
 
       if (result.success) {
         trackPurchase(Number(step.amount), currency, result.transaction_id || undefined);
-        setState("success");
-        setTimeout(() => {
-          if (step.accept_redirect_url) {
-            redirectTo(step.accept_step_id, step.accept_redirect_url);
-          } else if (step.accept_step_id) {
-            redirectTo(step.accept_step_id, null);
-          } else {
-            goToThankYou();
-          }
-        }, 1200);
+        // Seguir logo para o passo seguinte. Havia aqui um ecra de "juntado a
+        // tua compra" durante 1,2 segundos — a cada upsell, o que torna o funil
+        // lento e entala quem ja decidiu. A venda ja esta feita; o que falta e
+        // chegar depressa a oferta seguinte. A venda tambem e registada do lado
+        // do servidor, por isso nada se perde por nao esperar aqui.
+        if (step.accept_redirect_url) {
+          redirectTo(step.accept_step_id, step.accept_redirect_url);
+        } else if (step.accept_step_id) {
+          redirectTo(step.accept_step_id, null);
+        } else {
+          goToThankYou();
+        }
       } else {
         // If 1-click charge is not accepted (e.g. no saved token or bank decline), IMMEDIATELY redirect to the offer's checkout!
         console.warn("1-click not successful, taking user directly to checkout:", result.error);
@@ -826,6 +828,17 @@ export default function UpsellPage() {
   const pt = idioma === "pt";
   const t = {
     pagamentoAprovado: pt ? "PAGAMENTO CONFIRMADO" : "PAYMENT VERIFIED & APPROVED",
+    aCobrar: pt ? "A confirmar o pagamento…" : "Activating your upgrade…",
+    aCobrarNota: pt
+      ? "Estamos a juntar esta oferta à tua compra. Não atualizes a página."
+      : "Authorizing the 1-Click upgrade with your bank. Please do not refresh.",
+    aAutorizar: pt ? "Confirma com o teu banco" : "Approve with your bank",
+    aAutorizarNota: pt
+      ? "O teu banco pediu para confirmares. Aprova no telemóvel ou com o código por SMS — não precisas de escrever o cartão outra vez."
+      : "Your bank is asking you to confirm this addition. Approve the prompt (SMS code or your banking app) to finish — no need to re-enter your card.",
+    naoFechesCurto: pt ? "Não feches esta página." : "Please do not close this page.",
+    juntoACompra: pt ? "Juntado à tua compra!" : "Upgrade Added to Your Account!",
+    aSeguirPara: pt ? "A levar-te para o passo seguinte…" : "Redirecting to your member portal...",
     passoPagamento: pt ? "Pagamento" : "Payment",
     feito: pt ? "Feito" : "Done",
     passoMeio: pt ? (isPhysical ? "Encomenda" : "A preparar acesso") : (isPhysical ? "Package Upgrade" : "Portal Setup"),
@@ -1099,13 +1112,12 @@ export default function UpsellPage() {
           <div className="bg-white rounded-2xl border border-blue-200 p-8 text-center shadow-md">
             <Lock className="w-12 h-12 text-[#0b72e7] mx-auto mb-4" />
             <h2 className="text-lg font-bold text-gray-900 mb-1">
-              Approve with your bank
+              {t.aAutorizar}
             </h2>
             <p className="text-xs text-gray-600">
-              Your bank is asking you to confirm this addition. Approve the prompt
-              (SMS code or your banking app) to finish — no need to re-enter your card.
+              {t.aAutorizarNota}
             </p>
-            <p className="text-[11px] text-gray-400 mt-3">Please do not close this page.</p>
+            <p className="text-[11px] text-gray-400 mt-3">{t.naoFechesCurto}</p>
           </div>
         )}
 
@@ -1113,10 +1125,10 @@ export default function UpsellPage() {
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-md">
             <Loader2 className="w-12 h-12 text-[#0b72e7] mx-auto mb-4 animate-spin" />
             <h2 className="text-lg font-bold text-gray-900 mb-1">
-              Activating your VIP upgrade...
+              {t.aCobrar}
             </h2>
             <p className="text-xs text-gray-500 mb-3">
-              Authorizing 1-Click upgrade with your bank. Please do not refresh.
+              {t.aCobrarNota}
             </p>
             <div className="w-48 h-1.5 bg-gray-100 rounded-full mx-auto overflow-hidden">
               <div className="h-full bg-[#0b72e7] rounded-full animate-pulse w-3/4" />
@@ -1131,15 +1143,16 @@ export default function UpsellPage() {
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {isPhysical ? "19-Piece Chef Set Added to Your Parcel! 🎉" : "Upgrade Added to Your Account!"}
+              {isPhysical ? "19-Piece Chef Set Added to Your Parcel!" : t.juntoACompra}
             </h2>
             <p className="text-xs text-gray-600">
               {isPhysical
                 ? `${step.product_name} has been added directly to your delivery parcel with Free Shipping.`
-                : `${step.product_name} has been activated on your member portal.`}
+                : pt ? `${step.product_name} foi juntado à tua compra.`
+                     : `${step.product_name} has been activated on your member portal.`}
             </p>
             <p className="text-[11px] text-gray-400 mt-2">
-              {isPhysical ? "Redirecting to your delivery confirmation..." : "Redirecting to your member portal..."}
+              {isPhysical ? "Redirecting to your delivery confirmation..." : t.aSeguirPara}
             </p>
           </div>
         )}
