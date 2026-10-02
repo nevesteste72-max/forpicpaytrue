@@ -951,7 +951,14 @@ export default function Checkout() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            transaction_id: txid,
+            // Quando o Stripe devolve o pagamento no endereco, e ele que manda:
+            // o servidor descobre a compra dentro do proprio pagamento, como
+            // faz o webhook. O identificador guardado no navegador so serve
+            // quando nao ha pagamento no endereco — perde-se ou fica
+            // desactualizado se o checkout for aberto mais do que uma vez, e
+            // era dai que vinha a confirmacao a falhar na pagina e a acertar
+            // no webhook.
+            transaction_id: paymentIntentId ? undefined : txid,
             payment_intent_id: paymentIntentId || undefined,
             payment_status: paymentIntentId ? undefined : "failed",
           }),

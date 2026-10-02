@@ -259,7 +259,30 @@ serve(async (req) => {
     const body = await req.json();
     const { transaction_id, payment_intent_id, update_customer, customer_email, customer_name, customer_phone, payment_status, tracking_params } = body;
 
-    if (!transaction_id) {
+    if (!transaction_id && !payment_intent_id) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing transaction_id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Quando so vem o pagamento, descobre-se a compra dentro dele — e e assim
+    // que o webhook do Stripe sempre funcionou, por isso acerta sempre. A
+    // pagina dependia de um identificador guardado no navegador, que se perde
+    // ou fica desactualizado quando se abre o checkout mais do que uma vez; dai
+    // a confirmacao falhar na pagina e funcionar no webhook.
+    let idDaCompra: string = transaction_id;
+    if (!idDaCompra && payment_intent_id && STRIPE_SECRET_KEY) {
+      try {
+        const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+        const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
+        const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
+        idDaCompra = String(pi.metadata?.transaction_id ?? "");
+      } catch (err) {
+        console.error("Nao foi possivel descobrir a compra pelo pagamento:", err);
+      }
+    }
+    if (!idDaCompra) {
       return new Response(
         JSON.stringify({ success: false, error: "Missing transaction_id" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -276,7 +299,7 @@ serve(async (req) => {
       const { error } = await supabaseAdmin
         .from("transactions")
         .update(updateData)
-        .eq("id", transaction_id);
+        .eq("id", idDaCompra);
 
       if (error) {
         console.error("Failed to update customer:", error);
@@ -292,7 +315,7 @@ serve(async (req) => {
           const { data: txRow } = await supabaseAdmin
             .from("transactions")
             .select("stripe_customer_id, stripe_payment_intent_id")
-            .eq("id", transaction_id)
+            .eq("id", idDaCompra)
             .single();
 
           let custId = txRow?.stripe_customer_id;
@@ -310,7 +333,7 @@ serve(async (req) => {
               custId = newCust.id;
             }
             // Save customer ID and attach to PaymentIntent
-            await supabaseAdmin.from("transactions").update({ stripe_customer_id: custId }).eq("id", transaction_id);
+            await supabaseAdmin.from("transactions").update({ stripe_customer_id: custId }).eq("id", idDaCompra);
             if (txRow?.stripe_payment_intent_id) {
               await stripe.paymentIntents.update(txRow.stripe_payment_intent_id, { customer: custId });
             }
@@ -376,9 +399,9 @@ serve(async (req) => {
         // metadata (create-stripe-payment e one-click-upsell), e a atualizacao
         // do valor preserva-o. Se nao corresponder, nao se confirma nada.
         const compraDoPagamento = pi.metadata?.transaction_id;
-        if (compraDoPagamento && compraDoPagamento !== transaction_id) {
+        if (compraDoPagamento && compraDoPagamento !== idDaCompra) {
           console.error(
-            `[CONFIRM] recusado: o pagamento ${payment_intent_id} pertence a ${compraDoPagamento}, nao a ${transaction_id}`,
+            `[CONFIRM] recusado: o pagamento ${payment_intent_id} pertence a ${compraDoPagamento}, nao a ${idDaCompra}`,
           );
           return new Response(
             JSON.stringify({ success: false, error: "payment does not belong to this transaction" }),
@@ -420,7 +443,7 @@ serve(async (req) => {
     const { data: prevRow } = await supabaseAdmin
       .from("transactions")
       .select("status")
-      .eq("id", transaction_id)
+      .eq("id", idDaCompra)
       .maybeSingle();
     const previousStatus = prevRow?.status;
     const alreadySuccessful = previousStatus === "successful" || previousStatus === "completed";
@@ -429,7 +452,7 @@ serve(async (req) => {
     const { error } = await supabaseAdmin
       .from("transactions")
       .update(updateData)
-      .eq("id", transaction_id);
+      .eq("id", idDaCompra);
 
     if (error) {
       console.error("Failed to update transaction:", error);
@@ -445,7 +468,7 @@ serve(async (req) => {
     const { data: txRow } = await supabaseAdmin
       .from("transactions")
       .select("*, payment_links(product_name, id, logo_url, facebook_pixel_id, facebook_token, redirect_url, order_bump_name, order_bump_price, order_bump_2_name, order_bump_2_price, order_bump_3_name, order_bump_3_price, order_bump_4_name, order_bump_4_price, product_type, checkout_language)")
-      .eq("id", transaction_id)
+      .eq("id", idDaCompra)
       .single();
 
     if (txRow) {
