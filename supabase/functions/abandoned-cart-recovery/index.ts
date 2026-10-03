@@ -13,7 +13,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  */
 
 const CRON_KEY = "cron_9f2b7a13e6c84d5f0a1bd7e4";
-const PAY_BASE = "https://paymhddigital.vercel.app/pay/";
+// O dominio antigo (paymhddigital.vercel.app) esta ligado a OUTRA base de dados:
+// o botao do email abria um checkout que nao conhecia o produto.
+const PAY_BASE = "https://www.tecnhogar.store/pay/";
 
 const SKIP_EMAILS = new Set([
   "ivanilsondagraca40@gmail.com",
@@ -43,7 +45,7 @@ type Row = {
   amount: number | string | null;
 };
 
-type Offer = "aves" | "bovinos";
+type Offer = "aves" | "bovinos" | "cardapios";
 
 interface OfferCfg {
   emoji: string;
@@ -59,6 +61,22 @@ interface OfferCfg {
 }
 
 const OFFERS: Record<Offer, OfferCfg> = {
+  // Funil dos cardapios (PT). Estes campos so servem o cabecalho, o rodape e o
+  // email de referencia Multibanco — o resto do email tem modelos proprios
+  // (cardapiosSubject/Html/Text), porque os modelos de cima contam a historia
+  // dos "sinais de doenca" e nao fazem sentido para quem quer planos de comida.
+  cardapios: {
+    emoji: "🥗",
+    brand: "Cardápios Flexíveis",
+    tag: "+170 Planos",
+    product: "acesso aos +170 Planos de Refeições Flexíveis",
+    from: "Cardápios Flexíveis <noreply@tecnhogar.store>",
+    reassureMain: "+170 planos de refeições prontos a seguir",
+    signsTitle: "",
+    signs: [],
+    extraSign: "",
+    costLine: "",
+  },
   aves: {
     emoji: "🐔",
     brand: "Saúde das Aves",
@@ -96,6 +114,9 @@ const OFFERS: Record<Offer, OfferCfg> = {
 function offerFor(productName: string | null): Offer {
   const p = (productName || "").toLowerCase();
   if (/aves|galinh|frango|poede|capoeira|ovo/.test(p)) return "aves";
+  // Antes daqui tudo o que nao fosse aves caia em "bovinos": quem desistia dos
+  // cardapios recebia um email da Saude Bovina sobre doencas do gado.
+  if (/card[aá]pio|refei[cç]|receita|fitness|desafio|dieta/.test(p)) return "cardapios";
   return "bovinos";
 }
 
@@ -267,10 +288,145 @@ function buildVoucherText(o: OfferCfg, n: string, v: Voucher, amount: string, ur
   ].join("\n");
 }
 
+// ---------------------------------------------------------------------------
+// Cardapios: recuperacao em formato de mini pagina de venda, que leva
+// directamente a pagina de back (o mesmo produto a 6,90 EUR em vez de 9,90 EUR).
+// Quem chegou a escrever o email no checkout ja queria comprar — o que o travou
+// foi o pagamento (nas compras reais de 2026-10-03, o MB Way: uma Failed e outra
+// Expired). Por isso o preco e o botao aparecem logo no inicio, e o resto da
+// pagina so serve quem ainda precisa de ser convencido.
+// Cada email e completo por si: a pessoa pode ler so o segundo ou so o terceiro.
+// As imagens sao JPG em /email/cardapios/ — o WebP da landing nao abre em todos
+// os clientes de email (Outlook, por exemplo).
+// ---------------------------------------------------------------------------
+const BACK_CARDAPIOS = "https://www.tecnhogar.store/cardapio-flexivel/espera/";
+const IMG_CARDAPIOS = "https://www.tecnhogar.store/email/cardapios/";
+
+function backCardapiosUrl(stage: number): string {
+  return `${BACK_CARDAPIOS}?utm_source=email&utm_medium=recuperacao&utm_campaign=cardapios_s${stage}`;
+}
+
+function cardapiosSubject(stage: number, n: string): string {
+  if (stage === 1) return `${n}, o teu pagamento não chegou a passar — guardei-te um preço mais baixo`;
+  if (stage === 2) return `${n}, os teus +170 planos de refeições continuam a 6,90 €`;
+  return `Último email sobre isto, ${n}`;
+}
+
+function cardapiosAbertura(stage: number, n: string): string[] {
+  if (stage === 1) return [
+    `Olá ${n},`,
+    `Começaste a comprar os +170 Planos de Refeições Flexíveis, mas o pagamento não chegou a ser concluído — não te foi cobrado nada.`,
+    `Para facilitar, separei-te o mesmo acesso por um preço mais baixo:`,
+  ];
+  if (stage === 2) return [
+    `Olá ${n},`,
+    `Só para te lembrar: o acesso aos +170 Planos de Refeições Flexíveis continua disponível pelo preço mais baixo que te separei.`,
+    `É o mesmo conteúdo completo, só mais barato:`,
+  ];
+  return [
+    `Olá ${n},`,
+    `Este é o último email que te mando sobre isto — não quero encher-te a caixa de correio.`,
+    `Se ainda quiseres os +170 Planos de Refeições Flexíveis, o preço mais baixo continua aqui:`,
+  ];
+}
+
+const CARDAPIOS_RECEBES: [string, string, string][] = [
+  ["cardapios.jpg", "+170 planos de refeições prontos", "Cardápios de 1200 a 2000 kcal — escolhes o que te serve e segues, sem pensar no que vais comer."],
+  ["refeicoes.jpg", "Opções para todas as refeições do dia", "Pequeno-almoço, colação, almoço, lanche, jantar e ceia — com ingredientes de supermercado."],
+  ["calculadora.jpg", "Como calculares o teu gasto calórico", "Para saberes que plano escolher, quer queiras perder peso quer ganhar massa magra."],
+];
+
+const CARDAPIOS_BONUS: [string, string][] = [
+  ["bonus-detox.jpg", "Bónus 1 — 40 Receitas Detox, Sumos e Chás"],
+  ["bonus-cardio.jpg", "Bónus 2 — Cardio Fit"],
+];
+
+function cardapiosHtml(o: OfferCfg, stage: number, n: string, url: string): string {
+  const C = "#33372e", V = "#1b5e20", VM = "#2e7d32", CINZA = "#6b7262";
+  const p = (t: string) => `<p style="margin:0 0 14px 0;color:${C};font-size:16px;line-height:1.6;">${t}</p>`;
+  const img = (f: string, alt: string, w = 504) =>
+    `<a href="${url}" style="text-decoration:none;"><img src="${IMG_CARDAPIOS}${f}" alt="${alt}" width="${w}" style="display:block;width:100%;max-width:${w}px;height:auto;border:0;margin:0 auto;border-radius:8px;"></a>`;
+  const titulo = (t: string) =>
+    `<p style="margin:28px 0 14px 0;color:${V};font-size:19px;font-weight:800;line-height:1.3;text-align:center;">${t}</p>`;
+  const botao = (t: string) =>
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 10px 0;"><tr><td align="center"><a href="${url}" style="display:inline-block;background-color:${VM};color:#ffffff;font-size:17px;font-weight:700;text-decoration:none;padding:16px 28px;border-radius:10px;">${t}</a></td></tr></table>`;
+  const precos =
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef4ea;border-radius:10px;margin:16px 0 4px 0;"><tr><td align="center" style="padding:18px 16px;">` +
+    `<p style="margin:0 0 4px 0;color:${CINZA};font-size:14px;">Preço normal <span style="text-decoration:line-through;">9,90 €</span></p>` +
+    `<p style="margin:0;color:${V};font-size:36px;font-weight:800;line-height:1.1;">6,90 €</p>` +
+    `<p style="margin:6px 0 0 0;color:${VM};font-size:14px;font-weight:600;">Poupas 3,00 € · pagamento único · acesso vitalício</p>` +
+    `</td></tr></table>`;
+  const recebes = CARDAPIOS_RECEBES.map(([f, t, d]) =>
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;"><tr><td>${img(f, t, 391)}` +
+    `<p style="margin:10px 0 4px 0;color:${C};font-size:16px;font-weight:700;text-align:center;">✅ ${t}</p>` +
+    `<p style="margin:0;color:${CINZA};font-size:14px;line-height:1.5;text-align:center;">${d}</p></td></tr></table>`
+  ).join("");
+  const bonus = CARDAPIOS_BONUS.map(([f, t]) =>
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px 0;"><tr><td>${img(f, t)}` +
+    `<p style="margin:8px 0 0 0;color:${C};font-size:15px;font-weight:700;text-align:center;">🎁 ${t} <span style="color:${VM};">— grátis</span></p></td></tr></table>`
+  ).join("");
+  const deps = ["dep1.jpg", "dep2.jpg"].map((f) =>
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px 0;"><tr><td>${img(f, "Comentário de cliente")}</td></tr></table>`
+  ).join("");
+  const comoRecebes =
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f5ef;border-radius:10px;margin:8px 0 0 0;"><tr><td style="padding:16px 18px;">` +
+    `<p style="margin:0 0 8px 0;color:${C};font-size:15px;line-height:1.5;">📩 <strong>Recebes no teu email e WhatsApp</strong>, logo a seguir ao pagamento.</p>` +
+    `<p style="margin:0 0 8px 0;color:${C};font-size:15px;line-height:1.5;">💳 <strong>Pagamento único</strong> — sem mensalidades, o acesso é teu para sempre.</p>` +
+    `<p style="margin:0;color:${C};font-size:15px;line-height:1.5;">🛡️ <strong>Garantia de 7 dias</strong> — se não gostares, devolvemos 100% do dinheiro.</p>` +
+    `</td></tr></table>`;
+  const nota =
+    `<p style="margin:0 0 6px 0;color:${CINZA};font-size:13px;line-height:1.5;text-align:center;">Podes pagar com cartão ou MB Way. Se escolheres MB Way, abre logo a app e confirma — o pedido expira em poucos minutos.</p>`;
+  const corpo =
+    cardapiosAbertura(stage, n).map(p).join("") +
+    img("hero.jpg", "+170 Planos de Refeições Flexíveis", 448) +
+    precos +
+    botao("Quero os meus planos por 6,90 €") +
+    nota +
+    titulo("O que recebes") + recebes +
+    titulo("E ainda levas 2 bónus") + bonus +
+    titulo("Quem já recebeu") + deps +
+    comoRecebes +
+    botao("Sim, quero por 6,90 €") +
+    nota;
+  return `<!DOCTYPE html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cardápios Flexíveis</title></head>` +
+    `<body style="margin:0;padding:0;background-color:#f4f1ea;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f1ea;"><tr><td align="center" style="padding:20px 10px;">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;overflow:hidden;">` +
+    `${header(o)}<tr><td style="padding:26px 28px 24px 28px;">${corpo}</td></tr>${footer(o)}` +
+    `</table></td></tr></table></body></html>`;
+}
+
+function cardapiosText(stage: number, n: string, url: string): string {
+  return [
+    ...cardapiosAbertura(stage, n), "",
+    "Preço normal: 9,90 €  →  agora 6,90 € (poupas 3,00 €, pagamento único, acesso vitalício)", "",
+    `Quero os meus planos por 6,90 €: ${url}`, "",
+    "O que recebes:",
+    ...CARDAPIOS_RECEBES.map(([, t, d]) => `- ${t}: ${d}`), "",
+    "Bónus grátis:",
+    ...CARDAPIOS_BONUS.map(([, t]) => `- ${t}`), "",
+    "Recebes no teu email e WhatsApp logo a seguir ao pagamento.",
+    "Garantia de 7 dias — se não gostares, devolvemos 100% do dinheiro.", "",
+    "Podes pagar com cartão ou MB Way. Se escolheres MB Way, abre logo a app e confirma — o pedido expira em poucos minutos.", "",
+    `Sim, quero por 6,90 €: ${url}`, "",
+    "Cardápios Flexíveis · Portugal",
+  ].join("\n");
+}
+
 serve(async (req) => {
   if (req.headers.get("x-cron-key") !== CRON_KEY) {
     return new Response("Unauthorized", { status: 401 });
   }
+
+  // Envio manual a pessoas concretas: {"emails": [...]}. Salta a espera entre
+  // etapas (manda ja a seguinte), mas mantem as outras proteccoes: quem ja
+  // comprou, emails de teste, enderecos malformados. O cron chama sem lista.
+  let manual: string[] = [];
+  try {
+    const pedido = await req.json();
+    if (Array.isArray(pedido?.emails)) {
+      manual = pedido.emails.map((e: unknown) => String(e).trim().toLowerCase()).filter(Boolean);
+    }
+  } catch { /* o cron pode chamar sem corpo */ }
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -349,6 +505,7 @@ serve(async (req) => {
       if (lower.includes("ivanilson")) continue;
       if (SKIP_EMAILS.has(lower)) continue;
       if (buyerSet.has(lower)) continue;
+      if (manual.length && !manual.includes(lower)) continue;
 
       const stageDone = row.recovery_stage ?? 0;
       const ageMs = now - new Date(row.created_at).getTime();
@@ -393,23 +550,31 @@ serve(async (req) => {
       const sinceLast = row.recovery_email_sent_at ? now - new Date(row.recovery_email_sent_at).getTime() : Infinity;
 
       let stage = 0;
-      if (stageDone === 0 && ageMs >= HOUR) stage = 1;
+      if (manual.length) stage = Math.min(3, stageDone + 1);
+      else if (stageDone === 0 && ageMs >= HOUR) stage = 1;
       else if (stageDone === 1 && sinceLast >= STEP_GAP) stage = 2;
       else if (stageDone === 2 && sinceLast >= STEP_GAP) stage = 3;
       else continue;
 
       const offer = offerFor(linkNames.get(row.payment_link_id || "") || "");
       const o = OFFERS[offer];
-      const url = row.payment_link_id ? `${PAY_BASE}${row.payment_link_id}` : "https://www.tecnhogar.store/aves/";
+      const ehCardapios = offer === "cardapios";
+      // No envio manual o texto e sempre o da primeira mensagem: quem recebeu
+      // antes o email errado (o da Saude Bovina) nunca leu nenhum dos cardapios,
+      // e o "so para te lembrar" da etapa 2 nao faria sentido.
+      const etapaTexto = manual.length ? 1 : stage;
+      const url = ehCardapios
+        ? backCardapiosUrl(etapaTexto)
+        : row.payment_link_id ? `${PAY_BASE}${row.payment_link_id}` : "https://www.tecnhogar.store/aves/";
       const n = firstName(row.customer_name, email);
       try {
         const resp = await resend.emails.send({
           from: o.from,
           reply_to: "ivanilsonjsousa@gmail.com",
           to: [email],
-          subject: buildSubject(o, stage, n),
-          html: buildHtml(o, stage, n, url),
-          text: buildText(o, stage, n, url),
+          subject: ehCardapios ? cardapiosSubject(etapaTexto, n) : buildSubject(o, stage, n),
+          html: ehCardapios ? cardapiosHtml(o, etapaTexto, n, url) : buildHtml(o, stage, n, url),
+          text: ehCardapios ? cardapiosText(etapaTexto, n, url) : buildText(o, stage, n, url),
           headers: {
             "List-Unsubscribe": "<mailto:noreply@tecnhogar.store?subject=unsubscribe>",
             "X-Entity-Ref-ID": `${row.id}-s${stage}`,
