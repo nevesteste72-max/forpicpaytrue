@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ShieldCheck, Mail, User, Phone, Lock, EyeOff } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, User, Phone, Lock, EyeOff, Smartphone } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
 import { suggestEmail } from "@/lib/emailSuggest";
 
@@ -147,6 +147,8 @@ export function StripeCheckoutForm({
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
+  // Guardado so para avisar quem escolhe MB Way do que vai acontecer a seguir.
+  const [metodoEscolhido, setMetodoEscolhido] = useState("");
   const [customerName, setCustomerName] = useState(initialName || "");
   const [customerEmail, setCustomerEmail] = useState(initialEmail || "");
   const [customerPhone, setCustomerPhone] = useState(initialPhone || "");
@@ -425,6 +427,7 @@ export function StripeCheckoutForm({
           {t("Forma de pagamento", "Payment method", "Método de pago", "Moyen de paiement")}
         </Label>
         <PaymentElement
+          onChange={(e) => setMetodoEscolhido(e.value?.type || "")}
           options={{
             layout: {
               type: "accordion",
@@ -436,7 +439,14 @@ export function StripeCheckoutForm({
             business: {
               name: "Reconquista Inversa",
             },
-            wallets: { applePay: "never", googlePay: "never", link: "never" },
+            // Apple Pay e Google Pay ligados de proposito: todo o trafego vem
+            // do browser dentro da app do Facebook, no telemovel. Ai escrever
+            // 16 digitos de cartao e penoso, e o MB Way obriga a sair da app —
+            // foi onde as duas unicas compras reais morreram (uma Failed, uma
+            // Expired). A carteira resolve-se com um toque e sem sair daqui.
+            // "auto" nao mostra nada quando o telemovel nao suporta, por isso
+            // nao ha risco de aparecer uma opcao que nao funciona.
+            wallets: { applePay: "auto", googlePay: "auto", link: "never" },
             // Ordem pensada para Portugal, que e o mercado activo. O Stripe
             // mostra so os metodos que a conta tem activos e que servem para a
             // moeda e o valor; os que nao servem sao saltados em silencio, por
@@ -473,6 +483,23 @@ export function StripeCheckoutForm({
             },
           }}
         />
+
+        {/* Quem escolhe MB Way fica a olhar para o ecra a espera que algo
+            aconteca. O pedido chega a app do banco e expira em poucos minutos:
+            sem este aviso a pessoa nao sabe que tem de ir la confirmar. */}
+        {metodoEscolhido === "mb_way" && (
+          <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/[0.08] p-3">
+            <Smartphone className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-foreground leading-snug">
+              {t(
+                "Vais receber um pedido na app MB WAY. Abre a app e confirma — o pedido expira em poucos minutos.",
+                "You will get a request in the MB WAY app. Open it and confirm — the request expires in a few minutes.",
+                "Recibirás una solicitud en la app MB WAY. Ábrela y confirma — caduca en pocos minutos.",
+                "Vous recevrez une demande dans l application MB WAY. Ouvrez-la et confirmez — elle expire en quelques minutes."
+              )}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Total */}
